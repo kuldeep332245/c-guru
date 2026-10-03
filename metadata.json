@@ -1,0 +1,6 @@
+{
+  "name": "C-Guru: C Language Mastery",
+  "description": "Learn C Programming from scratch to file handling with interactive tutorials, compiler, quizzes, debugging exercises, and progress tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
