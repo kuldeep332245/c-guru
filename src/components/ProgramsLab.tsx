@@ -271,11 +271,11 @@ export const ProgramsLab: React.FC<ProgramsLabProps> = ({
               </pre>
 
               {/* Expected Output */}
-              <div className="px-4 py-3 border-t border-slate-800/80 bg-slate-950/90 text-xs font-mono">
+              <div className="px-4 py-3 border-t border-slate-800/80 bg-slate-950/90 text-xs font-mono max-w-full overflow-hidden">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 mb-1">
-                  Expected Output:
+                  {lang === 'hi' ? 'अपेक्षित आउटपुट (Expected Output):' : 'Expected Output:'}
                 </div>
-                <div className="text-slate-300 whitespace-pre-line">{activeProgram.output}</div>
+                <div className="text-slate-300 whitespace-pre-wrap break-all break-words overflow-x-auto max-w-full">{activeProgram.output}</div>
               </div>
             </div>
           </div>
