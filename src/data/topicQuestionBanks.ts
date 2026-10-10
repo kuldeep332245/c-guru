@@ -414,7 +414,11 @@ const RAW_BANKS: Record<string, { easy: Omit<QuizQuestion, 'difficulty'>[]; hard
  * Universal generator that ensures every topic has exactly 40 questions
  * (20 Easy + 20 Hard) with authentic Devanagari Hindi translations.
  */
-export function getTopicQuestionBank(topicId: string, topicTitle: string, topicCategory: string): QuizQuestion[] {
+export function getTopicQuestionBank(
+  topicId: string,
+  topicTitle: string = '',
+  topicCategory: string = ''
+): QuizQuestion[] {
   // If handcrafted repository has it, use it
   const repo = RAW_BANKS[topicId];
   if (repo && repo.easy.length >= 20 && repo.hard.length >= 20) {
