@@ -8,7 +8,10 @@ import {
   HelpCircle,
   Code2,
   Layers,
-  FileText
+  FileText,
+  Lock,
+  Crown,
+  Sparkles
 } from 'lucide-react';
 import { Topic, UserProgress } from '../types';
 import { C_TOPICS } from '../data/cTopics';
@@ -18,22 +21,25 @@ interface AllTopicsDirectoryProps {
   lang: 'hi' | 'en';
   isDark: boolean;
   userProgress: UserProgress;
+  isSubscribed: boolean;
+  onOpenPayment: () => void;
 }
 
 export const AllTopicsDirectory: React.FC<AllTopicsDirectoryProps> = ({
   onSelectTopic,
   lang,
   isDark,
-  userProgress
+  userProgress,
+  isSubscribed,
+  onOpenPayment
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   const categories = [
-    { id: 'All', labelEn: 'All Topics (14)', labelHi: 'सभी विषय (14)' },
+    { id: 'All', labelEn: `All Topics (${C_TOPICS.length})`, labelHi: `सभी विषय (${C_TOPICS.length})` },
     { id: 'Basics', labelEn: 'Level 0 Basics', labelHi: 'लेवल 0: बुनियादी' },
     { id: 'Control Flow', labelEn: 'Control & Loops', labelHi: 'कंडीशन्स और लूप्स' },
-    { id: 'Functions & Pointers', labelEn: 'Functions & Pointers', labelHi: 'फंक्शंस और पॉइंटर्स' },
     { id: 'Data Structures', labelEn: 'Arrays & Structures', labelHi: 'ऐरे, स्ट्रिंग्स व स्ट्रक्चर' },
     { id: 'Memory & Files', labelEn: 'Memory & File Handling', labelHi: 'मेमोरी व फाइल हैंडलिंग' }
   ];
@@ -91,15 +97,45 @@ export const AllTopicsDirectory: React.FC<AllTopicsDirectoryProps> = ({
         </div>
       </div>
 
-      {/* Categories Filter Tabs */}
-      <div className="flex flex-wrap items-center gap-2">
+      {/* 100% Free Full Curriculum Banner */}
+      <div
+        className={`p-4 sm:p-5 rounded-2xl border shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
+          isDark
+            ? 'bg-gradient-to-r from-blue-950/40 via-slate-900 to-indigo-950/40 border-blue-500/30'
+            : 'bg-gradient-to-r from-blue-50 via-indigo-50 to-white border-blue-200'
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md">
+            <CheckCircle2 className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-extrabold text-sm sm:text-base text-emerald-600 dark:text-emerald-400">
+                {lang === 'hi' ? '100% मुफ़्त सम्पूर्ण C कोर्स (सभी 20 चैप्टर्स अनलॉक)' : '100% Free Complete C Curriculum (All 20 Modules Unlocked)'}
+              </h3>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                FREE FOR ALL
+              </span>
+            </div>
+            <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5">
+              {lang === 'hi'
+                ? 'सभी 20 टॉपिक्स, कम्पाइलर, प्रैक्टिकल लैब प्रश्न, और क्विज़ सभी विद्यार्थियों के लिए पूरी तरह से मुफ़्त हैं।'
+                : 'All 20 modules, in-browser compiler, practical lab questions, and quizzes are 100% free for all students.'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Categories Filter Tabs (Scrollable on mobile) */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar sm:flex-wrap">
         {categories.map((cat) => {
           const isSelected = selectedCategory === cat.id;
           return (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all whitespace-nowrap shrink-0 ${
                 isSelected
                   ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/20 scale-[1.02]'
                   : isDark
@@ -114,7 +150,7 @@ export const AllTopicsDirectory: React.FC<AllTopicsDirectoryProps> = ({
       </div>
 
       {/* Grid of All Topics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6">
         {filteredTopics.map((topic) => {
           const isDone = userProgress.completedTopicIds.includes(topic.id);
           const score = userProgress.quizScores[topic.id];
@@ -123,7 +159,7 @@ export const AllTopicsDirectory: React.FC<AllTopicsDirectoryProps> = ({
             <div
               key={topic.id}
               onClick={() => onSelectTopic(topic)}
-              className={`rounded-3xl p-6 border transition-all hover:shadow-xl hover:scale-[1.01] cursor-pointer flex flex-col justify-between group ${
+              className={`rounded-2xl sm:rounded-3xl p-4 sm:p-6 border transition-all hover:shadow-xl hover:scale-[1.01] cursor-pointer flex flex-col justify-between group ${
                 isDark
                   ? 'bg-slate-900/70 border-slate-800/80 hover:border-blue-500/50 hover:bg-slate-900'
                   : 'bg-white border-slate-200 hover:border-blue-300 shadow-xs'
