@@ -401,11 +401,11 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
               </pre>
 
               {/* Expected Output */}
-              <div className="px-5 py-3.5 border-t border-slate-800 bg-slate-900/40 text-xs font-mono">
+              <div className="px-5 py-3.5 border-t border-slate-800 bg-slate-900/40 text-xs font-mono max-w-full overflow-hidden">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 mb-1">
-                  Expected Output:
+                  {lang === 'hi' ? 'अपेक्षित आउटपुट (Expected Output):' : 'Expected Output:'}
                 </div>
-                <div className="text-slate-300 whitespace-pre-line">{ex.output}</div>
+                <div className="text-slate-300 whitespace-pre-wrap break-all break-words overflow-x-auto max-w-full font-mono">{ex.output}</div>
               </div>
 
               {/* Logic Explanation */}
