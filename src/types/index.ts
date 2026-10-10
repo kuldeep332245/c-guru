@@ -1,10 +1,20 @@
 export interface User {
   id: string;
   name: string;
-  email: string;
+  phone: string;
+  email?: string;
+  password?: string;
+  course?: string;
   avatarSeed?: string;
   createdAt: string;
   goal?: string;
+  role?: 'admin' | 'student';
+  isAdmin?: boolean;
+  isSubscribed?: boolean;
+  subscribedAt?: string;
+  subscriptionExpiresAt?: string;
+  subscriptionPlan?: string;
+  transactionId?: string;
 }
 
 export interface UserProgress {
@@ -179,6 +189,30 @@ export interface ClassicProgram {
   defaultInput?: string;
   output: string;
   flowchartId?: string;
+}
+
+export interface LabQuestion {
+  id: string;
+  number: number;
+  title: string;
+  titleHindi: string;
+  category: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  objective: string;
+  objectiveHindi: string;
+  theoryExplanationEn: string;
+  theoryExplanationHi: string;
+  algorithmEn: string[];
+  algorithmHi: string[];
+  cCode: string;
+  sampleInput: string;
+  sampleOutput: string;
+  vivaQuestions: {
+    qEn: string;
+    qHi: string;
+    aEn: string;
+    aHi: string;
+  }[];
 }
 
 export interface SyntaxItem {
