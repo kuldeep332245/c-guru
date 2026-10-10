@@ -1,1457 +1,1052 @@
-import { Topic } from '../types';
+import { Topic, Milestone } from '../types';
+import { getTopicQuestionBank } from './topicQuestionBanks';
+
+/**
+ * C-Mastery Complete 13 Topics Curriculum
+ * Each topic includes textbook-grade theory (800+ words in both English & Hindi),
+ * runnable C code examples, interactive practicals, key points, common pitfalls,
+ * and a dedicated 40-question test (20 Easy + 20 Hard) for comprehensive mastery.
+ */
 
 export const C_TOPICS: Topic[] = [
-  {
-    id: 'c-intro',
-    order: 1,
-    title: 'Introduction to C & First Program',
-    titleHindi: 'C भाषा का परिचय एवं पहला प्रोग्राम (Dennis Ritchie)',
-    category: 'Basics',
-    summary: 'Discover the mother of all modern languages created by Dennis Ritchie. Understand compilation and your very first "Hello World" code.',
-    summaryHindi: 'डेनिस रिची द्वारा निर्मित C भाषा का इतिहास, प्रोग्राम की बुनियादी संरचना और पहला "Hello World" कोड समझें।',
-    readTimeMinutes: 10,
-    explanationEn: `1. WHAT IS C IN SIMPLE WORDS?
-C is a general-purpose, procedural computer programming language created in 1972 by Dennis Ritchie at AT&T Bell Laboratories in the United States. It was originally designed to rewrite the UNIX operating system. Today, C is universally celebrated as the "Mother of all Modern Programming Languages" because languages like C++, Java, C#, Python, JavaScript, and PHP all borrowed their syntax, control structures, and fundamental philosophy directly from C!
-
-2. WHY IS C ESSENTIAL & HOW DOES THE COMPUTER UNDERSTAND IT?
-Computers do not speak English, Hindi, or any human language. The CPU only understands machine language consisting of raw binary bits: 0s and 1s (electrical off and on signals). Writing code in 0s and 1s directly is practically impossible for humans. 
-C acts as a high-level bridge that humans can easily read and write, while still having low-level access to memory addresses and hardware registers.
-A special program called the COMPILER takes your C code and translates it through four distinct phases:
-- Preprocessor: Expands headers and macros.
-- Compiler: Converts C source code into assembly instructions.
-- Assembler: Converts assembly into machine object code (.o).
-- Linker: Binds library files together into a final runnable executable (.exe).
-
-3. STEP-BY-STEP BREAKDOWN OF YOUR FIRST C PROGRAM:
-Let us analyze every single character of the classic program:
-#include <stdio.h>
-int main() {
-    printf("Namaste, World!\\n");
-    return 0;
-}
-
-- '#include <stdio.h>': The hash (#) tells the preprocessor to act before compilation. 'stdio.h' stands for Standard Input Output header file. Without this line, the computer would have no clue what 'printf' or 'scanf' mean!
-- 'int main()': This is the mandatory front door of every C program. No matter how large an application is (even 1 million lines), the operating system always begins execution precisely at the first line of main(). The 'int' before main means the function will return an integer number to the OS when it finishes.
-- '{ and }': The opening and closing curly braces define the boundaries of the main function. Everything you want to execute must live inside these walls.
-- 'printf("...");': printf stands for "print formatted". It takes the text enclosed inside double quotation marks and prints it out onto your monitor screen.
-- '\\n': This is an escape sequence that represents a newline. It is equivalent to pressing the 'Enter' key on your keyboard, moving the cursor to the next line.
-- Semicolon (;): In English, every sentence ends with a full stop (.). In C, every single instruction MUST end with a semicolon (;). Forgetting a semicolon is the most famous beginner error in programming!
-- 'return 0;': When main finishes successfully, it hands the number 0 back to the Operating System. In computer science, an exit code of 0 universally means: "Everything finished perfectly without any errors!"
-
-4. REAL-LIFE ANALOGY FOR BEGINNERS:
-Think of main() as the principal entrance gate of your school. The school has many classrooms, playgrounds, and labs (functions), but every morning all students and teachers must enter through the front gate first. #include <stdio.h> is like packing your school bag with notebooks and pens before class begins so you have the tools needed to write!`,
-    explanationHi: `१. सरल शब्दों में C भाषा क्या है?
-C एक अत्यंत लोकप्रिय, शक्तिशाली और बुनियादी कंप्यूटर प्रोग्रामिंग भाषा है। इसका आविष्कार सन् 1972 में अमेरिका की बेल लैबोरेटरीज (Bell Labs) में वैज्ञानिक डेनिस रिची (Dennis Ritchie) ने किया था। C को सभी आधुनिक भाषाओं (जैसे C++, Java, Python, JavaScript) की "माता (Mother Language)" कहा जाता है। इसका कारण यह है कि यदि आप C भाषा सीख लेते हैं, तो दुनिया की किसी भी दूसरी प्रोग्रामिंग भाषा को सीखना आपके लिए बच्चों के खेल जैसा आसान हो जाता है!
-
-२. C भाषा क्यों जरूरी है और कंप्यूटर इसे कैसे समझता है?
-कंप्यूटर कोई इंसान नहीं है; वह हमारी हिन्दी या अंग्रेजी भाषा नहीं समझता। कंप्यूटर का दिमाग (CPU) केवल बिजली के चालू और बंद सिग्नल्स, यानी बाइनरी भाषा (0 और 1) को ही समझता है। लेकिन इंसानों के लिए लाखों 0 और 1 लिखना असंभव है। 
-इसलिए हम C भाषा में अंग्रेजी जैसे सरल शब्दों में कोड लिखते हैं। इसके बाद एक विशेष सॉफ्टवेयर, जिसे "कम्पाइलर (Compiler)" कहते हैं, हमारे लिखे हुए कोड को कंप्यूटर की समझने योग्य 0 और 1 की मशीनी भाषा में बदल देता है। 
-कम्पाइलेशन के ४ मुख्य चरण होते हैं:
-- प्रीप्रोसेसर (Preprocessor): हेडर फाइलों को जोड़ता है।
-- कम्पाइलर (Compiler): C कोड को असेंबली कोड में बदलता है।
-- असेंबलर (Assembler): असेंबली को ऑब्जेक्ट कोड (.o) में बदलता है।
-- लिंकर (Linker): सभी फाइलों को मिलाकर चलाने योग्य (.exe) प्रोग्राम बनाता है।
-
-३. पहले C प्रोग्राम के एक-एक शब्द का सरल अर्थ:
-आइए हमारे पहले प्रोग्राम की प्रत्येक पंक्ति को गहराई से समझें:
-#include <stdio.h>
-int main() {
-    printf("नमस्ते भारत!\\n");
-    return 0;
-}
-
-- '#include <stdio.h>': यहाँ '#' का मतलब प्रीप्रोसेसर निर्देश है। 'stdio.h' का पूरा नाम "Standard Input Output Header File" है। जैसे रसोई में खाना बनाने से पहले बर्तनों की जरूरत होती है, वैसे ही स्क्रीन पर कुछ दिखाने (printf) या इनपुट लेने (scanf) के लिए इस फाइल को शामिल करना अनिवार्य है।
-- 'int main()': यह पूरे प्रोग्राम का मुख्य दरवाजा (Main Gate) है। आपका प्रोग्राम चाहे 10 लाइनों का हो या 10,000 लाइनों का, कंप्यूटर हमेशा सबसे पहले main() फंक्शन की पहली लाइन से ही चलना शुरू करता है। 'int' का मतलब है कि यह फंक्शन अंत में एक पूर्णांक संख्या वापस करेगा।
-- '{ और }': मझले कोष्ठक (Curly Braces) प्रोग्राम की सीमाएं तय करते हैं। जो कुछ भी इन दोनों के बीच लिखा होगा, वही main फंक्शन का हिस्सा माना जाएगा।
-- 'printf("...");': printf का मतलब है "Print Formatted"। यह डबल कोट्स (" ") के भीतर लिखे गए किसी भी संदेश को कंप्यूटर की स्क्रीन पर छाप देता है।
-- '\\n': इसे एस्केप सीक्वेंस (Newline) कहते हैं। यह कीबोर्ड के 'Enter' बटन की तरह कर्सर को अगली नई लाइन पर भेज देता है।
-- सेमीकोलन (;): जैसे हिन्दी में वाक्य खत्म होने पर पूर्ण विराम (।) लगाते हैं, वैसे ही C भाषा में हर निर्देश के अंत में सेमीकोलन (;) लगाना अनिवार्य है। इसे भूलने पर कम्पाइलर तुरंत एरर दे देता है।
-- 'return 0;': यह ऑपरेटिंग सिस्टम को संकेत देता है कि "हमारा प्रोग्राम बिना किसी खराबी के बिल्कुल सही पूरा हो गया है।"
-
-४. बच्चों के लिए दैनिक जीवन का मजेदार उदाहरण:
-कल्पना कीजिए कि main() आपके घर का मुख्य दरवाजा है। घर में चाहे जितने भी कमरे हों, कोई भी मेहमान सबसे पहले मुख्य दरवाजे से ही प्रवेश करेगा। और #include <stdio.h> आपके स्कूल बैग की तरह है, जिसमें पेंसिल और कॉपी रखी होती है ताकि आप कक्षा में लिख सकें!`,
-    realLifeAnalogy: {
-      en: 'Think of "main()" as the main front door of your house. No matter how many rooms you have inside, every visitor must always enter through the front door first.',
-      hi: 'कल्पना कीजिए कि main() आपके घर का मुख्य प्रवेश द्वार है। घर में चाहे जितने भी कमरे हों, किसी भी मेहमान का प्रवेश हमेशा मुख्य द्वार से ही होगा!'
-    },
-    codeExamples: [
-      {
-        title: 'Hello World in C',
-        titleHindi: 'C में पहला Hello World प्रोग्राम',
-        code: `#include <stdio.h>
-
-int main() {
-    // स्क्रीन पर नमस्ते संदेश प्रिंट करें
-    printf("Namaste, World! Welcome to C-Guru.\\n");
-    printf("Dennis Ritchie would be proud of you!\\n");
-    return 0;
-}`,
-        output: `Namaste, World! Welcome to C-Guru.
-Dennis Ritchie would be proud of you!`,
-        explanation: 'printf() outputs text between double quotes. \\n adds a newline at the end.',
-        explanationHindi: 'printf() डबल कोट्स के भीतर लिखे टेक्स्ट को स्क्रीन पर दिखाता है। \\n नई पंक्ति (Enter) का काम करता है।'
-      }
-    ],
-    keyPoints: {
-      en: [
-        'C is case-sensitive: "main" is valid, but "Main" will cause a compilation error.',
-        'Always end statements with a semicolon (;).',
-        '#include <stdio.h> gives access to standard input/output functions.'
-      ],
-      hi: [
-        'C भाषा केस-सेंसिटिव है: "main" छोटे अक्षरों में ही लिखा जाएगा, "Main" लिखने पर कम्पाइलर त्रुटि देगा।',
-        'प्रत्येक स्टेटमेंट के अंत में सेमीकोलन (;) लगाना अनिवार्य है।',
-        '#include <stdio.h> से स्क्रीन पर आउटपुट दिखाने और इनपुट लेने की क्षमता मिलती है।'
-      ]
-    },
-    commonPitfalls: {
-      en: ['Forgetting the semicolon at the end of printf.', 'Typing <stdio> instead of <stdio.h>.'],
-      hi: ['printf के अंत में सेमीकोलन (;) लगाना भूल जाना।', '<stdio.h> की जगह गलती से <studio.h> लिख देना।']
-    },
-    quiz: [
-      {
-        id: 'q1-1',
-        difficulty: 'easy',
-        question: 'Who developed the C programming language?',
-        questionHindi: 'C प्रोग्रामिंग भाषा का विकास किसने किया था?',
-        options: ['James Gosling', 'Dennis Ritchie', 'Bjarne Stroustrup', 'Ken Thompson'],
-        correctIndex: 1,
-        explanation: 'Dennis Ritchie developed C in 1972 at Bell Labs.',
-        explanationHindi: 'डेनिस रिची ने 1972 में बेल लैब्स में C भाषा का विकास किया था।'
-      }
-    ]
+{
+  "id": "program-structure",
+  "order": 1,
+  "title": "Program Structure in C",
+  "titleHindi": "C प्रोग्राम की संरचना (Program Structure)",
+  "category": "Basics",
+  "summary": "Understand the comprehensive anatomy of a C program from preprocessor directives, header files, main() function entry point, statements, and comments to the compilation pipeline.",
+  "summaryHindi": "C प्रोग्राम की छह मूलभूत संरचनाओं (Sections), प्रीप्रोसेसर, main() फंक्शन, सिंटेक्स नियमों और कम्पाइलेशन के चार चरणों को गहराई से समझें।",
+  "readTimeMinutes": 15,
+  "explanationEn": "1. HISTORICAL CONTEXT & THE BIRTH OF C:\nThe C programming language was conceived and crafted between 1969 and 1972 by computer scientist Dennis Ritchie at AT&T Bell Laboratories in Murray Hill, New Jersey. Its historical imperative was revolutionary: Dennis Ritchie and Ken Thompson needed a modern, elegant, yet low-level language to rewrite the Unix operating system so it could be ported across diverse hardware architectures instead of being chained to PDP-7 assembly code. Derived from Ken Thompson's B language (which originated from BCPL), C introduced rich data typing, pointer arithmetic, and structured programming paradigms. Today, C is universally celebrated as the foundational bedrock of all modern computing. Operating systems such as Linux, macOS, Android, Windows, database engines like PostgreSQL, MySQL, and SQLite, and game engines are built primarily on C. Modern languages including C++, Java, C#, Python, JavaScript, PHP, and Rust inherited their core control structures, syntax rules, and operators directly from C.\n\n2. THE SIX FUNDAMENTAL SECTIONS OF A C PROGRAM:\nA standard, professional C program follows a well-defined architectural sequence comprising six sequential sections:\nSection 1 - Documentation Section:\nContains comments detailing the program's title, purpose, author name, creation date, and algorithmic notes. Although completely ignored by the C compiler, this section is indispensable for code maintainability, team collaboration, and software documentation. Both single-line comments (//) and multi-line comments (/* ... */) are utilized here.\nSection 2 - Link Section (Preprocessor Directives):\nInstructs the preprocessor to pull in external header files containing prototypes of library functions before compilation begins. For example, #include <stdio.h> grants access to standard input/output routines, and #include <stdlib.h> provides memory management tools. Without the link section, functions like printf() and scanf() would remain unrecognized symbols.\nSection 3 - Definition Section:\nEstablishes symbolic constants and macros using the #define directive (e.g., #define PI 3.14159 or #define MAX_BUFFER 1024). Macros perform literal compile-time textual replacement without consuming RAM storage, providing symbolic clarity and performance.\nSection 4 - Global Declaration Section:\nHouses variables and custom function prototypes that must be visible and accessible across multiple functions throughout the entire source file. Variables declared here reside in the static data segment and persist for the entire program duration.\nSection 5 - Main Function Section:\nThe mandatory gateway of every standalone executable C application. Execution invariably commences at the very first line of main(). The main function consists of two parts: the declaration part (where local variables are created) and the execution part (where operations, expressions, and calls execute). It must conclude by returning an integer exit status code (return 0;) back to the operating system shell.\nSection 6 - Subprogram (User-Defined Functions) Section:\nContains custom helper functions (such as calculateSum(), displayBanner(), or sortArray()) defined by the programmer to achieve modular programming, code reuse, and separation of concerns.\n\n3. ANATOMICAL BREAKDOWN OF THE STARTER PROGRAM:\nConsider this classic foundational program:\n```c\n#include <stdio.h>\n\nint main() {\n    printf(\"Namaste, World!\\n\");\n    return 0;\n}\n```\nLet us examine each token with surgical precision:\n- '#': The hash character indicates a preprocessor directive. It flags instructions executed before the actual language compiler translates source code.\n- 'include': Tells the preprocessor to search for the specified file and paste its contents verbatim into the current translation unit.\n- '<stdio.h>': Standard Input Output header file. The angled brackets tell the preprocessor to search standard system include paths. It defines function prototypes for printf, scanf, getchar, and file operations.\n- 'int': Specifies the return type of the function. Modern ISO C standards mandate that main() must return an integer back to the host operating system.\n- 'main()': The designated primary execution entry point. The parentheses can contain command-line argument parameters such as (int argc, char *argv[]).\n- '{ and }': Curly braces define a code block or scope boundary. Statements inside represent the function body.\n- 'printf(\"...\");': Formatted print library routine that transmits characters to the standard output console stream (stdout).\n- '\\n': Escape sequence denoting an ASCII Line Feed / Newline character (decimal 10), advancing the terminal cursor to the start of the next line.\n- Semicolon ';': The mandatory statement terminator in C. In English, sentences conclude with a period; in C, every executable instruction must terminate with a semicolon. Forgetting a semicolon triggers compilation failure.\n- 'return 0;': Concludes the main function and transmits exit code 0 to the Operating System. In Unix and Windows environments, an exit code of 0 universally signifies successful termination with zero errors.\n\n4. THE FOUR PHASES OF THE C COMPILATION PIPELINE:\nWhen you compile a source file like program.c using GCC or Clang, your code passes through four distinct transformation phases:\nPhase 1 - Preprocessing:\nThe preprocessor strips out all comments, expands macros defined by #define, and replaces #include directives with the actual contents of the referenced header files. The resulting intermediate file is called a Translation Unit (.i extension).\nPhase 2 - Compilation:\nThe compiler parses the preprocessed C source code, performs lexical, syntactic, and semantic analysis, builds an Abstract Syntax Tree (AST), and generates equivalent assembly language instructions (.s extension) customized for the host CPU architecture (x86, ARM, RISC-V).\nPhase 3 - Assembly:\nThe assembler translates assembly mnemonics into raw machine code instructions, generating an unlinked Object File (.o on Linux or .obj on Windows).\nPhase 4 - Linking:\nThe linker combines the object file with runtime C standard library binaries (libc), resolves external memory symbols (such as printf), and binds them together into the final runnable executable application (.exe on Windows or ELF binary on Linux).\n\n5. SYNTAX RULES AND CODING CONVENTIONS:\nC is a free-form, case-sensitive language. You can format whitespace, blank lines, and indentations flexibly without affecting compiler logic. However, strict adherence to clean formatting standards, descriptive identifier naming, consistent indentation, and thoughtful commenting is vital for real-world software engineering.",
+  "explanationHi": "१. C भाषा का ऐतिहासिक परिचय एवं उत्पत्ति:\nC प्रोग्रामिंग भाषा का निर्माण सन् 1969 से 1972 के बीच अमेरिका के न्यू जर्सी स्थित AT&T बेल लैबोरेटरीज (Bell Labs) में विश्वप्रसिद्ध कंप्यूटर वैज्ञानिक डेनिस रिची (Dennis Ritchie) द्वारा किया गया था। उस समय यूनिक्स (UNIX) ऑपरेटिंग सिस्टम को असेंबली भाषा में लिखा गया था, जिसके कारण वह केवल एक ही प्रकार के कंप्यूटर (PDP-7) पर चल सकता था। केन थॉम्पसन और डेनिस रिची एक ऐसी शक्तिशाली, पोर्टेबल और आधुनिक भाषा चाहते थे जिससे पूरे ऑपरेटिंग सिस्टम को पुनः लिखा जा सके ताकि वह दुनिया के किसी भी हार्डवेयर पर सरलता से चल सके। डेनिस रिची ने B भाषा को उन्नत करके C भाषा का आविष्कार किया। आज C भाषा को सभी आधुनिक भाषाओं की \"जननी (Mother of All Languages)\" कहा जाता है। C++, Java, C#, Python, JavaScript, PHP और Rust जैसी आधुनिक भाषाओं ने अपने बुनियादी सिंटेक्स, लूप, कंडीशन्स और ऑपरेटर्स सीधे C भाषा से ही ग्रहण किए हैं। लिनक्स कर्नेल, विंडोज़ ऑपरेटिंग सिस्टम, डेटाबेस जैसे MySQL व SQLite, और सुपरकंप्यूटर्स के कोर इंजन आज भी C भाषा में लिखे गए हैं।\n\n२. C प्रोग्राम के छह मुख्य भाग (Six Sections of a C Program):\nएक आदर्श और मानक C प्रोग्राम की संरचना को छह प्रमुख अनुभागों में विभाजित किया जाता है:\n१. डॉक्यूमेंटेशन सेक्शन (Documentation Section):\nयह प्रोग्राम का सबसे पहला भाग होता है जिसमें टिप्पणियाँ (Comments) लिखी जाती हैं। इसमें प्रोग्राम का शीर्षक, लेखक का नाम, निर्माण की तिथि और प्रोग्राम का उद्देश्य लिखा जाता है। कम्पाइलर कमेंट्स को पूरी तरह अनदेखा कर देता है, किंतु यह कोड को समझने और टीम के साथ काम करने के लिए अत्यंत महत्वपूर्ण है।\n२. लिंक सेक्शन (Link Section / Preprocessor Directives):\nइस भाग में प्रीप्रोसेसर निर्देश लिखे जाते हैं जो कम्पाइलर को बाहरी हेडर फाइलों को जोड़ने का आदेश देते हैं। जैसे '#include <stdio.h>' लिखने से कम्पाइलर को इनपुट-आउटपुट फंक्शन्स (printf, scanf) की जानकारी मिलती है।\n३. डेफिनिशन सेक्शन (Definition Section):\nयहाँ '#define' मैक्रो के माध्यम से सिंबॉलिक स्थिरांक (Constants) परिभाषित किए जाते हैं; जैसे '#define PI 3.14159' या '#define MAX 100'। ये मान मेमोरी में जगह नहीं लेते बल्कि कोड कम्पाइल होने से पहले सीधे बदल दिए जाते हैं।\n४. ग्लोबल डिक्लेरेशन सेक्शन (Global Declaration Section):\nइस भाग में ऐसे वेरिएबल्स और कस्टम फंक्शन्स के प्रोटोटाइप घोषित किए जाते हैं जिनकी आवश्यकता प्रोग्राम के सभी फंक्शन्स में होती है। यहाँ बनाए गए चर प्रोग्राम के शुरू होने से खत्म होने तक मेमोरी में जीवित रहते हैं।\n५. मेन फंक्शन सेक्शन (Main Function Section):\nयह प्रत्येक C प्रोग्राम का सबसे महत्वपूर्ण और अनिवार्य प्रवेश द्वार (Entry Point) है। ऑपरेटिंग सिस्टम किसी भी C प्रोग्राम को चलाना हमेशा main() की पहली पंक्ति से ही शुरू करता है। इसके दो भाग होते हैं: डिक्लेरेशन भाग (जहाँ लोकल वेरिएबल्स बनते हैं) और एग्जीक्यूशन भाग (जहाँ निर्देश चलते हैं)। अंत में ऑपरेटिंग सिस्टम को सूचना देने के लिए 'return 0;' लिखा जाता है।\n६. सब-प्रोग्राम सेक्शन (Subprogram / Functions Section):\nयहाँ यूजर-डिफाइंड फंक्शन्स (User-defined functions) की बॉडी लिखी जाती है, जैसे जोड़ना, घटाना, या सॉर्ट करना। इससे प्रोग्राम मॉड्यूलर और सुव्यवस्थित बनता है।\n\n३. पहले C प्रोग्राम के एक-एक शब्द का गहरा विश्लेषण:\nआइए इस सरल क्लासिक प्रोग्राम की प्रत्येक पंक्ति को समझें:\n```c\n#include <stdio.h>\n\nint main() {\n    printf(\"नमस्ते भारत!\\n\");\n    return 0;\n}\n```\n- '#': हैश चिह्न यह बताता है कि यह एक प्रीप्रोसेसर निर्देश है जिसे मुख्य कम्पाइलेशन से पहले चलाया जाना चाहिए।\n- 'include': यह कम्पाइलर को निर्देश देता है कि बताई गई हेडर फाइल को इस प्रोग्राम के साथ जोड़ दो।\n- '<stdio.h>': स्टैंडर्ड इनपुट आउटपुट हेडर फाइल। इसमें स्क्रीन पर प्रिंट करने (printf) और कीबोर्ड से पढ़ने (scanf) के नियम लिखे होते हैं।\n- 'int': यह बताता है कि main() फंक्शन अपना कार्य समाप्त करने के बाद ऑपरेटिंग सिस्टम को एक पूर्णांक (Integer) मान वापस लौटाएगा।\n- 'main()': हर C प्रोग्राम का पहला दरवाजा। कंप्यूटर चाहे 10,000 लाइनों का कोड हो, निष्पादन हमेशा main() से ही शुरू करता है।\n- '{ और }': कर्ली ब्रेसेस कोड ब्लॉक की शुरुआत और अंत की सीमा निर्धारित करते हैं।\n- 'printf(\"...\");': प्रिंट फॉर्मेटेड फंक्शन, जो कोट्स के अंदर लिखे शब्दों को स्क्रीन (कंसोल) पर दिखाता है।\n- '\\n': न्यूलाइन एस्केप सीक्वेंस, जो कर्सर को अगली नई लाइन पर भेज देता है (कीबोर्ड के Enter बटन के समान)।\n- सेमीकोलन ';': C भाषा में हर स्टेटमेंट के अंत में सेमीकोलन लगाना अनिवार्य है। यह बताता है कि निर्देश यहाँ पूरा हो चुका है।\n- 'return 0;': यह ऑपरेटिंग सिस्टम को संकेत देता है कि प्रोग्राम बिना किसी त्रुटि (Error) के सफलतापूर्वक समाप्त हो चुका है।\n\n४. C प्रोग्राम के कम्पाइलेशन के चार चरण:\nजब आप किसी C प्रोग्राम को कम्पाइल करते हैं, तो वह चार चरणों से होकर गुजरता है:\n१. प्रीप्रोसेसर (Preprocessor): यह सभी कमेंट्स को हटाता है और #include वाली फाइलों को कोड में जोड़कर ट्रांसलेशन यूनिट (.i) बनाता है।\n२. कम्पाइलर (Compiler): यह C कोड को असेंबली भाषा (.s) में बदलता है और सिंटेक्स की जांच करता है।\n३. असेंबलर (Assembler): यह असेंबली कोड को मशीन के समझने योग्य बाइनरी ऑब्जेक्ट कोड (.o या .obj) में बदलता है।\n४. लिंकर (Linker): यह सभी ऑब्जेक्ट फाइलों और C लाइब्रेरी फाइलों को जोड़कर अंतिम चलाने योग्य फाइल (.exe या ELF) तैयार करता है।",
+  "realLifeAnalogy": {
+    "en": "Think of a C program as constructing a building from an architectural blueprint. The documentation is the project blueprint notes. The #include directives are bringing specialized construction machinery to the site. The main() function is the grand front entrance. The sub-functions are specialized rooms, and return 0 is the city building safety clearance.",
+    "hi": "C प्रोग्राम की तुलना मकान के निर्माण से करें। डॉक्यूमेंटेशन नक्शा है, #include निर्माण उपकरण लाना है, main() मुख्य प्रवेश द्वार है, सब-फंक्शन्स अलग-अलग कमरे हैं, और return 0 भवन पूर्णता प्रमाण पत्र है।"
   },
-  {
-    id: 'variables-datatypes',
-    order: 2,
-    title: 'Variables, Constants & Data Types',
-    titleHindi: 'वेरिएबल्स, कॉन्स्टेंट्स एवं डेटा प्रकार (RAM Memory Storage)',
-    category: 'Basics',
-    summary: 'Master how data is stored in memory. Understand int, float, char, format specifiers (%d, %f, %c), and naming conventions.',
-    summaryHindi: 'मेमोरी (RAM) में डेटा संग्रहण के नियम समझें: int, float, char, फॉर्मेट विनिर्देशक और नेमिंग रूल्स।',
-    readTimeMinutes: 10,
-    explanationEn: `1. WHAT IS A VARIABLE IN SIMPLE WORDS?
-When you play a video game, the computer needs to remember your score, your player name, and how many lives you have left. Where does the computer store this changing information? Inside its temporary memory, called RAM (Random Access Memory)!
-A VARIABLE is simply a named storage box inside the computer's RAM that holds a piece of information which can change (vary) while your program runs.
-
-2. HOW DOES COMPUTER MEMORY (RAM) WORK?
-Imagine RAM as a giant post office containing millions of tiny numbered mailboxes. Each mailbox has a hexadecimal address (like 0x7ffd10). Humans cannot memorize numbers like 0x7ffd10, so C allows us to give that mailbox a friendly label, such as "score" or "age".
-When you write:
-int score = 100;
-The compiler reserves 4 bytes of RAM, labels that spot "score", and places the binary number 100 inside!
-
-3. THE 4 FUNDAMENTAL DATA TYPES IN C:
-Different items require different types of storage containers:
-- int (Integer): Used for whole numbers without any decimal point (e.g., 5, 25, -50, 1000). On modern systems, it occupies 4 bytes (32 bits) of RAM and can store values from -2,147,483,648 to +2,147,483,647. Format specifier: %d
-- float (Floating Point): Used for numbers with decimal fractions (e.g., 3.14, 98.6, -0.05). It occupies 4 bytes of memory and gives about 6 to 7 digits of decimal precision. Format specifier: %f
-- double (Double Precision Float): Used when you need ultra-precise decimal calculations (e.g., scientific calculations, GPS coordinates, astronomy). It occupies 8 bytes (64 bits) of RAM and gives 15 digits of precision. Format specifier: %lf
-- char (Character): Used to store a single letter, digit, or symbol enclosed inside single quotes (e.g., 'A', 'z', '9', '$'). Internally, the computer does not store the letter itself; it stores its numeric ASCII integer code (e.g., 'A' is stored as 65). It takes exactly 1 byte (8 bits) of memory. Format specifier: %c
-
-4. VARIABLE NAMING RULES (HOW TO NAME YOUR BOXES):
-- Can use letters (A-Z, a-z), digits (0-9), and underscores (_).
-- MUST NOT begin with a digit! 'score1' is valid, but '1score' is illegal.
-- Cannot be a reserved C keyword (you cannot name a variable 'int', 'return', or 'while').
-- C is case-sensitive: 'age', 'Age', and 'AGE' are three completely distinct variables.
-
-5. WHAT ARE CONSTANTS (const)?
-If you have a value that should NEVER be altered anywhere in your program (such as the value of PI = 3.14159 or number of months = 12), place the 'const' keyword in front:
-const float PI = 3.14159f;
-If any line of code attempts to change PI, the compiler will protect your program and raise a compile-time error.`,
-    explanationHi: `१. सरल शब्दों में वेरिएबल (Variable) क्या है?
-जब आप कोई वीडियो गेम खेलते हैं, तो कंप्यूटर को याद रखना पड़ता है कि आपका स्कोर कितना है, आपके पास कितनी लाइफ बची हैं, और आपका नाम क्या है। कंप्यूटर यह बदलती हुई जानकारी कहाँ रखता है? अपनी याददाश्त यानी RAM (मेमोरी) में!
-वेरिएबल (चर) कंप्यूटर की मेमोरी (RAM) में बना हुआ एक ऐसा नाम वाला डिब्बा (कंटेनर) होता है, जिसमें हम कोई जानकारी सुरक्षित रखते हैं और जरूरत पड़ने पर उसका मान (Value) बदल भी सकते हैं।
-
-२. कंप्यूटर की मेमोरी (RAM) कैसे काम करती है?
-कल्पना कीजिए कि कंप्यूटर की RAM एक बहुत बड़ी अलमारी है जिसमें लाखों छोटे-छोटे लॉकर बने हुए हैं। हर लॉकर का एक अजीब सा नंबर (मेमोरी एड्रेस) होता है, जैसे 0x7ffd20। इंसान इतने कठिन पते याद नहीं रख सकते। इसलिए C भाषा हमें उस लॉकर पर एक प्यारा सा नाम चिपकाने की सुविधा देती है, जैसे "age" या "score"।
-जब आप लिखते हैं:
-int age = 21;
-तो कंप्यूटर RAM में 4 बाइट्स की जगह घेरता है, उस पर "age" का लेबल लगाता है, और उसके अंदर 21 रख देता है!
-
-३. C भाषा के ४ मुख्य डेटा प्रकार (Data Types):
-जैसे रसोई में दूध रखने के लिए बर्तन, चीनी के लिए डिब्बा और मसाले के लिए छोटी शीशी चाहिए, वैसे ही अलग-अलग डेटा के लिए अलग-अलग डेटा प्रकार होते हैं:
-- int (पूर्णांक संख्या): बिना दशमलव वाली पूरी संख्याएं (जैसे 10, 50, -20)। यह मेमोरी में 4 बाइट्स (32 बिट्स) स्थान लेता है। इसका फॉर्मेट विनिर्देशक %d होता है।
-- float (दशमलव संख्या): दशमलव बिंदु वाली संख्याएं (जैसे 98.6, 3.14, 45.50)। यह मेमोरी में 4 बाइट्स लेता है। इसका फॉर्मेट विनिर्देशक %f होता है।
-- double (बड़ी दशमलव संख्या): अधिक सटीक और लंबी दशमलव संख्याएं। यह 8 बाइट्स लेता है। इसका फॉर्मेट विनिर्देशक %lf होता है।
-- char (अक्षर / कैरेक्टर): कोई एक अकेला अक्षर, चिह्न या अंक जिसे सिंगल कोट्स (' ') में लिखा जाए (जैसे 'A', 'z', '@', '5')। कंप्यूटर इसे ASCII कोड के रूप में संचित करता है (जैसे 'A' का ASCII कोड 65 है)। यह मेमोरी में केवल 1 बाइट लेता है। इसका फॉर्मेट विनिर्देशक %c होता है।
-
-४. वेरिएबल का नाम रखने के नियम (Naming Rules):
-- नाम में केवल अक्षर (A-Z, a-z), संख्याएं (0-9) और अंडरस्कोर (_) आ सकते हैं।
-- नाम का पहला अक्षर कभी भी संख्या (अंक) नहीं हो सकता! 'num1' सही है, लेकिन '1num' गलत है।
-- C भाषा के आरक्षित कीवर्ड्स (जैसे int, float, return, if) का उपयोग नाम के लिए नहीं किया जा सकता।
-- C केस-सेंसिटिव है: 'total', 'Total' और 'TOTAL' तीन अलग-अलग डिब्बे माने जाएंगे।
-
-५. स्थिरांक यानी Constant (const) क्या है?
-यदि आप चाहते हैं कि किसी मान को प्रोग्राम में कोई भी गलती से न बदल सके (जैसे साल के 12 महीने या गणित में PI = 3.14), तो उसके आगे 'const' लगा दें:
-const float PI = 3.14f;
-यदि कोड में कोई इसे बदलने की कोशिश करेगा, तो कम्पाइलर तुरंत रोक देगा।`,
-    realLifeAnalogy: {
-      en: 'Think of variables as labelled jars in a kitchen. The "Sugar" jar holds sugar (int), the "Milk" jar holds liquid (float), and a spice pouch holds a single pinch (char).',
-      hi: 'रसोईघर के डिब्बों की कल्पना करें: चीनी का डिब्बा (int), दूध का बर्तन (float), और मसाले की छोटी डिब्बी (char)। प्रत्येक डिब्बे का अपना आकार और उद्देश्य होता है!'
-    },
-    codeExamples: [
-      {
-        title: 'Variables and Format Specifiers',
-        titleHindi: 'वेरिएबल्स और फॉर्मेट विनिर्देशक',
-        code: `#include <stdio.h>
-
-int main() {
-    int age = 21;
-    float marks = 89.75f;
-    char grade = 'A';
-
-    printf("आयु (Age): %d वर्ष\\n", age);
-    printf("प्रतिशत (Percentage): %.2f%%\\n", marks);
-    printf("ग्रेड (Grade): %c\\n", grade);
-
-    return 0;
-}`,
-        output: `आयु (Age): 21 वर्ष
-प्रतिशत (Percentage): 89.75%
-ग्रेड (Grade): A`,
-        explanation: '%d replaces age, %.2f formats float to 2 decimal places, and %c prints a single character.',
-        explanationHindi: '%d पूर्णांक मान दिखाता है, %.2f दशमलव के 2 अंकों तक दिखाता है, और %c कैरेक्टर प्रिंट करता है।'
-      }
-    ],
-    keyPoints: {
-      en: [
-        'Each data type occupies a specific number of bytes in memory.',
-        'Use %.2f to print float values rounded to 2 decimal places.',
-        'Single quotes are for char (\'A\'), double quotes are for strings ("Hello").'
-      ],
-      hi: [
-        'प्रत्येक डेटा प्रकार मेमोरी में निश्चित बाइट्स स्थान लेता है।',
-        'दशमलव के दो अंकों तक प्रिंट करने के लिए %.2f का उपयोग करें।',
-        'कैरेक्टर के लिए सिंगल कोट्स (\'A\') और शब्दों के लिए डबल कोट्स ("नमस्ते") लगाएं।'
-      ]
-    },
-    commonPitfalls: {
-      en: ['Using %d for a float variable will print garbage values.', 'Declaring variables with numbers at the start.'],
-      hi: ['फ्लोट वेरिएबल के लिए %d लगा देना जिससे अमान्य (Garbage) मान आता है।', 'वेरिएबल का नाम 2score या 1num जैसे अंक से प्रारंभ करना।']
-    },
-    quiz: [
-      {
-        id: 'q2-1',
-        difficulty: 'easy',
-        question: 'Which of the following is an INVALID variable name in C?',
-        questionHindi: 'C भाषा में निम्नलिखित में से कौन-सा वेरिएबल नाम अमान्य (INVALID) है?',
-        options: ['_totalScore', 'total_score', '2nd_score', 'score2'],
-        correctIndex: 2,
-        explanation: 'Variables cannot begin with a number (2nd_score is invalid).',
-        explanationHindi: 'वेरिएबल का नाम किसी अंक से प्रारंभ नहीं हो सकता।'
-      }
-    ]
-  },
-  {
-    id: 'operators',
-    order: 3,
-    title: 'Operators & Expressions',
-    titleHindi: 'ऑपरेटर्स एवं व्यंजक (Operators & Calculations)',
-    category: 'Basics',
-    summary: 'Master arithmetic, relational, logical, assignment, bitwise, and ternary operators with precedence rules.',
-    summaryHindi: 'अंकगणितीय (+ - * / %), संबंधपरक (== !=), तार्किक (&& || !), इंक्रीमेंट/डिक्रीमेंट और टर्नरी ऑपरेटर्स का गहन अध्ययन।',
-    readTimeMinutes: 10,
-    explanationEn: `1. WHAT ARE OPERATORS IN SIMPLE WORDS?
-In mathematics, when you see 5 + 3 = 8, the plus sign (+) tells you what action to perform on the numbers 5 and 3. In programming, OPERATORS are special symbols that instruct the computer's CPU to carry out specific arithmetic, relational, or logical operations on data items (called operands).
-
-2. THE 5 MAJOR CATEGORIES OF OPERATORS IN C:
-- Arithmetic Operators (Math work):
-  + (Addition): Adds two values (10 + 5 = 15).
-  - (Subtraction): Subtracts right operand from left (10 - 5 = 5).
-  * (Multiplication): Multiplies numbers (10 * 5 = 50).
-  / (Division): Divides numerator by denominator. CAUTION: In C, if both numbers are integers, integer division truncates the decimal (10 / 4 = 2, NOT 2.5!). To get 2.5, at least one number must be a float (10.0f / 4 = 2.5f).
-  % (Modulus / Remainder): Gives the integer remainder left over after division. For example, 10 % 3 = 1 (because 3 * 3 = 9, remainder is 1). Modulus ONLY works with integers!
-
-- Relational Operators (Comparisons):
-  These compare two values and return 1 if TRUE and 0 if FALSE.
-  == (Equal to): Checks if both sides are equal (5 == 5 is 1).
-  != (Not equal to): Checks if sides are different (5 != 3 is 1).
-  > (Greater than) and < (Less than).
-  >= (Greater than or equal) and <= (Less than or equal).
-
-- Logical Operators (Connecting multiple conditions):
-  && (Logical AND): Evaluates to TRUE ONLY IF ALL conditions are true. (Age >= 18 && HasVoterID == 1).
-  || (Logical OR): Evaluates to TRUE if AT LEAST ONE condition is true. (Day == Saturday || Day == Sunday).
-  ! (Logical NOT): Flips the truth value. If something is TRUE, ! makes it FALSE; if FALSE, ! makes it TRUE.
-
-- Increment & Decrement Operators (++ and --):
-  x++ (Post-increment): Uses the current value first in the expression, then adds 1 to x.
-  ++x (Pre-increment): Adds 1 to x first, then uses the updated value.
-
-- Ternary (Conditional) Operator (? :):
-  This is a compact, one-line replacement for an if-else statement:
-  (condition) ? (value_if_true) : (value_if_false);
-  Example: (marks >= 40) ? printf("Pass") : printf("Fail");
-
-3. OPERATOR PRECEDENCE (BODMAS FOR C):
-Just like in school math where multiplication comes before addition, C follows strict Operator Precedence rules:
-1st: Parentheses ( ) have the highest priority.
-2nd: Multiplicative (* / %)
-3rd: Additive (+ -)
-4th: Relational (< <= > >=)
-5th: Equality (== !=)
-6th: Logical AND (&&) then OR (||)
-7th: Assignment (=)`,
-    explanationHi: `१. सरल शब्दों में ऑपरेटर क्या होते हैं?
-गणित में जब आप 10 + 5 देखते हैं, तो जोड़ का चिह्न (+) कंप्यूटर को बताता है कि इन दोनों संख्याओं को आपस में मिलाना है। C भाषा में ऑपरेटर (Operator) वे विशेष चिह्न होते हैं जो कंप्यूटर के सीपीयू को संख्याओं या डेटा पर गणितीय गणना, तुलना या तार्किक निर्णय लेने का आदेश देते हैं।
-
-२. C भाषा के मुख्य ५ प्रकार के ऑपरेटर्स:
-- अंकगणितीय ऑपरेटर्स (Arithmetic Operators):
-  + (जोड़): दो मानों को जोड़ता है (10 + 5 = 15)।
-  - (घटाव): बड़ी संख्या से छोटी संख्या घटाता है (10 - 5 = 5)।
-  * (गुणा): आपस में गुणा करता है (10 * 5 = 50)।
-  / (भाग): विभाजन करता है। ध्यान रहे: यदि दोनों संख्याएं पूर्णांक (int) हैं, तो उत्तर का दशमलव हिस्सा कट जाता है (10 / 4 का उत्तर 2.5 नहीं बल्कि 2 आएगा)। दशमलव मान पाने के लिए कम से कम एक संख्या float होनी चाहिए (10.0 / 4 = 2.5)।
-  % (मॉड्यूलो यानी शेषफल): भाग देने के बाद जो बाकी बचता है (शेषफल), यह वह मान निकालता है। जैसे 10 % 3 का उत्तर 1 होगा (क्योंकि 3 × 3 = 9 और 1 शेष बचा)। शेषफल ऑपरेटर केवल पूर्णांकों (int) पर कार्य करता है!
-
-- संबंधपरक ऑपरेटर्स (तुलना करने वाले Relational Operators):
-  ये दो मानों की तुलना करते हैं और सत्य होने पर 1 तथा असत्य होने पर 0 देते हैं:
-  == (समानता जांच): क्या दोनों बराबर हैं? (5 == 5 सत्य यानी 1 है)।
-  != (असमानता जांच): क्या दोनों अलग हैं? (5 != 3 सत्य यानी 1 है)।
-  > (बड़ा है) और < (छोटा है)।
-  >= (बड़ा या बराबर) और <= (छोटा या बराबर)।
-
-- तार्किक ऑपरेटर्स (शर्तें जोड़ने वाले Logical Operators):
-  && (तार्किक AND): जब दोनों शर्तें एक साथ सच होंगी, तभी सत्य मानेगा। (जैसे: उम्र >= 18 && वोटर_कार्ड == 1)।
-  || (तार्किक OR): यदि कोई एक शर्त भी सच हो जाए, तो सत्य मानेगा। (जैसे: आज_शनिवार || आज_रविवार)।
-  ! (तार्किक NOT): यह परिणाम को उल्टा कर देता है; सच को झूठ और झूठ को सच बना देता है।
-
-- इंक्रीमेंट और डिक्रीमेंट (++ और --):
-  x++ (पोस्ट-इंक्रीमेंट): पहले पुरानी वैल्यू का उपयोग करो, फिर 1 बढ़ाओ।
-  ++x (प्री-इंक्रीमेंट): पहले 1 बढ़ाओ, फिर नए मान का उपयोग करो।
-
-- टर्नरी ऑपरेटर (? :):
-  यह छोटे if-else का जादुई एक-लाइन शॉर्टकट है:
-  (शर्त) ? (सत्य होने पर यह) : (असत्य होने पर यह);
-  उदाहरण: (marks >= 40) ? printf("पास") : printf("फेल");`,
-    realLifeAnalogy: {
-      en: 'Think of && like needing BOTH your ID and ticket to board a flight. Think of || like showing EITHER Aadhaar OR Passport to verify your identity.',
-      hi: '&& का अर्थ है हवाई जहाज में बैठने के लिए टिकट और पहचान पत्र दोनों अनिवार्य हैं। || का अर्थ है पहचान के लिए आधार कार्ड या पासपोर्ट में से कोई एक पर्याप्त है।'
-    },
-    codeExamples: [
-      {
-        title: 'Ternary & Modulo in Action',
-        titleHindi: 'शेषफल और टर्नरी ऑपरेटर का उदाहरण',
-        code: `#include <stdio.h>
-
-int main() {
-    int num = 17;
-
-    // टर्नरी ऑपरेटर से सम/विषम जांच
-    (num % 2 == 0) ? printf("%d सम (Even) है\\n", num) : printf("%d विषम (Odd) है\\n", num);
-
-    int a = 5;
-    printf("Post-increment: %d\\n", a++); // 5 प्रिंट करेगा, फिर 6 होगा
-    printf("New value: %d\\n", a);         // 6 प्रिंट करेगा
-    return 0;
-}`,
-        output: `17 विषम (Odd) है
-Post-increment: 5
-New value: 6`,
-        explanation: 'num % 2 returns 1, so the false branch prints Odd.',
-        explanationHindi: '17 % 2 का शेषफल 1 आया, इसलिए टर्नरी ऑपरेटर ने विषम प्रिंट किया।'
-      }
-    ],
-    keyPoints: {
-      en: [
-        'Modulus operator (%) CANNOT be applied to float or double values in C.',
-        'Single equal (=) is assignment, double equal (==) is comparison.',
-        'In C, any non-zero value is treated as TRUE; 0 is treated as FALSE.'
-      ],
-      hi: [
-        'शेषफल ऑपरेटर (%) दशमलव (float/double) पर लागू नहीं किया जा सकता।',
-        'एकल बराबर (=) मान सौंपता है, दोहरा बराबर (==) समानता की जांच करता है।',
-        'C में शून्य (0) असत्य होता है और शून्य के अलावा कोई भी संख्या सत्य मानी जाती है।'
-      ]
-    },
-    commonPitfalls: {
-      en: ['Writing if (x = 5) instead of if (x == 5).', 'Integer division: 5 / 2 yields 2, not 2.5.'],
-      hi: ['if (x == 5) की जगह if (x = 5) लिख देना जिससे शर्त हमेशा सत्य हो जाती है।', 'पूर्णांक विभाजन: 5 / 2 का उत्तर 2.5 नहीं बल्कि 2 आएगा।']
-    },
-    quiz: [
-      {
-        id: 'q3-1',
-        difficulty: 'easy',
-        question: 'What is the result of expression 19 % 4 in C?',
-        questionHindi: 'C में 19 % 4 का मान क्या होगा?',
-        options: ['4', '4.75', '3', '1'],
-        correctIndex: 2,
-        explanation: '19 divided by 4 leaves a remainder of 3.',
-        explanationHindi: '19 को 4 से भाग देने पर शेषफल 3 बचता है।'
-      }
-    ]
-  },
-  {
-    id: 'control-statements',
-    order: 4,
-    title: 'Conditional Statements (if, else, switch)',
-    titleHindi: 'कंडीशनल स्टेटमेंट्स (if, else, switch-case से निर्णय लेना)',
-    category: 'Control Flow',
-    summary: 'Direct the flow of your program. Learn simple if, if-else, ladder, nested if, and switch-case with fallthrough control.',
-    summaryHindi: 'प्रोग्राम में निर्णय लेना सीखें: साधारण if, if-else, else-if सीढ़ी और switch-case break के साथ।',
-    readTimeMinutes: 10,
-    explanationEn: `1. WHAT IS DECISION MAKING IN PROGRAMMING?
-In real life, we make decisions constantly: "If it rains, I will carry an umbrella; otherwise, I will wear sunglasses." A program without decision-making abilities would be robotic and dull, executing the exact same lines from top to bottom every single time. 
-CONDITIONAL STATEMENTS allow a program to test conditions and branch off to execute different blocks of code depending on whether those conditions evaluate to TRUE or FALSE.
-
-2. THE 4 TYPES OF CONDITIONAL STRUCTURES IN C:
-- Simple if statement:
-  Executes the code block ONLY IF the condition is true. If the condition is false, the program simply skips the block and moves on.
-  Syntax: if (age >= 18) { printf("Eligible to Vote"); }
-
-- if-else statement:
-  Provides a fork in the road: executes Block A if the condition is true, or executes Block B if the condition is false.
-  Syntax: if (score >= 50) { printf("Passed"); } else { printf("Failed"); }
-
-- else-if ladder (Multiple conditions):
-  Used when you have a sequence of multiple mutually exclusive conditions. The computer evaluates each condition from top to bottom; as soon as one condition evaluates to true, its block executes and the rest of the entire ladder is skipped!
-  Syntax:
-  if (marks >= 90) { printf("Grade A"); }
-  else if (marks >= 75) { printf("Grade B"); }
-  else if (marks >= 60) { printf("Grade C"); }
-  else { printf("Fail"); }
-
-- Nested if statements:
-  An if statement placed entirely inside another if statement. The inner check only happens if the outer check passed first (e.g., Check if username is correct -> if true, check if password is correct).
-
-- switch-case statement (Menu Selection):
-  Best when you have a single variable and you want to test it against multiple exact constant values. It is cleaner and faster than a 10-level else-if ladder.
-  CRITICAL RULE: Always put a 'break;' statement at the end of every case! Without break, execution will fall through and run all subsequent cases regardless of their value! The 'default:' block acts like an 'else' if none of the cases matched.`,
-    explanationHi: `१. प्रोग्रामिंग में निर्णय लेने (Decision Making) का क्या अर्थ है?
-वास्तविक जीवन में हम हर पल फैसले लेते हैं: "यदि आज बारिश होगी, तो मैं छाता लेकर स्कूल जाऊंगा, अन्यथा धूप का चश्मा पहनूंगा।" यदि कंप्यूटर में फैसले लेने की ताकत न हो, तो वह हमेशा ऊपर से नीचे तक एक ही जैसा कोड चलाता रहेगा। 
-कंडीशनल स्टेटमेंट्स (शर्त वाले निर्देश) कंप्यूटर को यह सोचने और तय करने की क्षमता देते हैं कि कौन-सा काम कब करना है और कब छोड़ना है!
-
-२. C भाषा में कंडीशनल स्टेटमेंट्स के ४ मुख्य प्रकार:
-- साधारण if स्टेटमेंट:
-  यह केवल तभी काम करता है जब दी गई शर्त पूरी तरह सच (True) हो। यदि शर्त गलत है, तो कंप्यूटर भीतर के कोड को छोड़कर आगे बढ़ जाता है।
-  उदाहरण: if (उम्र >= 18) { printf("आप वोट डाल सकते हैं"); }
-
-- if-else स्टेटमेंट (दोराहा):
-  यह सड़क के दोराहे की तरह है: यदि शर्त सच है तो पहला रास्ता (if ब्लॉक) चुनो, और यदि शर्त गलत है तो दूसरा रास्ता (else ब्लॉक) चुनो।
-  उदाहरण: if (अंक >= 40) { printf("पास"); } else { printf("फेल"); }
-
-- else-if सीढ़ी (कई शर्तों की जांच):
-  जब हमारे पास 3 या उससे अधिक विकल्प हों (जैसे स्कूल के परीक्षा परिणाम में ग्रेड्स तय करना):
-  if (अंक >= 90) { printf("ग्रेड A"); }
-  else if (अंक >= 75) { printf("ग्रेड B"); }
-  else if (अंक >= 50) { printf("ग्रेड C"); }
-  else { printf("कड़ी मेहनत करें!"); }
-  कंप्यूटर ऊपर से नीचे तक जांचता है; जो शर्त सबसे पहले सच मिलती है, उसे चलाकर सीढ़ी से बाहर आ जाता है।
-
-- switch-case स्टेटमेंट (मेनू चुनने वाला सिस्टम):
-  जब आपके पास एक ही वेरिएबल हो और उसके कई निश्चित उत्तर हो सकते हों (जैसे होटल का मेनू: 1 फॉर पिज़्ज़ा, 2 फॉर बर्गर, 3 फॉर डोसा)।
-  सबसे जरूरी नियम: प्रत्येक case के बाद 'break;' लगाना कभी मत भूलें! यदि आप break नहीं लगाएंगे, तो कंप्यूटर नीचे के सभी केस को भी बिना सोचे चला देगा (इसे Fall-through कहते हैं)। 'default:' तब चलता है जब कोई भी विकल्प मैच न करे।`,
-    realLifeAnalogy: {
-      en: 'Think of an ATM menu: Press 1 for Cash Withdrawal, Press 2 for Balance Enquiry, Press 3 for Mini Statement. That is exactly what a switch-case does!',
-      hi: 'एटीएम मशीन के मेनू की कल्पना करें: नकदी निकासी के लिए 1 दबाएं, बैलेंस देखने के लिए 2 दबाएं। यही सटीक switch-case का कार्य है!'
-    },
-    codeExamples: [
-      {
-        title: 'Switch-Case Calculator',
-        titleHindi: 'Switch-Case से कैलकुलेटर मेनू',
-        code: `#include <stdio.h>
-
-int main() {
-    char op = '+';
-    int a = 20, b = 10;
-
-    switch (op) {
-        case '+':
-            printf("योग (Sum): %d + %d = %d\\n", a, b, a + b);
-            break;
-        case '-':
-            printf("अंतर (Difference): %d - %d = %d\\n", a, b, a - b);
-            break;
-        default:
-            printf("अमान्य ऑपरेटर!\\n");
+  "codeExamples": [
+    {
+      "title": "Complete Multi-Section C Program",
+      "titleHindi": "छह सेक्शन वाला संपूर्ण C प्रोग्राम",
+      "code": "#include <stdio.h>\n\n#define PI 3.14159265\n\nfloat globalRadius = 5.0f;\n\nfloat computeArea(float r);\n\nint main() {\n    float area = computeArea(globalRadius);\n    printf(\"Radius: %.2f units\\n\", globalRadius);\n    printf(\"Computed Area: %.4f sq units\\n\", area);\n    return 0;\n}\n\nfloat computeArea(float r) {\n    return PI * r * r;\n}",
+      "output": "Radius: 5.00 units\nComputed Area: 78.5398 sq units",
+      "explanation": "Demonstrates all six sections: headers, macros, globals, main, and functions.",
+      "explanationHindi": "छह भागों: हेडर, मैक्रो, ग्लोबल, मेन और फंक्शन को दर्शाता है।"
     }
-
-    return 0;
-}`,
-        output: `योग (Sum): 20 + 10 = 30`,
-        explanation: 'op is +, case + runs and break exits cleanly.',
-        explanationHindi: 'op का मान + था, अतः case + चला और break ने switch से बाहर निकाल दिया।'
-      }
-    ],
-    keyPoints: {
-      en: [
-        'Switch expression must evaluate to an integer or character (floats are not allowed).',
-        'Forget the break statement, and all subsequent cases execute (fall-through).'
-      ],
-      hi: [
-        'Switch में केवल पूर्णांक (int) या कैरेक्टर (char) ही मान्य हैं, दशमलव संख्याएं अमान्य हैं।',
-        'Break न लगाने पर नीचे के सभी केस बिना जांचे चल जाएंगे (Fall-through)।'
-      ]
-    },
-    commonPitfalls: {
-      en: ['Using float in switch.', 'Missing break statement.'],
-      hi: ['Switch में float का उपयोग करना।', 'Case के बाद break लगाना भूल जाना।']
-    },
-    quiz: [
-      {
-        id: 'q4-1',
-        difficulty: 'easy',
-        question: 'Which data type cannot be used in a switch statement in C?',
-        questionHindi: 'C के switch स्टेटमेंट में किस डेटा टाइप का उपयोग नहीं किया जा सकता?',
-        options: ['int', 'char', 'float', 'short'],
-        correctIndex: 2,
-        explanation: 'Floats are prohibited in C switch statements.',
-        explanationHindi: 'C के switch में दशमलव (float/double) का उपयोग वर्जित है।'
-      }
-    ]
-  },
-  {
-    id: 'loops-iteration',
-    order: 5,
-    title: 'Loops & Iterations (for, while, do-while)',
-    titleHindi: 'लूप्स एवं पुनरावृत्ति (Loops: for, while, do-while)',
-    category: 'Control Flow',
-    summary: 'Automate repetitive tasks. Compare entry-controlled (for, while) vs exit-controlled (do-while) loops, break, and continue.',
-    summaryHindi: 'पुनरावृत्ति वाले कार्यों का स्वचालन: for, while, do-while लूप्स, break और continue की संपूर्ण समझ।',
-    readTimeMinutes: 10,
-    explanationEn: `1. WHY DO WE NEED LOOPS IN PROGRAMMING?
-Suppose your teacher asks you to write "I will practice C coding every day" 1,000 times in your notebook. Writing it by hand would take hours and exhaust your hand. In computer science, whenever we need to repeat an action multiple times, we use LOOPS!
-A loop executes a block of statements repeatedly as long as a specified condition remains TRUE. Once the condition turns FALSE, the loop automatically stops.
-
-2. THE 3 TYPES OF LOOPS IN C:
-- for Loop (Entry-Controlled):
-  Best when you know in advance EXACTLY how many times the loop should run (e.g., print numbers from 1 to 100).
-  Syntax structure: for (initialization; condition; increment/decrement) { ... }
-  - Initialization: Sets the starting counter (int i = 1;). Runs only once at the beginning.
-  - Condition: Checked before every lap (i <= 100;). If true, body runs; if false, loop exits.
-  - Increment/Decrement: Updates counter after each lap (i++;).
-
-- while Loop (Entry-Controlled):
-  Best when the number of iterations is NOT known beforehand and depends on an external condition (e.g., keep running a game while player lives > 0).
-  Syntax: while (condition) { // code; counter update; }
-  CAUTION: You must remember to update the variable inside the while loop body, otherwise the condition will stay true forever and your program will freeze in an Infinite Loop!
-
-- do-while Loop (Exit-Controlled):
-  This is the only loop that checks its condition at the very BOTTOM!
-  Because the condition is tested at the end, the loop body is GUARANTEED TO RUN AT LEAST ONCE, even if the condition was completely false right from the start!
-  Syntax: do { ... } while (condition); (Notice the mandatory semicolon at the end!).
-
-3. LOOP CONTROL KEYWORDS:
-- break: Acts as an emergency brake. It instantly terminates the innermost loop and jumps straight out.
-- continue: Does not stop the loop; it merely skips the rest of the current iteration and jumps directly to the next lap!`,
-    explanationHi: `१. हमें प्रोग्रामिंग में लूप्स (Loops) की आवश्यकता क्यों होती है?
-कल्पना कीजिए कि स्कूल में शिक्षक आपसे कहें कि अपनी कॉपी में १०० बार "मैं रोज कंप्यूटर कोडिंग का अभ्यास करूँगा" लिखो। हाथ से १०० बार लिखने में आपकी उंगलियां दुखने लगेंगी। लेकिन कंप्यूटर कभी थकता नहीं है!
-प्रोग्रामिंग में जब हमें किसी एक ही काम को बार-बार दोहराना हो (जैसे १ से १००० तक गिनती प्रिंट करना), तो हम लूप्स (Loops) का उपयोग करते हैं। लूप तब तक काम दोहराता रहता है जब तक कि दी गई शर्त सच रहती है। जैसे ही शर्त गलत होती है, लूप अपने आप रुक जाता है।
-
-२. C भाषा के ३ मुख्य लूप्स:
-- for लूप (प्रवेश-नियंत्रित Entry-Controlled):
-  यह लूप तब सबसे अच्छा होता है जब हमें पहले से पता हो कि चक्र कितनी बार घूमना चाहिए (जैसे ठीक १० बार या ५० बार)।
-  इसकी बनावट में ३ हिस्से होते हैं:
-  for (शुरुआत; शर्त; बढ़ोत्तरी) { कोड }
-  - शुरुआत (int i = 1): काउंटर कहाँ से शुरू होगा। यह सिर्फ एक बार चलता है।
-  - शर्त (i <= 10): क्या अभी चक्कर जारी रखना है?
-  - बढ़ोत्तरी (i++): हर चक्कर के बाद i का मान १ बढ़ा दो।
-
-- while लूप (प्रवेश-नियंत्रित):
-  जब हमें पहले से यह न पता हो कि काम कितनी बार दोहराना पड़ेगा (जैसे: जब तक खिलाड़ी की लाइफ > 0 है, तब तक गेम चलाते रहो)।
-  यह पहले दरवाजे पर शर्त जांचता है, फिर अंदर जाने देता है।
-  सावधानी: लूप के अंदर काउंटर को बढ़ाना कभी न भूलें, अन्यथा कंप्यूटर अनंत लूप (Infinite Loop) में फंस जाएगा और हैंग हो जाएगा!
-
-- do-while लूप (निकास-नियंत्रित Exit-Controlled):
-  यह अकेला ऐसा लूप है जो शर्त सबसे अंत में जांचता है!
-  इसका मतलब यह है कि चाहे शर्त पहले ही चक्कर में गलत क्यों न हो, do-while लूप कम से कम एक बार जरूर चलेगा ही चलेगा!
-  विशेष नियम: do-while के अंत में सेमीकोलन (;) लगाना अनिवार्य होता है: while(शर्त);
-
-३. लूप के दो जादुई कीवर्ड्स:
-- break (इमरजेंसी ब्रेक): यह लूप को तुरंत तोड़कर बाहर फेंक देता है।
-- continue (छलांग): यह पूरे लूप को नहीं रोकता, बल्कि सिर्फ उस एक चक्कर के बचे हुए कोड को छोड़कर सीधे अगले चक्कर पर कूद जाता है!`,
-    realLifeAnalogy: {
-      en: 'A while loop is like a security guard checking tickets at the gate. A do-while loop is like trying a free sweet sample at a sweet shop: you taste once first, then decide whether to continue.',
-      hi: 'while लूप सिनेमा हॉल के गार्ड की तरह है जो पहले टिकट देखता है फिर अंदर जाने देता है। do-while मिठाई की दुकान पर मुफ्त में चखने की तरह है: पहले एक बार स्वाद चखते हैं, फिर निर्णय लेते हैं!'
-    },
-    codeExamples: [
-      {
-        title: 'Comparing Loops & Continue',
-        titleHindi: 'लूप और Continue का उदाहरण',
-        code: `#include <stdio.h>
-
-int main() {
-    printf("1 से 10 तक सम संख्याएं:\\n");
-    for (int i = 1; i <= 10; i++) {
-        if (i % 2 != 0) {
-            continue; // विषम संख्याओं को छोड़ें
+  ],
+  "practicals": [
+    {
+      "id": "prac-ps-1",
+      "title": "Build Your First Professional C Template",
+      "titleHindi": "पहला C प्रोग्राम टेम्प्लेट बनाएं",
+      "objective": "Write a clean C program with comments, escape sequences, and return code.",
+      "objectiveHindi": "कमेंट्स और एस्केप सीक्वेंस के साथ C प्रोग्राम बनाएं।",
+      "code": "#include <stdio.h>\n\nint main() {\n    printf(\"Welcome to C Programming!\\n\");\n    printf(\"Line 1\\tLine 2\\n\");\n    return 0;\n}",
+      "expectedOutput": "Welcome to C Programming!\nLine 1\tLine 2",
+      "lineByLineExplanation": [
+        {
+          "line": "#include <stdio.h>",
+          "noteEn": "Includes standard I/O library.",
+          "noteHi": "इनपुट/आउटपुट लाइब्रेरी शामिल करता है।"
+        },
+        {
+          "line": "int main()",
+          "noteEn": "Main entry point.",
+          "noteHi": "मुख्य प्रवेश द्वार।"
+        },
+        {
+          "line": "return 0;",
+          "noteEn": "Returns success status.",
+          "noteHi": "सफल कोड लौटाता है।"
         }
-        printf("%d ", i);
-    }
-    printf("\\n");
-    return 0;
-}`,
-        output: `1 से 10 तक सम संख्याएं:
-2 4 6 8 10 `,
-        explanation: 'continue skips odd iterations.',
-        explanationHindi: 'continue ने विषम संख्याओं को छोड़ दिया और केवल सम संख्याएं प्रिंट हुईं।'
-      }
-    ],
-    keyPoints: {
-      en: [
-        'do-while is the only loop that ends with a semicolon: while(condition);',
-        'break exits the loop entirely, while continue only skips the current iteration.'
-      ],
-      hi: [
-        'do-while एकमात्र ऐसा लूप है जिसके अंत में सेमीकोलन (;) लगता है।',
-        'break पूरे लूप को रोकता है, जबकि continue केवल उस एक चक्कर को छोड़ता है।'
       ]
-    },
-    commonPitfalls: {
-      en: ['Putting a semicolon after for(): for (int i=0; i<10; i++);', 'Infinite loop caused by not updating counter.'],
-      hi: ['for() के कोष्ठक के तुरंत बाद सेमीकोलन लगा देना जिससे लूप खाली हो जाता है।', 'काउंटर को बढ़ाना भूल जाना जिससे लूप अनंत (Infinite) हो जाए।']
-    },
-    quiz: [
-      {
-        id: 'q5-1',
-        difficulty: 'easy',
-        question: 'Which loop executes at least once even if the condition is false initially?',
-        questionHindi: 'कौन-सा लूप शर्त असत्य होने पर भी कम से कम एक बार अवश्य चलता है?',
-        options: ['for loop', 'while loop', 'do-while loop', 'all loops'],
-        correctIndex: 2,
-        explanation: 'do-while is an exit-controlled loop.',
-        explanationHindi: 'do-while शर्त अंत में जांचता है, इसलिए कम से कम 1 बार अवश्य चलता है।'
-      }
-    ]
-  },
-  {
-    id: 'functions',
-    order: 6,
-    title: 'Functions & Modular Programming',
-    titleHindi: 'फंक्शंस एवं मॉड्यूलर प्रोग्रामिंग (Functions)',
-    category: 'Functions & Pointers',
-    summary: 'Write clean, reusable code. Learn function prototypes, arguments, return types, call-by-value vs call-by-reference.',
-    summaryHindi: 'कोड को पुनः उपयोग करने योग्य और सुव्यवस्थित बनाएं: डिक्लेरेशन, डेफिनिशन, पैरामीटर्स और कॉल बाय वैल्यू।',
-    readTimeMinutes: 10,
-    explanationEn: `1. WHAT IS A FUNCTION IN SIMPLE WORDS?
-Imagine a big busy restaurant. If one single person had to welcome guests, take orders, chop vegetables, cook the food, bake the bread, wash the dishes, and clean the tables, the restaurant would collapse in chaos! Instead, the restaurant divides the work among specialized experts: a Chef cooks, a Waiter serves, and a Cleaner washes.
-In computer programming, a FUNCTION is a self-contained, named block of code that is designed to perform one specific task. 
-Instead of writing 2,000 lines of messy code in one place, we break our program into small, clean functions. This philosophy is called MODULAR PROGRAMMING!
-
-2. THE 3 GOLDEN BENEFITS OF FUNCTIONS:
-- Reusability (DRY Principle - Don't Repeat Yourself): Write the code once, and you can call it 10,000 times from anywhere in your project!
-- Easy Debugging: If the tax calculation is wrong, you only need to inspect the 'calculateTax()' function rather than reading through 5,000 lines of unrelated code.
-- Team Collaboration: Different software engineers can build separate functions at the same time without interfering with each other.
-
-3. THE 3 PHASES OF A FUNCTION IN C:
-- Function Prototype / Declaration: Tells the compiler the function's name, return type, and parameters before main().
-  Syntax: int add(int a, int b);
-- Function Definition: The actual recipe containing the code instructions inside curly braces { }.
-  Syntax: int add(int a, int b) { return a + b; }
-- Function Call: Ordering the function to do its job.
-  Syntax: int total = add(10, 20);
-
-4. CALL BY VALUE EXPLAINED:
-By default, C passes function arguments by VALUE. When you pass a variable into a function, the computer creates a fresh PHOTOCOPY of that variable. Any changes made to the copy inside the function do NOT affect the original variable back in main()! To modify the original variable, we must use pointers (Call by Reference).`,
-    explanationHi: `१. सरल शब्दों में फंक्शन (Function) क्या है?
-कल्पना कीजिए एक बड़े होटल की रसोई की। यदि एक ही व्यक्ति को दरवाजे पर स्वागत करना हो, सब्जियां काटनी हों, खाना पकाना हो, रोटियां सेंकनी हों, और बर्तन भी धोने हों, तो पूरा होटल गड़बड़ा जाएगा! समझदारी इसी में है कि काम को अलग-अलग विशेषज्ञों में बांट दिया जाए: रसोइया खाना पकाएगा, वेटर खाना परोसेगा, और हेल्पर बर्तन धोएगा।
-प्रोग्रामिंग में फंक्शन (Function) कोड का एक ऐसा छोटा, सुव्यवस्थित और स्वतंत्र टुकड़ा होता है जिसे किसी एक खास काम को करने के लिए बनाया जाता है। इसे "मॉड्यूलर प्रोग्रामिंग" कहते हैं।
-
-२. फंक्शंस के ३ सबसे बड़े फायदे:
-- कोड को बार-बार नहीं लिखना पड़ता (Reusability): एक बार फंक्शन बना लो, फिर पूरे प्रोग्राम में चाहे जितनी बार उसे आवाज देकर बुलाओ!
-- गलतियां ढूंढना आसान (Easy Debugging): यदि जोड़ की गणना में कोई गलती आ रही है, तो केवल जोड़ वाले फंक्शन में जाकर सुधार करो, बाकी पूरा प्रोग्राम सुरक्षित रहता है।
-- साफ-सुथरा कोड: कोड देखने में सुंदर और समझने में आसान लगता है।
-
-३. फंक्शन बनाने के ३ आवश्यक कदम:
-- १. डिक्लेरेशन (प्रोटोटाइप): कम्पाइलर को पहले से बताना कि ऐसा एक फंक्शन आगे आने वाला है।
-  जैसे: int add(int a, int b);
-- २. डेफिनिशन (वास्तविक कोड): फंक्शन का असली काम जो मझले कोष्ठक { } में लिखा जाता है।
-  जैसे: int add(int a, int b) { return a + b; }
-- ३. कॉल (बुलाना): जहाँ फंक्शन की जरूरत हो, वहाँ उसका नाम लेकर बुलाना।
-  जैसे: int result = add(5, 10);
-
-४. कॉल बाय वैल्यू (Call by Value) क्या है?
-C भाषा में जब आप किसी सामान्य वेरिएबल को फंक्शन में भेजते हैं, तो कंप्यूटर उसकी एक फोटोकॉपी (नकल) बनाकर भेजता है। यदि फंक्शन के अंदर उस कॉपी में कोई बदलाव किया जाए, तो main() में बैठे असली वेरिएबल पर कोई असर नहीं पड़ता! असली मान को बदलने के लिए हमें पॉइंटर्स (Call by Reference) का उपयोग करना पड़ता है।`,
-    realLifeAnalogy: {
-      en: 'A function is like a kitchen blender: you put fruits inside (parameters), it blends them (logic), and pours out juice (return value).',
-      hi: 'फंक्शन एक जूसर मिक्सर की तरह है: आपने उसमें मौसमी डाली (पैरामीटर्स), उसने प्रोसेस किया (लॉजिक), और ताजा रस निकाल कर दे दिया (रिटर्न वैल्यू)!'
-    },
-    codeExamples: [
-      {
-        title: 'Area Calculator Function',
-        titleHindi: 'क्षेत्रफल गणना फंक्शन',
-        code: `#include <stdio.h>
-
-// फंक्शन प्रोटोटाइप
-int calculateArea(int width, int height);
-
-int main() {
-    int w = 5, h = 10;
-    int area = calculateArea(w, h);
-    printf("आयत का क्षेत्रफल: %d वर्ग इकाई\\n", area);
-    return 0;
-}
-
-int calculateArea(int width, int height) {
-    return width * height;
-}`,
-        output: `आयत का क्षेत्रफल: 50 वर्ग इकाई`,
-        explanation: 'Function calculates area and returns product.',
-        explanationHindi: 'calculateArea ने चौड़ाई और ऊंचाई का गुणनफल वापस लौटाया।'
-      }
-    ],
-    keyPoints: {
-      en: [
-        'If a function returns nothing, declare its return type as void.',
-        'C defaults to Call by Value.'
-      ],
-      hi: [
-        'यदि फंक्शन कोई मान वापस नहीं लौटाता तो उसका प्रकार "void" रखा जाता है।',
-        'C में डिफ़ॉल्ट रूप से कॉल बाय वैल्यू का उपयोग होता है।'
-      ]
-    },
-    commonPitfalls: {
-      en: ['Defining functions after main() without declaring a prototype.'],
-      hi: ['main() के बाद फंक्शन लिखना और ऊपर उसका प्रोटोटाइप घोषित न करना।']
-    },
-    quiz: [
-      {
-        id: 'q6-1',
-        difficulty: 'easy',
-        question: 'What return type is used when a function returns no value?',
-        questionHindi: 'यदि फंक्शन कोई मान वापस नहीं करता तो कौन-सा रिटर्न टाइप लिखा जाता है?',
-        options: ['int', 'null', 'void', 'empty'],
-        correctIndex: 2,
-        explanation: 'void indicates no return value.',
-        explanationHindi: 'void का अर्थ है कोई मान रिटर्न नहीं होगा।'
-      }
-    ]
-  },
-  {
-    id: 'recursion',
-    order: 7,
-    title: 'Recursion in C',
-    titleHindi: 'रिकर्शन (Recursion: जब फंक्शन खुद को कॉल करे)',
-    category: 'Functions & Pointers',
-    summary: 'When a function calls itself. Understand base conditions, recursive steps, stack frames, and solving Factorial and Fibonacci.',
-    summaryHindi: 'फंक्शन द्वारा स्वयं को बार-बार बुलाना: बेस केस, कॉल स्टैक और फैक्टोरियल का सटीक समाधान।',
-    readTimeMinutes: 10,
-    explanationEn: `1. WHAT IS RECURSION IN SIMPLE WORDS?
-Imagine standing between two parallel mirrors in a barber shop: you see an endless corridor of reflections repeating inside reflections! In computer science, RECURSION is a programming technique where a function calls ITSELF to solve a smaller version of the exact same problem.
-
-2. THE 2 VITAL PARTS OF EVERY RECURSIVE FUNCTION:
-- The Base Case (The Emergency Brake):
-  This is the stopping condition that tells the function: "Stop calling yourself now!" Without a base case, the function will keep creating new calls indefinitely until the computer runs out of memory and crashes with a catastrophic STACK OVERFLOW error!
-- The Recursive Step (Making the problem smaller):
-  The part where the function calls itself, but with smaller input so that it steadily marches toward the base case.
-
-3. CLASSIC EXAMPLE: FACTORIAL OF A NUMBER (5!):
-In math, 5! = 5 * 4 * 3 * 2 * 1 = 120.
-Notice the recursive pattern:
-5! = 5 * 4!
-4! = 4 * 3!
-3! = 3 * 2!
-2! = 2 * 1!
-1! = 1 (This is our Base Case: we stop here!).
-Once the base case 1 is reached, the computer multiplies on the way back up: 2 * 1 = 2 -> 3 * 2 = 6 -> 4 * 6 = 24 -> 5 * 24 = 120!`,
-    explanationHi: `१. सरल शब्दों में रिकर्शन (Recursion) क्या है?
-कल्पना कीजिए कि आप नाई की दुकान में दो आमने-सामने लगे शीशों के बीच खड़े हैं: आपको शीशे के अंदर शीशा, और उसके अंदर एक और शीशा अनंत तक दिखाई देता है! 
-प्रोग्रामिंग में जब कोई फंक्शन किसी बड़ी समस्या को हल करने के लिए अपने ही भीतर से स्वयं को दोबारा आवाज देता है (कॉल करता है), तो इस जादुई तकनीक को रिकर्शन (Recursion) कहते हैं।
-
-२. रिकर्शन के २ सबसे महत्वपूर्ण अंग:
-- १. बेस केस (Base Case - रुकने का इमरजेंसी ब्रेक):
-  यह सबसे जरूरी शर्त है जो फंक्शन को बताती है कि "बस, अब रुक जाओ!" यदि आप बेस केस नहीं लगाएंगे, तो फंक्शन अपने आप को लगातार बुलाता रहेगा और कंप्यूटर की मेमोरी भरकर प्रोग्राम स्टैक ओवरफ्लो (Stack Overflow) होकर क्रैश हो जाएगा!
-- २. रिकर्सिव स्टेप (समस्या को छोटा करना):
-  जहाँ फंक्शन समस्या को एक कदम छोटा करके खुद को पुनः कॉल करता है।
-
-३. फैक्टोरियल (5!) का प्रसिद्ध उदाहरण:
-गणित में 5! का मतलब होता है 5 × 4 × 3 × 2 × 1 = 120।
-इसे रिकर्शन से ऐसे समझा जाता है:
-5! निकालने के लिए 5 × 4! चाहिए
-4! निकालने के लिए 4 × 3! चाहिए
-3! निकालने के लिए 3 × 2! चाहिए
-2! निकालने के लिए 2 × 1! चाहिए
-1! का मान 1 होता है (यह हमारा बेस केस है, यहाँ रुक गए!)।
-जैसे ही 1 मिला, कंप्यूटर पीछे लौटते हुए सबकी गुणा करता चला आता है और हमें अंतिम उत्तर 120 मिल जाता है!`,
-    realLifeAnalogy: {
-      en: 'Russian Nesting Dolls: You open a doll to find a smaller doll inside, until you hit the smallest doll that cannot be opened (the base case).',
-      hi: 'रूसी गुड़िया (Nesting Dolls) की तरह: बड़ी गुड़िया खोलने पर अंदर छोटी गुड़िया मिलती है, जब तक कि सबसे छोटी गुड़िया न आ जाए जिसे खोला न जा सके (बेस केस)!'
-    },
-    codeExamples: [
-      {
-        title: 'Factorial using Recursion',
-        titleHindi: 'रिकर्शन से फैक्टोरियल गणना',
-        code: `#include <stdio.h>
-
-long long factorial(int n) {
-    // बेस केस (Base Case)
-    if (n <= 1) return 1;
-    // रिकर्सिव कॉल
-    return n * factorial(n - 1);
-}
-
-int main() {
-    int num = 5;
-    printf("%d का फैक्टोरियल = %lld\\n", num, factorial(num));
-    return 0;
-}`,
-        output: `5 का फैक्टोरियल = 120`,
-        explanation: '5 * factorial(4) down to base case 1.',
-        explanationHindi: '5 * 4 * 3 * 2 * 1 की गणना होकर 120 उत्तर आया।'
-      }
-    ],
-    keyPoints: {
-      en: ['Always define the base case first to avoid infinite recursion.'],
-      hi: ['स्टैक ओवरफ्लो से बचने के लिए बेस केस हमेशा सबसे पहले लिखें।']
-    },
-    commonPitfalls: {
-      en: ['Missing the base case causing stack overflow.'],
-      hi: ['बेस केस भूल जाना जिससे प्रोग्राम मेमोरी भरकर क्रैश हो जाए।']
-    },
-    quiz: [
-      {
-        id: 'q7-1',
-        difficulty: 'easy',
-        question: 'What error occurs if a recursive function lacks a base case?',
-        questionHindi: 'यदि किसी रिकर्सिव फंक्शन में बेस केस न हो तो कौन-सी गंभीर त्रुटि आती है?',
-        options: ['Syntax Error', 'Stack Overflow', 'Divide by Zero', 'File Not Found'],
-        correctIndex: 1,
-        explanation: 'Calls pile up on the call stack infinitely causing Stack Overflow.',
-        explanationHindi: 'कॉल स्टैक भर जाने से स्टैक ओवरफ्लो (Stack Overflow) क्रैश हो जाता है।'
-      }
-    ]
-  },
-  {
-    id: 'arrays',
-    order: 8,
-    title: 'Arrays: 1D & 2D Matrices',
-    titleHindi: 'ऐरे (Arrays: एक साथ कई डेटा का संग्रह)',
-    category: 'Data Structures',
-    summary: 'Store multiple values of the same type sequentially in memory. Learn 0-based indexing, traversal, and 2D matrix grids.',
-    summaryHindi: 'समान डेटा प्रकार के मानों को मेमोरी में लगातार क्रम में संचित करना: इंडेक्स 0 से n-1 और मैट्रिसेस।',
-    readTimeMinutes: 10,
-    explanationEn: `1. WHAT IS AN ARRAY IN SIMPLE WORDS?
-Imagine your school has 50 students in your classroom. If you wanted to store their test marks using normal variables, you would have to declare 50 separate variables: mark1, mark2, mark3... mark50! Writing code like that is tedious and unmanageable.
-An ARRAY is a collection of multiple elements of the EXACT SAME DATA TYPE stored sequentially one after another in contiguous (neighboring) RAM memory locations under a single shared name!
-
-2. HOW ARE ARRAYS STORED IN MEMORY?
-When you write:
-int marks[5] = {90, 85, 78, 92, 88};
-The computer allocates 5 contiguous slots in RAM. If each integer takes 4 bytes and the array starts at memory address 1000, then:
-marks[0] is at address 1000
-marks[1] is at address 1004
-marks[2] is at address 1008
-marks[3] is at address 1012
-marks[4] is at address 1016
-
-3. WHY DOES INDEXING START AT ZERO (0)?
-In C, the index number does not mean "the 1st element"; it represents the OFFSET DISTANCE from the beginning of the array!
-The very first element is at distance 0 from the start, so it is arr[0].
-For an array of size N, the valid indices run from 0 to N-1.
-
-4. TWO-DIMENSIONAL (2D) ARRAYS (MATRICES):
-Used when data is naturally organized in Rows and Columns (like a chessboard, a calendar, or an Excel spreadsheet):
-int matrix[2][3] = { {1, 2, 3}, {4, 5, 6} };
-We use nested loops (one loop for rows, one loop for columns) to traverse 2D arrays.`,
-    explanationHi: `१. सरल शब्दों में ऐरे (Array) क्या है?
-कल्पना कीजिए कि आपकी कक्षा में ५० बच्चे हैं और आपको सबके गणित के नंबर कंप्यूटर में सुरक्षित रखने हैं। यदि आप सामान्य वेरिएबल्स का उपयोग करेंगे, तो आपको ५० अलग-अलग नाम बनाने पड़ेंगे: marks1, marks2, marks3... marks50! यह कितना थका देने वाला काम होगा!
-ऐरे (Array) एक ही नाम के तहत समान डेटा प्रकार के कई सारे मानों को मेमोरी में एक कतार में (एक के बाद एक पड़ोसी बनाकर) रखने की शानदार तकनीक है!
-
-२. ऐरे कंप्यूटर मेमोरी में कैसे रहता है?
-जब आप लिखते हैं:
-int marks[5] = {90, 85, 78, 92, 88};
-तो कंप्यूटर मेमोरी में लगातार ५ डिब्बे आवंटित करता है। यदि पहला डिब्बा पता संख्या 1000 पर है, तो दूसरा 1004 पर, तीसरा 1008 पर होगा।
-३. गिनती 0 से क्यों शुरू होती है?
-C भाषा में इंडेक्स का मतलब "पहला या दूसरा" नहीं होता, बल्कि इसका मतलब है "शुरुआत से कितनी दूरी पर है (Offset)"। पहला डिब्बा शुरुआत में ही है (दूरी 0), इसलिए वह marks[0] है।
-यदि ऐरे का आकार 5 है, तो उसके इंडेक्स 0, 1, 2, 3, 4 तक ही होंगे।
-
-४. 2D ऐरे (टेबल और मैट्रिक्स):
-जब हमें पंक्तियों (Rows) और स्तंभों (Columns) में डेटा रखना हो (जैसे शतरंज का बोर्ड या एक्सेल शीट), तो हम 2D ऐरे बनाते हैं:
-int table[2][3]; // 2 पंक्तियां और 3 स्तंभ`,
-    realLifeAnalogy: {
-      en: 'Think of an egg carton with numbered slots from 0 to 11. Each slot holds one egg of identical size.',
-      hi: 'अंडे की ट्रे की तरह जिसमें 0 से 11 तक नंबर वाले स्लॉट बने होते हैं। प्रत्येक स्लॉट में एक अंडा सुरक्षित रखा जा सकता है!'
-    },
-    codeExamples: [
-      {
-        title: 'Array Sum and Traversal',
-        titleHindi: 'ऐरे का योग और ट्रैवर्सल',
-        code: `#include <stdio.h>
-
-int main() {
-    int numbers[5] = {10, 20, 30, 40, 50};
-    int sum = 0;
-
-    for (int i = 0; i < 5; i++) {
-        sum += numbers[i];
     }
-    printf("कुल योग (Sum) = %d\\n", sum);
-    return 0;
-}`,
-        output: `कुल योग (Sum) = 150`,
-        explanation: 'Loop traverses from index 0 to 4 and accumulates sum.',
-        explanationHindi: 'लूप ने 0 से 4 तक के तत्वों को जोड़कर कुल 150 प्राप्त किया।'
-      }
+  ],
+  "keyPoints": {
+    "en": [
+      "main() is mandatory.",
+      "Statements end with semicolon.",
+      "C is case-sensitive.",
+      "Compilation has 4 phases."
     ],
-    keyPoints: {
-      en: ['C does NOT perform boundary checks on arrays.'],
-      hi: ['C में ऐरे बाउंड्स चेकिंग नहीं होती, अतः गलत इंडेक्स पर पढ़ने से कचरा (Garbage) मान आता है।']
-    },
-    commonPitfalls: {
-      en: ['Accessing arr[5] on an array of size 5 (valid indices are 0 to 4).'],
-      hi: ['5 आकार के ऐरे में arr[5] को पढ़ना (वैध इंडेक्स केवल 0 से 4 हैं)।']
-    },
-    quiz: [
-      {
-        id: 'q8-1',
-        difficulty: 'easy',
-        question: 'What is the index of the first element in any C array?',
-        questionHindi: 'C भाषा में किसी भी ऐरे के पहले तत्व का इंडेक्स क्या होता है?',
-        options: ['1', '0', '-1', 'Undefined'],
-        correctIndex: 1,
-        explanation: 'C arrays are 0-indexed.',
-        explanationHindi: 'C भाषा में इंडेक्सिंग हमेशा 0 से ही शुरू होती है।'
-      }
+    "hi": [
+      "main() अनिवार्य है।",
+      "सेमीकोलन आवश्यक है।",
+      "C केस-सेंसिटिव है।",
+      "कम्पाइलेशन के 4 चरण हैं।"
     ]
   },
-  {
-    id: 'pointers',
-    order: 9,
-    title: 'Pointers & Memory Addresses',
-    titleHindi: 'पॉइंटर्स एवं मेमोरी एड्रेस (C की असली शक्ति)',
-    category: 'Functions & Pointers',
-    summary: 'Demystify pointers! Understand memory addresses (&), dereferencing (*), pointer arithmetic, and swapping values by reference.',
-    summaryHindi: 'C की असली शक्ति: मेमोरी का पता (&), मान निकालना (*), पॉइंटर अंकगणित और कॉल बाय रेफरेंस।',
-    readTimeMinutes: 10,
-    explanationEn: `1. DEMYSTIFYING POINTERS IN SIMPLE WORDS:
-Many students find pointers scary, but they are actually very simple!
-A normal variable stores a VALUE (like 10 or 3.14).
-A POINTER is simply a special variable that stores the MEMORY ADDRESS of another variable!
-Think of your friend's house: the house itself contains furniture (value), but if your friend writes their street address on a piece of paper and hands it to you, that slip of paper is a POINTER!
-
-2. THE 2 SUPERSTAR OPERATORS:
-- Address-of Operator (&):
-  Placed before a variable name, it tells you: "Where does this variable live in RAM?"
-  Example: printf("%p", &age); prints hexadecimal address like 0x7ffd20.
-- Dereference Operator (*):
-  Placed before a pointer variable, it tells the computer: "Go to that memory address, unlock the door, and fetch or modify the value inside!"
-  Example: *ptr = 50; directly changes the value sitting at that memory location!
-
-3. WHY ARE POINTERS SO POWERFUL?
-- Call by Reference: Functions in C normally receive copies. With pointers, you pass the memory address, enabling the function to alter variables inside main().
-- Dynamic Memory: Used with malloc() to create arrays of any size at runtime.
-- High Performance: Passing the address of a 1-million-byte image takes only 8 bytes of pointer memory, avoiding slow copying.`,
-    explanationHi: `१. सरल शब्दों में पॉइंटर्स (Pointers) क्या हैं?
-अक्सर छात्र पॉइंटर्स के नाम से घबराते हैं, लेकिन यह बहुत आसान है!
-एक सामान्य वेरिएबल अपने अंदर कोई मान (जैसे 10 या 25) रखता है।
-लेकिन पॉइंटर (Pointer) एक ऐसा विशेष वेरिएबल होता है जो किसी दूसरे वेरिएबल का मेमोरी एड्रेस (कंप्यूटर की RAM में उसके घर का पता) संचित करता है!
-कल्पना कीजिए कि आपका घर एक वेरिएबल है और उसमें सामान (वैल्यू) रखा है। यदि आप एक पर्ची पर अपने घर का पता लिखकर अपने दोस्त को दे दें, तो वह पर्ची एक "पॉइंटर" है!
-
-२. पॉइंटर्स के दो जादुई ऑपरेटर्स:
-- '&' (Address-of ऑपरेटर):
-  यह किसी वेरिएबल के आगे लगाने पर बताता है कि वह कंप्यूटर की मेमोरी में किस पते पर बैठा है (जैसे &age)।
-- '*' (Dereference ऑपरेटर):
-  यह उस पते पर जाकर वहां रखे सामान (वैल्यू) को बाहर निकालता है या बदल देता है!
-  जैसे: *ptr = 50; लिखने से उस पते पर रखी संख्या बदलकर 50 हो जाएगी!
-
-३. पॉइंटर्स का उपयोग क्यों किया जाता है?
-- कॉल बाय रेफरेंस: फंक्शंस को असली वेरिएबल का पता देकर सीधे मुख्य मान बदलवाना (जैसे दो संख्याओं की अदला-बदली swap करना)।
-- डायनेमिक मेमोरी (malloc): प्रोग्राम चलते समय मनचाही मेमोरी लेना।
-- सुपर स्पीड: बड़ी फाइलों की नकल करने के बजाय सिर्फ उनका पता भेजना जिससे कंप्यूटर सुपरफास्ट काम करता है।`,
-    realLifeAnalogy: {
-      en: 'A variable is your house, and a pointer is a slip of paper with your home address written on it.',
-      hi: 'वेरिएबल आपका घर है, और पॉइंटर एक कागज का टुकड़ा है जिस पर आपके घर का पता लिखा है। उस पते के जरिए कोई भी आपके घर पहुंच सकता है!'
-    },
-    codeExamples: [
-      {
-        title: 'Swap Two Numbers using Pointers',
-        titleHindi: 'पॉइंटर्स द्वारा दो संख्याओं की अदला-बदली (Swap)',
-        code: `#include <stdio.h>
-
-void swap(int *a, int *b) {
-    int temp = *a;
-    *a = *b;
-    *b = temp;
-}
-
-int main() {
-    int x = 10, y = 20;
-    printf("बदलने से पहले: x=%d, y=%d\\n", x, y);
-    swap(&x, &y); // एड्रेस पास किया
-    printf("बदलने के बाद:   x=%d, y=%d\\n", x, y);
-    return 0;
-}`,
-        output: `बदलने से पहले: x=10, y=20
-बदलने के बाद:   x=20, y=10`,
-        explanation: 'swap takes addresses and modifies x and y in place.',
-        explanationHindi: 'swap फंक्शन ने सीधे पते पर जाकर मानों को आपस में बदल दिया।'
-      }
+  "commonPitfalls": {
+    "en": [
+      "Missing semicolon.",
+      "Typing Main instead of main.",
+      "Using void main()."
     ],
-    keyPoints: {
-      en: ['Always initialize unused pointers to NULL: int *ptr = NULL;'],
-      hi: ['अप्रयुक्त पॉइंटर को हमेशा NULL से इनिशियलाइज करें: int *ptr = NULL;']
-    },
-    commonPitfalls: {
-      en: ['Dereferencing a NULL or wild pointer causes instant crash.'],
-      hi: ['NULL या कचरा पते वाले पॉइंटर पर * लगाना, जिससे प्रोग्राम तुरंत क्रैश हो जाता है।']
-    },
-    quiz: [
-      {
-        id: 'q9-1',
-        difficulty: 'easy',
-        question: 'Which operator is used to get the memory address of a variable in C?',
-        questionHindi: 'किसी वेरिएबल का मेमोरी एड्रेस प्राप्त करने के लिए कौन-सा ऑपरेटर उपयोग होता है?',
-        options: ['*', '&', '->', '%'],
-        correctIndex: 1,
-        explanation: '& is the address-of operator.',
-        explanationHindi: '& ऑपरेटर वेरिएबल का मेमोरी पता देता है।'
-      }
-    ]
-  },
-  {
-    id: 'strings',
-    order: 10,
-    title: 'Strings & String Manipulation',
-    titleHindi: 'स्ट्रिंग्स एवं स्ट्रिंग फंक्शंस (अक्षरों की माला)',
-    category: 'Data Structures',
-    summary: 'Strings in C are character arrays terminated with \\0. Learn strlen, strcpy, strcat, strcmp, and buffer overflow prevention.',
-    summaryHindi: 'C में स्ट्रिंग: नल कैरेक्टर (\\0) का महत्व, strlen, strcpy, strcat और strcmp का प्रयोग।',
-    readTimeMinutes: 10,
-    explanationEn: `1. WHAT IS A STRING IN C?
-Unlike Python or Java, C does not have a built-in 'string' data type. In C, a STRING is simply a one-dimensional array of characters that is terminated by a special hidden sentinel character: the NULL TERMINATOR ('\\0', ASCII value 0).
-
-2. WHY IS THE NULL TERMINATOR ('\\0') CRITICAL?
-How does the computer know where the word "Kuldeep" ends in memory? It looks for '\\0'!
-If '\\0' is missing, functions like printf("%s") will keep reading whatever garbage bytes happen to follow in RAM until they crash.
-Rule of thumb: If your string has 7 letters, your char array must be AT LEAST 8 bytes to accommodate '\\0'.
-
-3. THE CORE <string.h> LIBRARY FUNCTIONS:
-- strlen(str): Counts characters up to '\\0'.
-- strcpy(dest, src): Copies src into dest.
-- strcat(dest, src): Concatenates (glues) src onto the end of dest.
-- strcmp(s1, s2): Lexicographically compares two strings (returns 0 if identical).`,
-    explanationHi: `१. सरल शब्दों में स्ट्रिंग (String) क्या है?
-पायथन या जावा की तरह C भाषा में "String" नाम का कोई अलग डेटा प्रकार नहीं होता। C भाषा में स्ट्रिंग वास्तव में अक्षरों की एक माला (Character Array) होती है, जिसके सबसे अंत में एक विशेष अदृश्य कैरेक्टर, जिसे "नल टर्मिनेटर" ('\\0') कहते हैं, लगा होता है।
-
-२. नल कैरेक्टर ('\\0') क्यों अनिवार्य है?
-कंप्यूटर को कैसे पता चलेगा कि आपका नाम "भारत" कहाँ समाप्त हुआ? नल कैरेक्टर ('\\0') यह लाल झंडी है जो कंप्यूटर को बताती है कि स्ट्रिंग यहीं समाप्त हो गई है! यदि '\\0' न हो, तो कंप्यूटर मेमोरी में आगे रखा कचरा भी पढ़ने लगेगा।
-अतः यदि नाम में 5 अक्षर हैं, तो ऐरे का साइज कम से कम 6 होना चाहिए।
-
-३. सबसे महत्वपूर्ण <string.h> फंक्शंस:
-- strlen(str): स्ट्रिंग में अक्षरों की कुल संख्या गिनता है।
-- strcpy(dest, src): एक स्ट्रिंग को दूसरी में कॉपी करता है।
-- strcat(dest, src): दो स्ट्रिंग्स को आपस में जोड़ता है।
-- strcmp(s1, s2): दोनों की तुलना करता है; यदि दोनों बराबर हों तो 0 देता है।`,
-    realLifeAnalogy: {
-      en: 'Think of a string as a train of character wagons. The null terminator \\0 is the red light on the last wagon signaling the train has ended.',
-      hi: 'स्ट्रिंग को ट्रेन के डिब्बों की तरह समझें। सबसे अंतिम डिब्बे पर लगी लाल बत्ती नल कैरेक्टर (\\0) है जो दर्शाती है कि ट्रेन यहीं समाप्त हो गई!'
-    },
-    codeExamples: [
-      {
-        title: 'String Functions Demo',
-        titleHindi: 'स्ट्रिंग फंक्शंस का उपयोग',
-        code: `#include <stdio.h>
-#include <string.h>
-
-int main() {
-    char greeting[30] = "Namaste";
-    char name[] = " Bharat";
-
-    strcat(greeting, name); // दोनों को जोड़ा
-    printf("पूर्ण संदेश: %s\\n", greeting);
-    printf("कुल लंबाई: %lu\\n", strlen(greeting));
-    return 0;
-}`,
-        output: `पूर्ण संदेश: Namaste Bharat
-कुल लंबाई: 14`,
-        explanation: 'strcat combines both strings, strlen counts characters.',
-        explanationHindi: 'strcat ने दोनों स्ट्रिंग्स को जोड़ा और strlen ने लंबाई बताई।'
-      }
-    ],
-    keyPoints: {
-      en: ['Always allocate size + 1 to accommodate the null terminator \'\\0\'.', 'Compare strings with strcmp, NOT with ==.'],
-      hi: ['नल कैरेक्टर (\\0) के लिए ऐरे का साइज हमेशा अक्षरों की संख्या + 1 रखें।', 'स्ट्रिंग्स की तुलना के लिए strcmp का उपयोग करें, == का नहीं।']
-    },
-    commonPitfalls: {
-      en: ['Comparing strings with == compares pointers, not characters!'],
-      hi: ['if (s1 == s2) लिखना जो केवल पतों की तुलना करता है, अक्षरों की नहीं।']
-    },
-    quiz: [
-      {
-        id: 'q10-1',
-        difficulty: 'easy',
-        question: 'What special character marks the end of a string in C?',
-        questionHindi: 'C भाषा में स्ट्रिंग के अंत को चिह्नित करने वाला विशेष कैरेक्टर कौन-सा है?',
-        options: ['\\n', '\\t', '\\0', ';'],
-        correctIndex: 2,
-        explanation: '\\0 indicates string termination.',
-        explanationHindi: '\\0 (नल कैरेक्टर) स्ट्रिंग की समाप्ति को दर्शाता है।'
-      }
-    ]
-  },
-  {
-    id: 'structures-unions',
-    order: 11,
-    title: 'Structures (struct) & Unions',
-    titleHindi: 'स्ट्रक्चर्स (struct) एवं यूनियन्स (डेटा का बंडल)',
-    category: 'Data Structures',
-    summary: 'Bundle heterogeneous data types together. Understand struct memory layout, member access (.), arrow operator (->), and unions.',
-    summaryHindi: 'विभिन्न डेटा प्रकारों का एक बंडल: डॉट (.) ऑपरेटर, एरो (->) ऑपरेटर और struct बनाम union का मेमोरी अंतर।',
-    readTimeMinutes: 10,
-    explanationEn: `1. WHY DO WE NEED STRUCTURES (struct)?
-An array can only store elements of the SAME data type (all ints or all floats). But in real life, a Student has:
-- rollNumber (int)
-- name (char array)
-- feePercentage (float)
-A STRUCTURE ('struct') is a user-defined compound data type that bundles diverse variables together into one clean package!
-
-2. HOW TO ACCESS MEMBERS:
-- Dot (.) operator: Used with normal structure variables (student1.marks = 95.0f;).
-- Arrow (->) operator: Used when accessing structure members via a pointer (ptr->marks = 95.0f;).
-
-3. STRUCT VS UNION (THE CRITICAL DIFFERENCE):
-- struct: Every member receives its own independent memory space. Total size = sum of all member sizes.
-- union: All members SHARE the exact same memory address! Total size = size of its largest member. Only one member can be used at any given time.`,
-    explanationHi: `१. स्ट्रक्चर (struct) की आवश्यकता क्यों है?
-ऐरे में केवल एक ही प्रकार का डेटा आ सकता है (जैसे सारे पूर्णांक)। लेकिन यदि हमें किसी विद्यार्थी का पूरा रिकॉर्ड रखना हो:
-- रोल नंबर (int)
-- विद्यार्थी का नाम (char स्ट्रिंग)
-- परीक्षा के प्राप्तांक (float)
-अलग-अलग प्रकार के डेटा को एक साथ एक ही पहचान में बांधने के लिए हम 'struct' (Structure) बनाते हैं!
-
-२. सदस्यों तक पहुंच (Access):
-- डॉट (.) ऑपरेटर: सामान्य वेरिएबल के साथ (s1.marks = 95.5;)।
-- एरो (->) ऑपरेटर: पॉइंटर के साथ (ptr->marks = 95.5;)।
-
-३. Struct और Union में सबसे बड़ा अंतर:
-- struct में हर सदस्य को अपनी अलग मेमोरी मिलती है।
-- union में सभी सदस्य एक ही मेमोरी साझा (Share) करते हैं, जिससे बहुत सारी रैम बचती है!`,
-    realLifeAnalogy: {
-      en: 'A struct is like an apartment with separate rooms for each person. A union is like a single hotel room where only one guest can stay at a time.',
-      hi: 'struct एक घर की तरह है जिसमें हर सदस्य का अपना अलग कमरा होता है। union एक होटल के कमरे की तरह है जिसमें एक समय में केवल एक ही व्यक्ति रह सकता है!'
-    },
-    codeExamples: [
-      {
-        title: 'Student Structure Record',
-        titleHindi: 'विद्यार्थी रिकॉर्ड स्ट्रक्चर',
-        code: `#include <stdio.h>
-
-struct Student {
-    int roll;
-    char name[30];
-    float marks;
-};
-
-int main() {
-    struct Student s1 = {101, "Kuldeep", 95.5f};
-    struct Student *ptr = &s1;
-
-    printf("रोल नंबर: %d\\n", ptr->roll);
-    printf("नाम: %s\\n", ptr->name);
-    printf("अंक: %.1f\\n", ptr->marks);
-    return 0;
-}`,
-        output: `रोल नंबर: 101
-नाम: Kuldeep
-अंक: 95.5`,
-        explanation: 'Arrow operator accesses members via pointer.',
-        explanationHindi: 'एरो ऑपरेटर (->) पॉइंटर के जरिए स्ट्रक्चर के सदस्यों को दिखाता है।'
-      }
-    ],
-    keyPoints: {
-      en: ['Arrow operator (->) is equivalent to (*ptr).member.'],
-      hi: ['एरो ऑपरेटर (->) और (*ptr).member दोनों एक ही अर्थ रखते हैं।']
-    },
-    commonPitfalls: {
-      en: ['Using dot (.) on a pointer instead of arrow (->).'],
-      hi: ['पॉइंटर पर डॉट (.) लगाना जबकि एरो (->) लगना चाहिए।']
-    },
-    quiz: [
-      {
-        id: 'q11-1',
-        difficulty: 'easy',
-        question: 'Which operator is used to access structure members through a structure pointer?',
-        questionHindi: 'स्ट्रक्चर पॉइंटर के माध्यम से सदस्यों तक पहुँचने के लिए कौन-सा ऑपरेटर उपयोग होता है?',
-        options: ['.', '->', '*', '&'],
-        correctIndex: 1,
-        explanation: 'Arrow operator (->) is used with pointers.',
-        explanationHindi: 'पॉइंटर के साथ एरो (->) ऑपरेटर का उपयोग होता है।'
-      }
-    ]
-  },
-  {
-    id: 'dynamic-memory',
-    order: 12,
-    title: 'Dynamic Memory Allocation (DMA)',
-    titleHindi: 'डायनेमिक मेमोरी एलोकेशन (malloc, calloc, free)',
-    category: 'Memory & Files',
-    summary: 'Take control of heap memory at runtime. Master malloc, calloc, realloc, and prevent memory leaks using free().',
-    summaryHindi: 'प्रोग्राम चलते समय मेमोरी लेना और लौटाना: malloc, calloc, realloc और free() से मेमोरी लीक रोकना।',
-    readTimeMinutes: 10,
-    explanationEn: `1. STACK VS HEAP MEMORY:
-- Stack: Automatic, fast, but fixed in size at compile time.
-- Heap: Vast reservoir of RAM that can be allocated dynamically at runtime using pointers.
-
-2. THE 4 ESSENTIAL FUNCTIONS IN <stdlib.h>:
-- malloc(bytes): Requests raw memory block from heap. Contains garbage values.
-- calloc(n, size): Allocates memory and clears all bytes to zero (0).
-- realloc(ptr, new_size): Expands or shrinks existing allocated block.
-- free(ptr): Returns memory back to the operating system. Always set ptr = NULL afterwards to prevent dangling pointers!`,
-    explanationHi: `१. स्टैक बनाम हीप (Heap) मेमोरी:
-सामान्य ऐरे का साइज पहले से निश्चित करना पड़ता है। लेकिन जब हमें प्रोग्राम के चलने के दौरान उपयोगकर्ता की जरूरत के अनुसार मेमोरी चाहिए हो, तो हम हीप (Heap) मेमोरी से डायनेमिक मेमोरी मांगते हैं।
-
-२. <stdlib.h> के ४ प्रमुख फंक्शंस:
-- malloc(): हीप से कच्ची मेमोरी लेता है (इसमें पहले से कचरा मान होता है)।
-- calloc(): मेमोरी देने के साथ-साथ सभी डिब्बों में 0 भर देता है।
-- realloc(): पहले से ली गई मेमोरी का आकार बदलने के लिए।
-- free(): काम खत्म होने पर मेमोरी ऑपरेटिंग सिस्टम को लौटाने के लिए।
-स्वर्ण नियम: यदि malloc या calloc किया है, तो free() करना अनिवार्य है, अन्यथा मेमोरी लीक हो जाएगा!`,
-    realLifeAnalogy: {
-      en: 'Stack is like your private desk. Heap is like renting hotel rooms: rent what you need, but remember to checkout (free) when leaving!',
-      hi: 'स्टैक मेमोरी आपके स्कूल बैग की तरह है (छोटा, अपने आप खाली)। हीप मेमोरी होटल रूम रेंट पर लेने जैसी है: जब तक रहना हो रहो, पर चेक-आउट (free) करना अनिवार्य है!'
-    },
-    codeExamples: [
-      {
-        title: 'Dynamic Array with malloc and free',
-        titleHindi: 'malloc और free का वास्तविक उदाहरण',
-        code: `#include <stdio.h>
-#include <stdlib.h>
-
-int main() {
-    int *arr = (int*) malloc(3 * sizeof(int));
-    if (arr == NULL) {
-        printf("मेमोरी आवंटन असफल!\\n");
-        return 1;
-    }
-
-    arr[0] = 100; arr[1] = 200; arr[2] = 300;
-    printf("डायनेमिक मान: %d, %d, %d\\n", arr[0], arr[1], arr[2]);
-
-    free(arr); // मेमोरी मुक्त की
-    arr = NULL;
-    printf("मेमोरी सफलतापूर्वक मुक्त कर दी गई।\\n");
-    return 0;
-}`,
-        output: `डायनेमिक मान: 100, 200, 300
-मेमोरी सफलतापूर्वक मुक्त कर दी गई।`,
-        explanation: 'malloc allocates heap memory, free releases it.',
-        explanationHindi: 'malloc ने हीप मेमोरी दी और free ने उसे ऑपरेटिंग सिस्टम को लौटा दिया।'
-      }
-    ],
-    keyPoints: {
-      en: ['Always check if (ptr == NULL) after allocation.', 'After free(ptr), set ptr = NULL.'],
-      hi: ['मेमोरी मांगने के बाद हमेशा जांचें कि कहीं ptr == NULL तो नहीं है।', 'free(ptr) के बाद ptr = NULL अवश्य करें।']
-    },
-    commonPitfalls: {
-      en: ['Memory leak from forgetting free().', 'Dangling pointers.'],
-      hi: ['free() करना भूल जाना जिससे मेमोरी लीक हो जाए।']
-    },
-    quiz: [
-      {
-        id: 'q12-1',
-        difficulty: 'easy',
-        question: 'Which function initializes allocated memory bytes to zero?',
-        questionHindi: 'कौन-सा फंक्शन आवंटित की गई मेमोरी को शून्य (0) से प्रारंभ करता है?',
-        options: ['malloc()', 'calloc()', 'realloc()', 'free()'],
-        correctIndex: 1,
-        explanation: 'calloc zeroes out memory.',
-        explanationHindi: 'calloc मेमोरी के सभी बाइट्स में 0 भर देता है।'
-      }
-    ]
-  },
-  {
-    id: 'preprocessors',
-    order: 13,
-    title: 'Preprocessors & Macros',
-    titleHindi: 'प्रीप्रोसेसर्स एवं मैक्रोज़ (#define, #include)',
-    category: 'Memory & Files',
-    summary: 'Understand the preliminary phase of compilation. Learn #include, #define constants, macro functions, and #ifdef conditional compilation.',
-    summaryHindi: 'कंपाइलेशन से पहले का कार्य: #include, #define मैक्रो फंक्शंस और हेडर गार्ड्स।',
-    readTimeMinutes: 10,
-    explanationEn: `1. WHAT IS THE PREPROCESSOR IN SIMPLE WORDS?
-Think of a master chef who has a helper in the kitchen. Before the chef cooks, the helper washes, peels, and chops the vegetables. In C, the PREPROCESSOR is that kitchen helper! It inspects and modifies your source code BEFORE the compiler translates it into machine code. Every preprocessor line begins with a hash (#).
-
-2. KEY DIRECTIVES:
-- #include: Injects header files.
-- #define: Performs find-and-replace text substitution for constants and macro formulas.
-- Note: Preprocessor directives NEVER terminate with a semicolon!`,
-    explanationHi: `१. सरल शब्दों में प्रीप्रोसेसर क्या है?
-रसोई में मुख्य बावर्ची (कम्पाइलर) के खाना पकाने से पहले उसका सहायक जो सब्जियां धोकर, छीलकर और काटकर तैयार रखता है, वही C में प्रीप्रोसेसर (Preprocessor) है! यह कोड को कम्पाइल होने से पहले तैयार करता है। इसकी हर पंक्ति हैश (#) से शुरू होती है।
-
-२. मुख्य निर्देश:
-- #include: हेडर फाइलों को जोड़ता है।
-- #define: फॉर्मूले और मैक्रोज़ को टेक्स्ट रूप में बदलता है।
-- विशेष नियम: इसके अंत में कभी भी सेमीकोलन (;) नहीं लगाया जाता!`,
-    realLifeAnalogy: {
-      en: 'The preprocessor is like the "Find and Replace" tool in Microsoft Word running across your document before printing.',
-      hi: 'प्रीप्रोसेसर एमएस वर्ड के "Find and Replace" टूल की तरह है जो प्रिंट निकालने से पहले सभी शब्दों को बदल देता है!'
-    },
-    codeExamples: [
-      {
-        title: 'Macro Function Example',
-        titleHindi: 'मैक्रो फंक्शन का उदाहरण',
-        code: `#include <stdio.h>
-
-#define PI 3.14159
-#define SQUARE(x) ((x) * (x))
-
-int main() {
-    int side = 5;
-    printf("वर्ग का क्षेत्रफल = %d\\n", SQUARE(side));
-    printf("PI का मान = %.2f\\n", PI);
-    return 0;
-}`,
-        output: `वर्ग का क्षेत्रफल = 25
-PI का मान = 3.14`,
-        explanation: 'SQUARE(5) expands to ((5) * (5)).',
-        explanationHindi: 'कम्पाइल होने से पहले SQUARE(5) का मान ((5) * (5)) में बदल गया।'
-      }
-    ],
-    keyPoints: {
-      en: ['Preprocessor directives do NOT end with a semicolon.'],
-      hi: ['प्रीप्रोसेसर निर्देशों के अंत में कभी भी सेमीकोलन नहीं लगाया जाता।']
-    },
-    commonPitfalls: {
-      en: ['Putting a semicolon after #define: #define MAX 100;'],
-      hi: ['#define के अंत में सेमीकोलन लगा देना: #define MAX 100;']
-    },
-    quiz: [
-      {
-        id: 'q13-1',
-        difficulty: 'easy',
-        question: 'Which character precedes all C preprocessor directives?',
-        questionHindi: 'सभी C प्रीप्रोसेसर निर्देश किस प्रतीक से प्रारंभ होते हैं?',
-        options: ['$', '@', '#', '&'],
-        correctIndex: 2,
-        explanation: 'All directives begin with #.',
-        explanationHindi: 'सभी प्रीप्रोसेसर डायरेक्टिव्स # (Hash) से शुरू होते हैं।'
-      }
-    ]
-  },
-  {
-    id: 'file-handling',
-    order: 14,
-    title: 'File Handling in C (Zero to Hero)',
-    titleHindi: 'फाइल हैंडलिंग: हार्ड डिस्क में डेटा हमेशा के लिए सुरक्षित करना',
-    category: 'Memory & Files',
-    summary: 'Persist data on hard disk permanently! Master FILE* pointer, fopen modes ("r", "w", "a"), fprintf, fscanf, fgetc, and fclose.',
-    summaryHindi: 'डेटा को हमेशा के लिए सुरक्षित करें: FILE पॉइंटर, fopen मोड्स ("r", "w", "a"), fprintf, fscanf और fclose।',
-    readTimeMinutes: 10,
-    explanationEn: `1. WHY DO WE NEED FILE HANDLING?
-All variables, arrays, and structs live in RAM. RAM is volatile: as soon as your program terminates or your computer shuts off, all RAM data vanishes instantly!
-FILE HANDLING allows your C program to create, read, append, and save data permanently on the non-volatile Hard Drive (SSD/HDD)!
-
-2. THE 4 STEPS OF FILE HANDLING:
-- Step 1: Open the file with fopen()
-  FILE *fp = fopen("students.txt", "w");
-  Modes:
-  "r" (Read): Opens existing file for reading. Returns NULL if not found!
-  "w" (Write): Creates a fresh file. WARNING: Overwrites and erases existing contents!
-  "a" (Append): Keeps existing data and appends new lines at the end.
-- Step 2: Validate pointer (check if fp == NULL)
-- Step 3: Write or Read data using fprintf() or fscanf()
-- Step 4: Close the file with fclose(fp) so write buffers are flushed to disk.`,
-    explanationHi: `१. फाइल हैंडलिंग (File Handling) की आवश्यकता क्यों है?
-सामान्य वेरिएबल्स और ऐरे कंप्यूटर की RAM में रहते हैं। जैसे ही प्रोग्राम बंद होता है, RAM का सारा डेटा हमेशा के लिए गायब हो जाता है!
-यदि आप चाहते हैं कि आपका डेटा कंप्यूटर की हार्ड डिस्क में हमेशा के लिए सुरक्षित रहे ताकि कल या अगले साल भी उसे पढ़ा जा सके, तो हम फाइल हैंडलिंग का उपयोग करते हैं।
-
-२. फाइल हैंडलिंग के ४ आसान कदम:
-- कदम १: फाइल खोलना (fopen)
-  FILE *fp = fopen("data.txt", "w");
-  मोड्स:
-  "r" (पढ़ना): पुरानी फाइल पढ़ने के लिए।
-  "w" (लिखना): नई फाइल बनाता है (पुराना डेटा मिटा देता है)।
-  "a" (अपेंड): पुराने डेटा के अंत में नया डेटा जोड़ता है।
-- कदम २: शून्य की जांच करना: if (fp == NULL)
-- कदम ३: डेटा लिखना या पढ़ना: fprintf() या fscanf()
-- कदम ४: फाइल बंद करना: fclose(fp) ताकि डेटा हार्ड डिस्क में पक्का सेव हो जाए।`,
-    realLifeAnalogy: {
-      en: 'File handling is like a diary on your bookshelf: fopen() takes it off the shelf, fprintf() writes with a pen, and fclose() puts it safely back on the shelf.',
-      hi: 'फाइल हैंडलिंग अलमारी में रखी डायरी जैसी है: fopen() अलमारी से डायरी निकालना है, fprintf() पेन से लिखना है, और fclose() डायरी वापस अलमारी में संभाल कर रखना है!'
-    },
-    codeExamples: [
-      {
-        title: 'Writing Data to File',
-        titleHindi: 'फाइल में डेटा लिखना और बंद करना',
-        code: `#include <stdio.h>
-
-int main() {
-    FILE *fp = fopen("cguru_record.txt", "w");
-    if (fp == NULL) {
-        printf("फाइल खोलने में त्रुटि!\\n");
-        return 1;
-    }
-
-    fprintf(fp, "C-Guru Academy\\n");
-    fprintf(fp, "Student: Kuldeep Singh\\n");
-    fclose(fp); // फाइल सुरक्षित बंद की
-
-    printf("डेटा सफलतापूर्वक cguru_record.txt में सुरक्षित हो गया!\\n");
-    return 0;
-}`,
-        output: `डेटा सफलतापूर्वक cguru_record.txt में सुरक्षित हो गया!`,
-        explanation: 'fopen creates file, fprintf writes to it, fclose flushes buffer.',
-        explanationHindi: 'fopen ने फाइल बनाई, fprintf ने लिखा और fclose ने हार्ड ड्राइव पर सेव कर दिया।'
-      }
-    ],
-    keyPoints: {
-      en: ['Always check if (fp == NULL).', 'Always call fclose(fp).'],
-      hi: ['फाइल खोलने के तुरंत बाद if (fp == NULL) की जांच अवश्य करें।', 'कार्य होते ही fclose(fp) करना न भूलें।']
-    },
-    commonPitfalls: {
-      en: ['Forgetting fclose() leaving buffers unwritten.'],
-      hi: ['fclose() करना भूल जाना जिससे डेटा डिस्क में अधूरा रह जाए।']
-    },
-    quiz: [
-      {
-        id: 'q14-1',
-        difficulty: 'easy',
-        question: 'Which file mode appends new content to the end of a file without overwriting?',
-        questionHindi: 'कौन-सा फाइल मोड पुराने डेटा को मिटाए बिना अंत में नया डेटा जोड़ता है?',
-        options: ['"r"', '"w"', '"a"', '"wb"'],
-        correctIndex: 2,
-        explanation: '"a" is append mode.',
-        explanationHindi: '"a" (अपेंड मोड) फाइल के अंत में नया डेटा जोड़ता है।'
-      }
+    "hi": [
+      "सेमीकोलन भूलना।",
+      "main को Main लिखना।",
+      "void main() का उपयोग करना।"
     ]
   }
+  ,
+  "quiz": getTopicQuestionBank("program-structure", "Program Structure in C")
+},
+{
+  "id": "flow-chart",
+  "order": 2,
+  "title": "Flowchart & Logic Design",
+  "titleHindi": "फ्लोचार्ट और लॉजिक डिज़ाइन (Flowchart)",
+  "category": "Basics",
+  "summary": "Master visual algorithmic problem-solving using standardized flowchart symbols (Oval, Parallelogram, Rectangle, Diamond, Connectors), flowline rules, and systematic translation into C code.",
+  "summaryHindi": "समस्या समाधान के सचित्र एल्गोरिदम, मानक फ्लोचार्ट प्रतीकों (अंडाकार, समानांतर चतुर्भुज, आयत, समचतुर्भुज), नियमों और फ्लोचार्ट से C कोड बनाने की विधि सीखें।",
+  "readTimeMinutes": 16,
+  "explanationEn": "1. WHAT IS A FLOWCHART & WHY IS IT CRITICAL IN PROGRAMMING?\nBefore writing a single line of executable C source code, professional software engineers and computer scientists always design their problem-solving strategy visually. A flowchart is a diagrammatic, pictorial representation of an algorithm. It maps out the logical sequence of operations, control branching decisions, repetitive iterations, and input-output flows using internationally standardized geometric symbols. \nHistorically, attempting to code complex business or mathematical logic directly into syntax results in tangled thinking, syntax confusion, and obscure logical bugs. A flowchart separates pure problem-solving logic from language-specific syntax rules. It acts as a clear visual roadmap that allows anyone—whether a programmer, manager, or client—to trace how data flows from initial input to final result.\n\n2. STANDARD ANSI / ISO FLOWCHART SYMBOLS AND THEIR PRECISE FUNCTIONS:\nThe American National Standards Institute (ANSI X3.5) and International Organization for Standardization (ISO 5807) formalized the geometric symbols used across computer science:\n1. Terminal Symbol (Oval / Rounded Rectangle):\nRepresents the absolute beginning (START) and conclusion (STOP or END) of an algorithm or program module. Every valid flowchart must possess exactly one Start terminal and at least one Stop terminal.\n2. Input / Output Symbol (Parallelogram):\nRepresents operations where data enters the program from external devices (e.g., READ A, INPUT marks corresponding to scanf() in C) or where processed information is displayed to the user (e.g., PRINT sum, DISPLAY result corresponding to printf() in C).\n3. Processing Symbol (Rectangle):\nDepicts internal computational actions, variable assignments, mathematical formulas, and data manipulation. Examples include: sum = a + b, count = 1, or temp = x. A processing box has strictly one incoming flowline and one outgoing flowline.\n4. Decision Symbol (Rhombus / Diamond):\nRepresents a conditional decision point where a logical condition or relational comparison is evaluated (e.g., Is N > 0? or Is marks >= 40?). A decision box always has one incoming flowline and two or more outgoing flowlines labeled with outcomes such as 'Yes' and 'No', or 'True' and 'False'. This directly corresponds to if-else statements and while conditions in C.\n5. Flowlines (Directional Arrows):\nLines with arrowheads indicating the exact path and chronological direction of execution flow. Standard flow proceeds from top to bottom and from left to right.\n6. On-Page Connector (Small Circle):\nUsed to connect disparate parts of a flowchart on the same page, preventing intersecting or messy crisscrossing lines. Often labeled with matching capital letters (A, B, C).\n7. Off-Page Connector (Pentagon / Home-Plate Shape):\nUsed when a large flowchart exceeds a single physical sheet of paper and continues onto another page.\n8. Predefined Process Symbol (Rectangle with double vertical bars):\nDepicts an invocation of a subprogram, function, or modular subroutine (e.g., call calculateFactorial(n)).\n\n3. ESSENTIAL RULES FOR CONSTRUCTING VALID FLOWCHARTS:\nTo ensure clarity, accuracy, and standardization, flowcharts must adhere to strict engineering rules:\n- Clear Orientation: The overall direction of flow should invariably proceed from top to bottom and left to right.\n- Single Entry/Exit for Processes: A processing rectangle should possess only one incoming arrow and one outgoing arrow.\n- Exhaustive Decision Paths: Every decision diamond must have clearly labeled exit arrows covering all logical possibilities (e.g., Yes and No).\n- Unambiguous Flowlines: Lines must not cross over one another arbitrarily. Whenever lines must jump across each other, connectors must be employed.\n- Language Independence: Flowcharts should be written using clear mathematical and natural language statements (e.g., 'Input Age', 'Calculate Net = Gross - Tax') rather than machine-specific syntax (e.g., avoiding scanf(\"%d\", &a)).\n\n4. STEP-BY-STEP FLOWCHART EXAMPLES TRANSLATED TO C:\nExample 1: Finding the Largest of Two Numbers\nAlgorithm:\nStep 1: Start\nStep 2: Input two numbers A and B\nStep 3: Check if A > B?\n        - If Yes: Print \"A is Largest\"\n        - If No: Check if B > A?\n                - If Yes: Print \"B is Largest\"\n                - If No: Print \"Both numbers are equal\"\nStep 4: Stop\nIn C code, this maps directly to:\n```c\nif (A > B) printf(\"A is largest\\n\");\nelse if (B > A) printf(\"B is largest\\n\");\nelse printf(\"Both are equal\\n\");\n```\n\nExample 2: Loop Flowchart - Printing Numbers 1 to N\nAlgorithm:\nStep 1: Start\nStep 2: Read limit N\nStep 3: Initialize counter i = 1\nStep 4: Decision: Is i <= N?\n        - If True: Print i -> Increment i = i + 1 -> Loop back to Step 4\n        - If False: Exit loop -> Proceed to Step 5\nStep 5: Stop\nThis loop structure in the flowchart directly maps to a while or for loop in C:\n```c\nint i = 1;\nwhile (i <= N) {\n    printf(\"%d \", i);\n    i++;\n}\n```\n\n5. CONVERTING COMPLEX FLOWCHARTS TO C CODE (MAPPING TABLE):\n- Terminal Oval -> int main() { ... return 0; }\n- Parallelogram (Input) -> scanf(\"%d\", &var);\n- Parallelogram (Output) -> printf(\"%d\\n\", var);\n- Rectangle (Calculation) -> var = expr;\n- Diamond (Binary Condition) -> if (condition) { ... } else { ... }\n- Diamond with loopback -> while (condition) { ... } or for (;;) { ... }\n- Multi-exit Diamond -> switch (expression) { case 1: ... }\n\n6. DRY RUN TRACING & COMPLEXITY VERIFICATION:\nA trace table (or dry-run table) is constructed alongside a flowchart. By walking through sample numbers column-by-column across variables, programmers verify boundary conditions (such as zero, negative values, and large numbers) before touching the keyboard.",
+  "explanationHi": "१. फ्लोचार्ट क्या है और प्रोग्रामिंग में इसका क्या महत्व है?\nकिसी भी समस्या को कंप्यूटर प्रोग्राम के जरिए हल करने से पहले उसका व्यवस्थित खाका तैयार करना आवश्यक होता है। किसी एल्गोरिदम (Algorithm) या समस्या समाधान की कार्यविधि को ज्यामितीय आकृतियों (Geometric Symbols) और तीरों (Arrows) की सहायता से सचित्र प्रदर्शित करना \"फ्लोचार्ट (Flowchart)\" कहलाता है।\nसरल शब्दों में, जिस प्रकार कोई भवन निर्माता मकान बनाने से पहले उसका नक्शा बनाता है, उसी प्रकार एक कुशल प्रोग्रामर C कोड लिखने से पहले उसका फ्लोचार्ट बनाता है। फ्लोचार्ट बनाने का सबसे बड़ा लाभ यह है कि इससे प्रोग्राम का लॉजिक बिल्कुल शीशे की तरह साफ हो जाता है। यदि लॉजिक में कोई भूल या कमी हो, तो वह कोडिंग से पहले ही पकड़ में आ जाती है, जिससे समय और श्रम की भारी बचत होती है। एल्गोरिदम लिखित शब्दों में होता है जबकि फ्लोचार्ट उसका दृश्य (चित्रमय) रूप होता है, जिसे देखकर कोई भी व्यक्ति प्रोग्राम की पूरी कार्यप्रणाली को कुछ ही सेकंड्स में समझ सकता है।\n\n२. मानक फ्लोचार्ट प्रतीक एवं उनके सटीक कार्य (Standard Flowchart Symbols):\nअंतरराष्ट्रीय मानक संगठन (ANSI और ISO) द्वारा फ्लोचार्ट के लिए निम्नलिखित मानक प्रतीक निर्धारित किए गए हैं:\n१. टर्मिनल प्रतीक (Terminal - Oval / अंडाकार):\nयह आकृति प्रोग्राम की शुरुआत (START) और समाप्ति (STOP / END) को दर्शाती है। प्रत्येक फ्लोचार्ट में केवल एक Start और कम से कम एक Stop टर्मिनल होना अनिवार्य है।\n२. इनपुट / आउटपुट प्रतीक (Input/Output - Parallelogram / समानांतर चतुर्भुज):\nजब कंप्यूटर में कीबोर्ड से कोई मान लिया जाता है (जैसे READ A, INPUT marks - जो C में scanf होता है) या स्क्रीन पर कोई परिणाम दिखाया जाता है (जैसे PRINT sum, DISPLAY result - जो C में printf होता है), तब समानांतर चतुर्भुज का उपयोग किया जाता है।\n३. प्रोसेसिंग प्रतीक (Processing - Rectangle / आयत):\nयह गणनाओं, गणितीय फॉर्मूलों और मान निर्धारण (Assignment) को दर्शाता है। उदाहरण के लिए: sum = a + b, count = 1, या area = 3.14 * r * r। आयत में केवल एक तीर अंदर आता है और एक तीर बाहर निकलता है।\n४. निर्णय प्रतीक (Decision - Diamond / समचतुर्भुज):\nयह किसी शर्त (Condition) की जांच या निर्णय लेने के लिए प्रयुक्त होता है (जैसे: क्या N > 0 है? या क्या आयु >= 18 है?)। इस बॉक्स से हमेशा दो या अधिक रास्ते निकलते हैं जिन पर 'Yes' और 'No' (हाँ / ना) या 'True' और 'False' (सत्य / असत्य) लिखा होता है। यह C भाषा के 'if-else' और लूप्स की शर्तों से सीधे मेल खाता है।\n५. प्रवाह रेखाएं (Flowlines - तीर / Arrows):\nतीर के निशान प्रोग्राम के चलने की दिशा (Direction of Flow) और निष्पादन के क्रम को दर्शाते हैं। मानक प्रवाह हमेशा ऊपर से नीचे और बाएँ से दाएँ होता है।\n६. ऑन-पेज कनेक्टर (On-Page Connector - छोटा वृत्त / Circle):\nजब फ्लोचार्ट एक ही पेज पर बहुत बड़ा या उलझा हुआ हो, तो रेखाओं को एक-दूसरे के ऊपर से काटने से बचाने के लिए छोटे वृत्त का उपयोग किया जाता है। वृत्त के अंदर A, B जैसे अक्षर लिखे जाते हैं।\n७. ऑफ-पेज कनेक्टर (Off-Page Connector - पंचभुज / Pentagon):\nजब फ्लोचार्ट एक पेज से आगे बढ़कर दूसरे पेज पर जाता है, तो दोनों पेजों को आपस में जोड़ने के लिए ऑफ-पेज कनेक्टर का उपयोग होता है।\n८. सब-प्रोसेस प्रतीक (Predefined Process - दोहरी खड़ी रेखाओं वाला आयत):\nयह किसी पहले से बने फंक्शन या सब-रूटीन को कॉल करने के लिए प्रयोग होता है, जैसे किसी फंक्शन को कॉल करना।\n\n३. फ्लोचार्ट बनाने के आवश्यक नियम एवं सावधानियां:\n- फ्लोचार्ट का सामान्य प्रवाह हमेशा ऊपर से नीचे (Top to Bottom) और बाएँ से दाएँ (Left to Right) होना चाहिए।\n- हर प्रोसेसिंग बॉक्स (आयत) में केवल एक प्रवेश रेखा और एक निकास रेखा होनी चाहिए।\n- निर्णय बॉक्स (डायमंड) से निकलने वाले प्रत्येक रास्ते पर स्पष्ट रूप से 'हाँ/ना' या 'सत्य/असत्य' लिखा होना चाहिए।\n- प्रवाह रेखाएं कभी भी एक-दूसरे को काटनी नहीं चाहिए; यदि ऐसा हो तो कनेक्टर्स का उपयोग करें।\n- बॉक्स के अंदर लिखी भाषा सरल और स्पष्ट होनी चाहिए (जैसे 'Read A, B' या 'Sum = A + B'), सिंटेक्स की बारीकियां नहीं।\n\n४. चार प्रमुख प्रोग्रामिंग समस्याओं के फ्लोचार्ट और C कोड:\nउदाहरण १: सम अथवा विषम संख्या की जांच (Even or Odd Check):\n- स्टार्ट (Oval) -> इनपुट N (Parallelogram) -> शर्त: क्या N % 2 == 0? (Diamond)\n- यदि हाँ: प्रिंट \"Even\" -> स्टॉप\n- यदि ना: प्रिंट \"Odd\" -> स्टॉप\nC कोड:\n```c\nif (n % 2 == 0) printf(\"Even\\n\");\nelse printf(\"Odd\\n\");\n```\n\nउदाहरण २: तीन संख्याओं में से सबसे बड़ी संख्या (Largest of 3 Numbers):\n- स्टार्ट -> इनपुट A, B, C -> क्या A > B?\n  - हाँ: क्या A > C? -> हाँ तो A बड़ा, ना तो C बड़ा।\n  - ना: क्या B > C? -> हाँ तो B बड़ा, ना तो C बड़ा।\n- स्टॉप।\nयह नेस्टेड if-else को दर्शाता है।\n\nउदाहरण ३: 1 से N तक की संख्याओं का योग (Sum of 1 to N using Loop):\n- स्टार्ट -> इनपुट N -> sum = 0, i = 1 (Rectangle)\n- क्या i <= N? (Diamond)\n  - हाँ: sum = sum + i -> i = i + 1 -> वापस शर्त पर जाओ (Loopback Arrow)।\n  - ना: प्रिंट sum (Parallelogram) -> स्टॉप।\nयह सीधे while लूप या for लूप में बदल जाता है।\n\n५. फ्लोचार्ट से C कोड में सीधा रूपांतरण (Direct Mapping Table):\n- स्टार्ट / स्टॉप (अंडाकार) -> int main() { ... return 0; }\n- इनपुट (समानांतर चतुर्भुज) -> scanf(\"%d\", &num);\n- आउटपुट (समानांतर चतुर्भुज) -> printf(\"%d\", result);\n- प्रोसेसिंग (आयत) -> result = a + b;\n- निर्णय (डायमंड) -> if (a > b) { ... } else { ... }\n- लूप वाली वापसी रेखा -> while (i <= n) { ... } या for loop\n- बहु-शाखा निर्णय -> switch (choice) { case 1: ... }\n\n६. ड्राई रन टेबल (Trace Table) द्वारा फ्लोचार्ट की जांच:\nफ्लोचार्ट को कंप्यूटर पर चलाने से पहले कागज पर पेन द्वारा विभिन्न इनपुट मान रखकर जांचा जाता है, जिसे ड्राई रन (Dry Run) कहते हैं। जैसे N = 5 रखकर i और sum के मानों को प्रत्येक चक्र में लिखकर यह सुनिश्चित किया जाता है कि एल्गोरिदम हर स्थिति में सही काम कर रहा है।",
+  "realLifeAnalogy": {
+    "en": "Think of a flowchart as a GPS Turn-by-Turn Navigation system. The Start oval is your current driveway, and Stop oval is your destination. A straight road is a rectangular Process box. A toll booth is an Input/Output box. A highway fork sign is a Decision Diamond. And a roundabout taking you back is an iterative Loop!",
+    "hi": "फ्लोचार्ट को सड़क के जीपीएस नेविगेशन की तरह समझें। स्टार्ट घर है, स्टॉप मंजिल। सीधी सड़क प्रोसेसिंग आयत है। टोल बूथ इनपुट/आउटपुट बॉक्स है। तिराहे का बोर्ड निर्णय डायमंड है, और गोल चक्कर पर घूमना लूप है।"
+  },
+  "codeExamples": [
+    {
+      "title": "Largest of Two Numbers (Flowchart to C Implementation)",
+      "titleHindi": "दो संख्याओं में बड़ी संख्या ज्ञात करने का C प्रोग्राम",
+      "code": "#include <stdio.h>\n\nint main() {\n    int num1, num2;\n    printf(\"Enter two numbers: \");\n    scanf(\"%d %d\", &num1, &num2);\n    \n    if (num1 > num2) {\n        printf(\"%d is Greater\\n\", num1);\n    } else if (num2 > num1) {\n        printf(\"%d is Greater\\n\", num2);\n    } else {\n        printf(\"Both are Equal\\n\");\n    }\n    return 0;\n}",
+      "output": "Enter two numbers: 45 20\n45 is Greater",
+      "explanation": "Directly mirrors the flowchart decision diamond and branches.",
+      "explanationHindi": "फ्लोचार्ट के निर्णय डायमंड और शाखाओं का सीधा रूपांतरण।"
+    }
+  ],
+  "practicals": [
+    {
+      "id": "prac-fc-1",
+      "title": "Flowchart Loop Implementation: Factorial Calculator",
+      "titleHindi": "फ्लोचार्ट लूप आधारित फैक्टोरियल कैलकुलेटर",
+      "objective": "Implement an iterative loop derived from a flowchart.",
+      "objectiveHindi": "फ्लोचार्ट लूप के आधार पर फैक्टोरियल प्रोग्राम बनाएं।",
+      "code": "#include <stdio.h>\n\nint main() {\n    int n, i;\n    long long fact = 1;\n    printf(\"Enter N: \");\n    scanf(\"%d\", &n);\n    for (i = 1; i <= n; i++) {\n        fact *= i;\n    }\n    printf(\"Factorial = %lld\\n\", fact);\n    return 0;\n}",
+      "expectedOutput": "Enter N: 5\nFactorial = 120",
+      "lineByLineExplanation": [
+        {
+          "line": "for (i = 1; i <= n; i++)",
+          "noteEn": "Iterates loop from 1 to N.",
+          "noteHi": "1 से N तक लूप चलाता है।"
+        }
+      ]
+    }
+  ],
+  "keyPoints": {
+    "en": [
+      "Oval = Terminal",
+      "Parallelogram = I/O",
+      "Rectangle = Process",
+      "Diamond = Decision",
+      "Arrows = Flow"
+    ],
+    "hi": [
+      "अंडाकार = स्टार्ट/स्टॉप",
+      "समानांतर चतुर्भुज = इनपुट/आउटपुट",
+      "आयत = प्रोसेस",
+      "डायमंड = निर्णय",
+      "तीर = प्रवाह"
+    ]
+  },
+  "commonPitfalls": {
+    "en": [
+      "Using rectangle for I/O.",
+      "Missing Yes/No on diamonds.",
+      "Infinite loops without exit."
+    ],
+    "hi": [
+      "इनपुट के लिए आयत बनाना।",
+      "डायमंड पर हाँ/ना न लिखना।",
+      "बिना बाहर निकलने की शर्त के अनंत लूप बनाना।"
+    ]
+  }
+  ,
+  "quiz": getTopicQuestionBank("flow-chart", "Flowchart & Logic Design")
+},
+{
+  "id": "data-type",
+  "order": 3,
+  "title": "Data Types & Memory Sizes",
+  "titleHindi": "डेटा टाइप्स और मेमोरी साइज (Data Types)",
+  "category": "Basics",
+  "summary": "Master C's type system: Primitive types (int, float, double, char, void), type modifiers (signed, unsigned, short, long), byte sizes, ranges, format specifiers, and internal representation.",
+  "summaryHindi": "C भाषा के डेटा टाइप्स (int, float, double, char, void), मॉडिफायर्स (signed, unsigned, short, long), मेमोरी आकार, रेंज और फॉर्मेट विनिर्देशकों का संपूर्ण अध्ययन।",
+  "readTimeMinutes": 16,
+  "explanationEn": "1. WHAT IS A DATA TYPE & WHY IS C STATICALLY TYPED?\nIn computer science, a Data Type is a formal classification that specifies which type of value a variable can hold, how many bytes of physical RAM memory it occupies, how those bits are encoded internally, and what set of operations can legally be performed upon it. C is a Statically Typed language: every variable must have its data type explicitly declared before use, and that type cannot change at runtime. This provides two huge advantages: exceptional runtime speed (the compiler generates optimal assembly instructions without runtime type inspection overhead) and deterministic memory management.\n\n2. CLASSIFICATION OF DATA TYPES IN C:\nThe C language type system is organized into three distinct tiers:\n1. Fundamental / Primitive (Primary) Types:\nBuilt into the language core: int (whole numbers), char (characters), float (single-precision decimals), double (double-precision decimals), and void (valueless type).\n2. Derived Data Types:\nConstructed directly from primitive types: Arrays (homogeneous collections), Pointers (memory address holders), and Functions (callable routines).\n3. User-Defined Data Types:\nCustom types designed by the programmer: struct (heterogeneous records), union (shared memory records), enum (enumerated constants), and typedef aliases.\n\n3. DETAILED BREAKDOWN OF PRIMITIVE TYPES & FORMAT SPECIFIERS:\nLet us analyze each core type in detail:\n- 'char' (Character):\nOccupies strictly 1 byte (8 bits) of memory on every standard platform. Used to store individual characters like 'A', '7', or '$'. In memory, C does not store the visual symbol; it stores the numerical ASCII integer code (e.g., 'A' is stored as binary 01000001, decimal 65). Format specifier: %c. Range: -128 to +127 (signed) or 0 to 255 (unsigned).\n- 'int' (Integer):\nUsed to store whole numbers without any fractional component (e.g., 42, -500, 100000). On modern 32-bit and 64-bit operating systems, an int occupies 4 bytes (32 bits). Format specifiers: %d (signed decimal) or %i. Range: -2,147,483,648 to +2,147,483,647.\n- 'float' (Single-Precision Floating Point):\nStores real numbers with fractional decimal points (e.g., 3.14159, -98.6). Occupies 4 bytes (32 bits) formatted internally according to the IEEE-754 standard (1 sign bit, 8 exponent bits, 23 mantissa bits). Provides approximately 6 to 7 decimal digits of precision. Format specifier: %f.\n- 'double' (Double-Precision Floating Point):\nOccupies 8 bytes (64 bits) formatted under IEEE-754 (1 sign bit, 11 exponent bits, 52 mantissa bits). Provides roughly 15 to 17 decimal digits of precision, making it the preferred standard for scientific and financial computation. Format specifiers: %lf (in scanf) or %f/%lf (in printf).\n- 'void' (Empty / Valueless):\nIndicates the absence of value or type. Used as a return type for functions that produce no result (void display()), as an empty parameter list (int main(void)), or as a generic memory pointer (void *ptr). You cannot declare a variable of type void (e.g., void x; is a compilation error).\n\n4. TYPE MODIFIERS IN C:\nC provides four powerful keywords called Type Modifiers that alter the size, range, or signedness of base types:\n1. 'signed': Allows both positive and negative values using two's complement binary representation (default for int).\n2. 'unsigned': Disallows negative numbers, shifting the entire range into positive integers and doubling the maximum capacity (e.g., unsigned int spans 0 to 4,294,967,295). Format specifier: %u.\n3. 'short': Reduces the memory footprint. A 'short int' occupies 2 bytes (16 bits) spanning -32,768 to +32,767. Format specifier: %hd.\n4. 'long': Expands the memory range. A 'long int' occupies 4 or 8 bytes depending on OS (%ld). In C99, 'long long int' provides at least 8 bytes (64 bits, %lld) spanning from -9 quintillion to +9 quintillion!\n\n5. SIZEOF OPERATOR & LIMITS HEADER FILES:\nThe compile-time operator sizeof yields the exact byte count of any type or variable:\n```c\nprintf(\"Size of int: %zu bytes\\n\", sizeof(int));\nprintf(\"Size of double: %zu bytes\\n\", sizeof(double));\n```\n// 6. SIZEOF OPERATOR & LIMITS HEADER FILES:\nThe compile-time operator sizeof yields the exact byte count of any type or variable:\n```c\nprintf(\"Size of int: %zu bytes\\n\", sizeof(int));\nprintf(\"Size of double: %zu bytes\\n\", sizeof(double));\n```\nStandard header file <limits.h> defines architecture-specific limits (INT_MIN, INT_MAX, CHAR_BIT, ULONG_MAX), while <float.h> defines floating-point tolerances (FLT_EPSILON, DBL_MAX).\n\n7. EXACT-WIDTH TYPES IN C99 (<stdint.h>):\nBecause standard types like 'int' and 'long' can vary between 16-bit, 32-bit, and 64-bit microcontrollers and servers, C99 introduced portable fixed-width integer types:\n- int8_t and uint8_t: strictly 8 bits (1 byte)\n- int16_t and uint16_t: strictly 16 bits (2 bytes)\n- int32_t and uint32_t: strictly 32 bits (4 bytes)\n- int64_t and uint64_t: strictly 64 bits (8 bytes)\nEmbedded systems and networking protocols always prefer these exact-width definitions for predictable memory layout.\n\n8. TYPE CASTING (IMPLICIT VS EXPLICIT):\nType casting converts data from one type to another. \n- Implicit Casting (Type Promotion / Coercion): Performed automatically by the compiler during arithmetic operations following hierarchy: char -> short -> int -> unsigned -> long -> float -> double. For example, in 5 + 2.5, integer 5 is promoted to double 5.0, resulting in 7.5.\n- Explicit Casting: Deliberately instructed by the developer using syntax (type)expression. For instance, integer division 5 / 2 yields 2. By writing (float)5 / 2, the operation evaluates in floating-point precision yielding 2.5. Always be mindful of precision truncation when converting from floating-point to integer types.",
+  "explanationHi": "१. डेटा टाइप क्या है और C भाषा में इसका क्या महत्व है?\nकंप्यूटर प्रोग्रामिंग में डेटा टाइप (Data Type) यह निर्धारित करता है कि कोई वेरिएबल किस प्रकार का मान (संख्या, अक्षर, दशमलव) स्टोर करेगा, वह कंप्यूटर की रैम (RAM) में कितने बाइट्स जगह घेरेगा, और उस पर कौन-से गणितीय या तार्किक ऑपरेशन किए जा सकते हैं। \nC एक स्टैटिकली टाइप्ड (Statically Typed) भाषा है। इसका अर्थ यह है कि C में किसी भी वेरिएबल का उपयोग करने से पहले उसका डेटा टाइप बताना अनिवार्य होता है, और एक बार घोषित करने के बाद उसका टाइप बदला नहीं जा सकता। इससे C प्रोग्राम अत्यधिक तीव्र गति से चलते हैं क्योंकि कम्पाइलर को रनटाइम पर यह नहीं सोचना पड़ता कि मेमोरी में क्या रखा है। यह मेमोरी का कुशल प्रबंधन और प्रकार सुरक्षा (Type Safety) सुनिश्चित करता है।\n\n२. C भाषा में डेटा टाइप्स का संपूर्ण वर्गीकरण:\nC में डेटा टाइप्स को तीन मुख्य श्रेणियों में बांटा गया है:\n१. प्राइमरी / प्रिमिटिव डेटा टाइप्स (Primitive Data Types):\nये C भाषा में मूल रूप से पहले से निर्मित होते हैं:\n- int: पूर्णांक संख्याएं (बिना दशमलव वाली पूर्ण संख्याएं)\n- char: सिंगल कैरेक्टर (अक्षर या विशेष चिह्न)\n- float: दशमलव वाली संख्याएं (एकल परिशुद्धता)\n- double: दशमलव वाली संख्याएं (दोगुनी परिशुद्धता)\n- void: शून्य मान या खाली प्रकार\n२. डिराइव्ड डेटा टाइप्स (Derived Data Types):\nजो प्रिमिटिव टाइप्स की सहायता से बनाए जाते हैं:\n- Arrays (ऐरे): समान प्रकार के डेटा का अनुक्रमिक संग्रह\n- Pointers (पॉइंटर्स): मेमोरी एड्रेस स्टोर करने वाले चर\n- Functions (फंक्शन्स): निष्पादन योग्य कोड के मॉड्यूलर ब्लॉक\n३. यूजर-डिफाइंड डेटा टाइप्स (User-Defined Data Types):\nजो प्रोग्रामर अपनी आवश्यकतानुसार खुद बनाता है:\n- struct (स्ट्रक्चर): अलग-अलग प्रकार के डेटा का समूह\n- union (यूनियन): एक ही साझा मेमोरी का उपयोग करने वाले चरों का समूह\n- enum (इन्यूम): नामित पूर्णांक स्थिरांकों का समूह\n- typedef: किसी मौजूदा टाइप को नया सरल नाम देना\n\n३. प्रिमिटिव डेटा टाइप्स का विस्तृत अध्ययन:\n- 'char' (कैरेक्टर):\nयह मेमोरी में ठीक 1 बाइट (8 बिट्स) स्थान लेता है। इसमें एक अक्षर जैसे 'A', 'z', या '9' रखा जाता है। मेमोरी में यह सीधे अक्षर नहीं रखता बल्कि उसका ASCII कोड स्टोर करता है (जैसे 'A' का मान 65 है, 'a' का मान 97 है, और '0' का मान 48 है)। इसका फॉर्मेट विनिर्देशक '%c' है।\n- 'int' (पूर्णांक):\nयह बिना दशमलव वाली पूर्ण संख्याएं स्टोर करता है (जैसे 10, -50, 1000)। 32-बिट और 64-बिट सिस्टम पर यह 4 बाइट्स (32 बिट्स) स्थान लेता है। इसकी रेंज -2,147,483,648 से +2,147,483,647 तक होती है। इसका फॉर्मेट विनिर्देशक '%d' या '%i' है।\n- 'float' (दशमलव संख्या):\nयह दशमलव बिंदु वाली संख्याएं (जैसे 3.14, 98.6) स्टोर करता है। यह 4 बाइट्स लेता है और लगभग 6 से 7 अंकों तक की दशमलव शुद्धता देता है। इसका फॉर्मेट विनिर्देशक '%f' है।\n- 'double' (दोगुनी परिशुद्धता दशमलव):\nयह 8 बाइट्स (64 बिट्स) स्थान लेता है और लगभग 15 से 17 अंकों तक की उच्च परिशुद्धता प्रदान करता है। वैज्ञानिक और वित्तीय गणनाओं में इसका उपयोग होता है। इसका फॉर्मेट विनिर्देशक '%lf' (scanf में) होता है।\n- 'void' (शून्य प्रकार):\nइसका अर्थ 'कुछ नहीं' है। इसका उपयोग उन फंक्शन्स के लिए होता है जो कोई मान नहीं लौटाते (void printMessage()) या जेनेरिक पॉइंटर्स (void *ptr) के लिए होता है। void प्रकार का कोई वेरिएबल नहीं बनाया जा सकता।\n\n४. डेटा टाइप मॉडिफायर्स (Modifiers) और उनकी क्षमताएं:\nC भाषा में चार विशेष कीवर्ड्स होते हैं जो मूल प्रकारों का आकार या सीमा बदलते हैं:\n१. signed: धनात्मक और ऋणात्मक दोनों मानों की अनुमति देता है (int का डिफ़ॉल्ट रूप)।\n२. unsigned: केवल 0 और धनात्मक मान स्टोर करता है, जिससे अधिकतम धनात्मक क्षमता दोगुनी हो जाती है (unsigned int: 0 से 4,294,967,295, फॉर्मेट %u)।\n३. short: मेमोरी का आकार घटाता है (short int = 2 बाइट्स, रेंज -32768 से +32767, फॉर्मेट %hd)।\n४. long: आकार बढ़ाता है (long int = 4 या 8 बाइट्स, long long int = कम से कम 8 बाइट्स यानी 64 बिट्स, फॉर्मेट %lld)।\n\n५. आधुनिक C99 में निश्चित चौड़ाई वाले डेटा प्रकार (<stdint.h>):\nविभिन्न सिस्टम्स पर int का आकार 2 बाइट्स या 4 बाइट्स हो सकता है। इसलिए C99 में निश्चित चौड़ाई वाले पोर्टेबल प्रकार जोड़े गए:\n- int8_t व uint8_t: ठीक 8 बिट्स (1 बाइट)\n- int16_t व uint16_t: ठीक 16 बिट्स (2 बाइट्स)\n- int32_t व uint32_t: ठीक 32 बिट्स (4 बाइट्स)\n- int64_t व uint64_t: ठीक 64 बिट्स (8 बाइट्स)\nनेटवर्किंग और एम्बेडेड डिवाइसेज में इन्हीं का प्रयोग किया जाता है ताकि हर मशीन पर मेमोरी का आकार समान रहे।\n\n६. sizeof ऑपरेटर और टाइप कास्टिंग की अनिवार्यता:\n'sizeof' ऑपरेटर से हम किसी भी डेटा टाइप का बाइट्स में आकार ज्ञात कर सकते हैं (जैसे sizeof(int) = 4 बाइट्स, sizeof(double) = 8 बाइट्स)।\nटाइप कास्टिंग दो प्रकार की होती है:\n- अंतर्निहित टाइप कास्टिंग (Implicit Casting): कम्पाइलर द्वारा स्वतः छोटे प्रकार को बड़े प्रकार में बदलना (जैसे int + float मिलकर float बन जाना)।\n- स्पष्ट टाइप कास्टिंग (Explicit Casting): प्रोग्रामर द्वारा जबरन बदलना, जैसे '(float)5 / 2' लिखने पर 2.500000 प्राप्त होना, जबकि '5 / 2' लिखने पर केवल 2 प्राप्त होता है।",
+  "realLifeAnalogy": {
+    "en": "Think of data types as measuring containers in a kitchen. A teaspoon holds 1 gram—a char. A coffee cup holds 250ml—an int. A measuring jug with decimal milliliter lines—a float. A high-precision laboratory beaker—a double. And an empty tray—a void. Pouring a gallon into a teaspoon overflows, just like integer overflow!",
+    "hi": "डेटा टाइप्स रसोई के बर्तनों जैसे हैं। छोटी चम्मच char है (1 बाइट), चाय का कप int है (4 बाइट), दशमलव पैमाना वाला जग float है, वैज्ञानिक फ्लास्क double है, और खाली ट्रे void है। अधिक पानी डालने पर बर्तन छलक जाता है जैसे ओवरफ्लो।"
+  },
+  "codeExamples": [
+    {
+      "title": "Comprehensive Data Type Sizes & Specifiers",
+      "titleHindi": "सभी डेटा टाइप्स के मेमोरी साइज और फॉर्मेट विनिर्देशक",
+      "code": "#include <stdio.h>\n#include <limits.h>\n\nint main() {\n    char ch = 'K';\n    int age = 22;\n    unsigned int distance = 4000000000U;\n    float pi = 3.14159f;\n    double exactPi = 3.141592653589793;\n    \n    printf(\"char: '%c' | Size: %zu byte | ASCII: %d\\n\", ch, sizeof(ch), ch);\n    printf(\"int: %d | Size: %zu bytes\\n\", age, sizeof(age));\n    printf(\"unsigned int: %u | Size: %zu bytes\\n\", distance, sizeof(distance));\n    printf(\"float: %.5f | Size: %zu bytes\\n\", pi, sizeof(pi));\n    printf(\"double: %.15lf | Size: %zu bytes\\n\", exactPi, sizeof(exactPi));\n    printf(\"INT_MAX: %d, INT_MIN: %d\\n\", INT_MAX, INT_MIN);\n    \n    return 0;\n}",
+      "output": "char: 'K' | Size: 1 byte | ASCII: 75\nint: 22 | Size: 4 bytes\nunsigned int: 4000000000 | Size: 4 bytes\nfloat: 3.14159 | Size: 4 bytes\ndouble: 3.141592653589793 | Size: 8 bytes\nINT_MAX: 2147483647, INT_MIN: -2147483648",
+      "explanation": "Demonstrates sizes, specifiers, and limits.",
+      "explanationHindi": "आकार, विनिर्देशक और सीमाओं को दिखाता है।"
+    }
+  ],
+  "practicals": [
+    {
+      "id": "prac-dt-1",
+      "title": "Type Casting and Precision",
+      "titleHindi": "टाइप कास्टिंग और परिशुद्धता",
+      "objective": "Understand explicit type casting in division.",
+      "objectiveHindi": "विभाजन में एक्सप्लिसिट टाइप कास्टिंग को समझें।",
+      "code": "#include <stdio.h>\n\nint main() {\n    int total = 485, max = 600;\n    float pct = ((float)total / max) * 100.0f;\n    printf(\"Percentage: %.2f%%\\n\", pct);\n    return 0;\n}",
+      "expectedOutput": "Percentage: 80.83%",
+      "lineByLineExplanation": [
+        {
+          "line": "((float)total / max)",
+          "noteEn": "Casts total to float to preserve decimals.",
+          "noteHi": "दशमलव बचाने के लिए फ्लोट में कास्ट करता है।"
+        }
+      ]
+    }
+  ],
+  "keyPoints": {
+    "en": [
+      "char is 1 byte.",
+      "int is 4 bytes.",
+      "float is 4 bytes, double is 8 bytes.",
+      "sizeof returns byte size."
+    ],
+    "hi": [
+      "char 1 बाइट है।",
+      "int 4 बाइट है।",
+      "float 4 और double 8 बाइट्स है।",
+      "sizeof बाइट्स लौटाता है।"
+    ]
+  },
+  "commonPitfalls": {
+    "en": [
+      "Integer division 5/2 giving 2.",
+      "Wrong format specifiers."
+    ],
+    "hi": [
+      "5/2 का उत्तर 2 आना।",
+      "गलत फॉर्मेट विनिर्देशक लगाना।"
+    ]
+  }
+  ,
+  "quiz": getTopicQuestionBank("data-type", "Data Types & Memory Sizes")
+},
+{
+  "id": "three-digit-logic",
+  "order": 4,
+  "title": "Logic: 3-Digit Number Digits Extraction",
+  "titleHindi": "तीन अंकों की संख्या से पहली, दूसरी और तीसरी संख्या निकालना (Logic)",
+  "category": "Basics",
+  "summary": "Master fundamental arithmetic logic using integer division (/) and modulus (%) operators to extract 1st, 2nd, and 3rd digits of any 3-digit number. Build sum of digits, number reversal, and Armstrong number programs.",
+  "summaryHindi": "पूर्णांक भाग (/) और शेषफल (%) ऑपरेटरों के गणितीय लॉजिक से 3 अंकों की संख्या से पहली, दूसरी और तीसरी संख्या निकालना सीखें। अंकों का योग, उल्टा करना और आर्मस्ट्रांग संख्या की संपूर्ण कोडिंग।",
+  "readTimeMinutes": 18,
+  "explanationEn": "1. THE CORE MATHEMATICAL FOUNDATION: QUOTIENT (/) VS REMAINDER (%):\nIn computer programming, digit manipulation is the premier exercise for building algorithmic reasoning and logical thinking. Every number manipulation algorithm—from calculating digital sums, checking palindromes, reversing numbers, to cryptographic hashing—relies on understanding two fundamental integer operators:\n1. The Division Operator (/):\nWhen two integer variables are divided in C, the fractional decimal component is completely discarded (truncated toward zero). The operator returns exclusively the integer QUOTIENT (भागफल).\nExamples:\n385 / 100 = 3 (The hundreds digit is cleanly separated!)\n385 / 10 = 38 (The last digit is chopped off!)\n749 / 100 = 7\n2. The Modulus Operator (%):\nThe modulus operator calculates and returns the integer REMAINDER (शेषफल) left over after division.\nExamples:\n385 % 10 = 5 (The last unit digit is isolated!)\n385 % 100 = 85 (The hundreds digit is dropped, leaving the last two digits!)\n749 % 10 = 9\n\n2. STEP-BY-STEP FORMULAS FOR EXTRACTING EACH DIGIT:\nLet us suppose the user enters any 3-digit integer: num (where num is between 100 and 999, e.g., num = 749 or num = 385).\nWe want to extract three separate variables:\n- first_digit (d1): The Hundreds place digit (पहली संख्या)\n- second_digit (d2): The Tens place digit (दूसरी संख्या / बीच का अंक)\n- third_digit (d3): The Units place digit (तीसरी संख्या / अंतिम अंक)\n\nFormula for the First Digit (Hundreds Place / पहली संख्या):\n```c\nfirst_digit = num / 100;\n```\nMathematical Proof: In base-10 positional notation, any 3-digit number is represented as:\nnum = (d1 * 100) + (d2 * 10) + d3\nWhen divided by 100 in integer arithmetic:\nnum / 100 = ((d1 * 100) + (d2 * 10) + d3) / 100\nBecause (d2 * 10 + d3) is strictly less than 100, its division by 100 yields 0.\nTherefore, num / 100 = d1.\nFor num = 749: 749 / 100 = 7. Exactly the first digit!\n\nFormula for the Third Digit (Units Place / तीसरी संख्या / अंतिम अंक):\n```c\nthird_digit = num % 10;\n```\nMathematical Proof: The units digit is the remainder when dividing the entire number by 10:\nnum = (Quotient * 10) + Remainder\n749 = (74 * 10) + 9.\nTherefore, 749 % 10 = 9. Exactly the last digit!\n\nFormulas for the Second Digit (Tens Place / दूसरी संख्या / बीच का अंक):\nThere are two elegant mathematical methods to extract the middle digit:\nMethod A (Divide by 10 first, then Modulo 10):\n```c\nsecond_digit = (num / 10) % 10;\n```\nStep 1: num / 10 strips away the last unit digit:\n749 / 10 = 74.\nStep 2: 74 % 10 isolates the units digit of 74, which was originally the tens digit:\n74 % 10 = 4! Exactly the second digit!\n\nMethod B (Modulo 100 first, then Divide by 10):\n```c\nsecond_digit = (num % 100) / 10;\n```\nStep 1: num % 100 strips away the hundreds digit:\n749 % 100 = 49.\nStep 2: 49 / 10 isolates the tens digit:\n49 / 10 = 4! Exactly the second digit!\n\n3. COMPREHENSIVE DRY-RUN TRACE TABLE:\nLet us trace these formulas across diverse test numbers:\n| Input (num) | d1 = num / 100 | d2 = (num / 10) % 10 | d3 = num % 10 | Sum (d1+d2+d3) | Reversed ((d3*100)+(d2*10)+d1) |\n|---|---|---|---|---|---|\n| 385 | 385 / 100 = 3 | (385 / 10)%10 = 38%10 = 8 | 385 % 10 = 5 | 3 + 8 + 5 = 16 | 500 + 80 + 3 = 583 |\n| 749 | 749 / 100 = 7 | (749 / 10)%10 = 74%10 = 4 | 749 % 10 = 9 | 7 + 4 + 9 = 20 | 900 + 40 + 7 = 947 |\n| 102 | 102 / 100 = 1 | (102 / 10)%10 = 10%10 = 0 | 102 % 10 = 2 | 1 + 0 + 2 = 3 | 200 + 0 + 1 = 201 |\n| 999 | 999 / 100 = 9 | (999 / 10)%10 = 99%10 = 9 | 999 % 10 = 9 | 9 + 9 + 9 = 27 | 900 + 90 + 9 = 999 |\n| 153 | 153 / 100 = 1 | (153 / 10)%10 = 15%10 = 5 | 153 % 10 = 3 | 1 + 5 + 3 = 9 | 300 + 50 + 1 = 351 |\n\n4. CORE APPLICATIONS OF 3-DIGIT LOGIC IN C PROGRAMMING:\nOnce d1, d2, and d3 are separated into individual variables, programmers can construct powerful classic programs:\n1. Sum of Digits:\n```c\nint sum = d1 + d2 + d3;\n```\n2. Product of Digits:\n```c\nint product = d1 * d2 * d3;\n```\n3. Reversing a 3-Digit Number:\nTo reverse the number, the third digit becomes the hundreds place, the second digit remains the tens place, and the first digit becomes the units place:\n```c\nint reversed = (d3 * 100) + (d2 * 10) + d1;\n```\n4. Palindrome Number Verification:\nA number is a palindrome if it reads identical forward and backward (e.g., 121, 545, 989). In a 3-digit number, a number is a palindrome if and only if the first digit equals the third digit:\n```c\nif (d1 == d3) // or if (reversed == num)\n    printf(\"Palindrome Number!\\n\");\n```\n5. Armstrong Number (Narcissistic Number) Verification:\nA 3-digit number is an Armstrong number if the sum of the cubes of its digits equals the original number itself:\nnum == (d1 * d1 * d1) + (d2 * d2 * d2) + (d3 * d3 * d3)\nFor example, in 153:\n1^3 + 5^3 + 3^3 = 1 + 125 + 27 = 153! (Armstrong Number!)\nThere are only four 3-digit Armstrong numbers in mathematics: 153, 370, 371, and 407.\n\n5. INPUT VALIDATION & HANDLING EDGE CASES:\nTo ensure industrial robustness, your C program should always validate that the user actually supplied a genuine 3-digit number before performing arithmetic:\n```c\nif (num >= 100 && num <= 999) {\n    // Valid 3-digit positive number\n} else {\n    printf(\"Error: Please enter a valid 3-digit number between 100 and 999.\\n\");\n}\n```\nIf negative numbers are permitted (e.g., -749), take the absolute value first using abs(num) or num = -num so modulus does not yield negative digit remainders.",
+  "explanationHi": "१. मूल गणितीय सिद्धांत: भागफल (/) बनाम शेषफल (%):\nप्रोग्रामिंग में संख्याओं के अंकों (Digits) को अलग-अलग करना लॉजिक बिल्डिंग (Logic Building) का सबसे पहला और महत्वपूर्ण अभ्यास है। चाहे किसी संख्या के अंकों का योग निकालना हो, संख्या को उल्टा करना हो, पैलिंड्रोम चेक करना हो, या आर्मस्ट्रांग संख्या की जांच करनी हो—यह पूरा लॉजिक दो बुनियादी अंकगणितीय ऑपरेटरों पर आधारित होता है:\n१. पूर्णांक विभाजन ऑपरेटर (Division Operator - /):\nC भाषा में जब दो पूर्णांकों को भाग दिया जाता है, तो दशमलव के बाद का भाग हट जाता है और परिणाम में केवल पूर्णांक भागफल (Quotient) बचता है।\nउदाहरण:\n385 / 100 = 3 (सैकड़े का अंक सीधा बाहर निकल आया!)\n385 / 10 = 38 (अंतिम इकाई अंक कट गया!)\n749 / 100 = 7 (पहला अंक अलग हो गया!)\n२. मॉड्यूलस ऑपरेटर (Modulus Operator - %):\nयह ऑपरेटर भाग देने के बाद बचा हुआ शेषफल (Remainder) लौटाता है।\nउदाहरण:\n385 % 10 = 5 (अंतिम इकाई अंक बाहर निकल आया!)\n385 % 100 = 85 (सैकड़े का अंक कट गया, पीछे के दो अंक बचे!)\n749 % 10 = 9 (अंतिम इकाई अंक मिल गया!)\n\n२. तीन अंकों की संख्या से प्रत्येक अंक निकालने के सटीक फॉर्मूले:\nमान लीजिए यूजर ने कोई तीन अंकों की संख्या 'num' दर्ज की (जैसे num = 749 या 385)।\nहमें तीन अलग-अलग वेरिएबल्स निकालने हैं:\n- पहली संख्या (First Digit / सैकड़े का अंक): d1\n- दूसरी संख्या (Second Digit / दहाई का अंक / बीच का अंक): d2\n- तीसरी संख्या (Third Digit / इकाई का अंक / अंतिम अंक): d3\n\nपहला अंक (d1) निकालने का फॉर्मूला:\n```c\nd1 = num / 100;\n```\nतर्क: संख्या 749 में कितने 100 समाए हैं? 749 को 100 से भाग देने पर पूर्णांक भागफल 7 आता है। अतः 'num / 100' से हमेशा पहला अंक मिलता है।\n\nतीसरा अंक (d3) निकालने का फॉर्मूला:\n```c\nd3 = num % 10;\n```\nतर्क: किसी भी संख्या को 10 से भाग देने पर जो शेषफल बचता है, वह हमेशा उस संख्या का अंतिम अंक होता है। 749 % 10 = 9। अतः 'num % 10' से हमेशा अंतिम (तीसरा) अंक मिलता है।\n\nदूसरा अंक (d2 / बीच का अंक) निकालने के दो तरीके:\nविधि A (पहले 10 से भाग, फिर 10 से शेषफल):\n```c\nd2 = (num / 10) % 10;\n```\nचरण १: 749 / 10 = 74 (अंतिम इकाई अंक 9 हट गया, केवल 74 बचा)।\nचरण २: 74 % 10 = 4 (74 को 10 से भाग देने पर शेषफल 4 बचा, जो कि मूल संख्या का बीच का अंक है!)।\n\nविधि B (पहले 100 से शेषफल, फिर 10 से भाग):\n```c\nd2 = (num % 100) / 10;\n```\nचरण १: 749 % 100 = 49 (सैकड़े का अंक 7 हट गया, पीछे 49 बचा)।\nचरण २: 49 / 10 = 4 (49 को 10 से भाग देने पर भागफल 4 आया!)।\n\n३. स्टेप-बाय-स्टेप ड्राई-रन तालिका (Dry Run Trace Table):\nआइए विभिन्न संख्याओं पर इन फॉर्मूलों का परीक्षण करें:\n| इनपुट (num) | d1 = num / 100 | d2 = (num / 10) % 10 | d3 = num % 10 | अंकों का योग | उल्टी संख्या |\n|---|---|---|---|---|---|\n| 385 | 385 / 100 = 3 | 38 % 10 = 8 | 385 % 10 = 5 | 3 + 8 + 5 = 16 | 583 |\n| 749 | 749 / 100 = 7 | 74 % 10 = 4 | 749 % 10 = 9 | 7 + 4 + 9 = 20 | 947 |\n| 102 | 102 / 100 = 1 | 10 % 10 = 0 | 102 % 10 = 2 | 1 + 0 + 2 = 3 | 201 |\n| 153 | 153 / 100 = 1 | 15 % 10 = 5 | 153 % 10 = 3 | 1 + 5 + 3 = 9 | 351 |\n\n४. 3-अंकों के लॉजिक के व्यावहारिक अनुप्रयोग:\n१. अंकों का योग (Sum of Digits):\nsum = d1 + d2 + d3;\n(जैसे 749 के लिए: 7 + 4 + 9 = 20)।\n२. अंकों का गुणनफल (Product of Digits):\nproduct = d1 * d2 * d3;\n(जैसे 749 के लिए: 7 * 4 * 9 = 252)।\n३. उल्टी संख्या बनाना (Reversed Number):\nतीसरे अंक को 100 से गुणा करें, दूसरे अंक को 10 से, और पहले अंक को जोड़ दें:\nreversed = (d3 * 100) + (d2 * 10) + d1;\n(जैसे 749 का उल्टा: 9*100 + 4*10 + 7 = 947)।\n४. पैलिंड्रोम संख्या (Palindrome Number):\nयदि संख्या को उल्टा करने पर भी वही संख्या रहे (जैसे 121, 545, 989)। 3 अंकों में यदि पहला अंक और तीसरा अंक बराबर हो (d1 == d3), तो संख्या पैलिंड्रोम होती है।\n५. आर्मस्ट्रांग संख्या (Armstrong Number):\nयदि तीनों अंकों के घनों (Cubes) का योग मूल संख्या के बराबर हो:\nif ((d1 * d1 * d1) + (d2 * d2 * d2) + (d3 * d3 * d3) == num)\nगणित में 3 अंकों की केवल 4 आर्मस्ट्रांग संख्याएं हैं: 153, 370, 371 और 407।\n(उदाहरण 153: 1^3 + 5^3 + 3^3 = 1 + 125 + 27 = 153!)\n६. सबसे बड़ा अंक ज्ञात करना (Largest Digit):\nif (d1 >= d2 && d1 >= d3) max = d1;\nelse if (d2 >= d3) max = d2;\nelse max = d3;\n७. पहले और तीसरे अंक की अदला-बदली:\nnew_num = (d3 * 100) + (d2 * 10) + d1;\n\n५. इनपुट वैलिडेशन एवं सुरक्षा उपाय:\nकिसी भी प्रोग्राम में गणना करने से पहले यूजर के इनपुट की जांच करना आवश्यक है:\n```c\nif (num >= 100 && num <= 999) {\n    // मान्य 3 अंकों की संख्या\n} else {\n    printf(\"त्रुटि: कृपया 100 से 999 के बीच की तीन अंकों की संख्या दर्ज करें।\\n\");\n}\n```\nयदि संख्या ऋणात्मक (-749) हो सकती है, तो पहले abs(num) द्वारा उसे धनात्मक बना लें ताकि मॉड्यूलस ऑपरेटर सही धनात्मक अंक दे।",
+  "realLifeAnalogy": {
+    "en": "Think of a 3-digit number like a 3-wheel combination lock. Dividing by 100 reads the left wheel. Modulo 10 reads the right wheel. Dividing by 10 then modulo 10 reads the middle wheel.",
+    "hi": "3 अंकों की संख्या 3-पहियों वाले नंबर लॉक जैसी है। 100 से भाग देने पर बायाँ पहिया मिलता है, 10 से शेषफल पर दायाँ पहिया, और 10 से भाग देकर 10 से शेषफल पर बीच का पहिया मिलता है।"
+  },
+  "codeExamples": [
+    {
+      "title": "Complete 3-Digit Extraction, Sum, Reverse & Armstrong Check",
+      "titleHindi": "3-अंकों के निष्कर्षण, योग, उल्टा करने और आर्मस्ट्रांग का संपूर्ण C प्रोग्राम",
+      "code": "#include <stdio.h>\n\nint main() {\n    int num, d1, d2, d3;\n    int sum, reversed, armstrongSum;\n    \n    printf(\"Enter a 3-digit number (100-999): \");\n    scanf(\"%d\", &num);\n    \n    if (num < 100 || num > 999) {\n        printf(\"Error: Not a 3-digit number!\\n\");\n        return 1;\n    }\n    \n    d1 = num / 100;\n    d2 = (num / 10) % 10;\n    d3 = num % 10;\n    \n    sum = d1 + d2 + d3;\n    reversed = (d3 * 100) + (d2 * 10) + d1;\n    armstrongSum = (d1 * d1 * d1) + (d2 * d2 * d2) + (d3 * d3 * d3);\n    \n    printf(\"1st Digit: %d, 2nd Digit: %d, 3rd Digit: %d\\n\", d1, d2, d3);\n    printf(\"Sum of Digits: %d\\n\", sum);\n    printf(\"Reversed: %d\\n\", reversed);\n    printf(\"Armstrong: %s\\n\", (armstrongSum == num) ? \"YES\" : \"NO\");\n    printf(\"Palindrome: %s\\n\", (d1 == d3) ? \"YES\" : \"NO\");\n    \n    return 0;\n}",
+      "output": "Enter a 3-digit number (100-999): 153\n1st Digit: 1, 2nd Digit: 5, 3rd Digit: 3\nSum of Digits: 9\nReversed: 351\nArmstrong: YES\nPalindrome: NO",
+      "explanation": "Extracts 1st, 2nd, and 3rd digits, validates input, calculates sum, reverse, Armstrong and Palindrome.",
+      "explanationHindi": "पहली, दूसरी, तीसरी संख्या निकालता है, योग, उल्टा और आर्मस्ट्रांग की जांच करता है।"
+    }
+  ],
+  "practicals": [
+    {
+      "id": "prac-td-1",
+      "title": "Swap First and Last Digits",
+      "titleHindi": "पहले और आखिरी अंक को बदलना",
+      "objective": "Swap 1st and 3rd digits of a 3-digit integer.",
+      "objectiveHindi": "3-अंकों के पहले और तीसरे अंक को आपस में बदलें।",
+      "code": "#include <stdio.h>\n\nint main() {\n    int num = 742;\n    int d1 = num / 100;\n    int d2 = (num / 10) % 10;\n    int d3 = num % 10;\n    int swapped = (d3 * 100) + (d2 * 10) + d1;\n    printf(\"Original: %d, Swapped: %d\\n\", num, swapped);\n    return 0;\n}",
+      "expectedOutput": "Original: 742, Swapped: 247",
+      "lineByLineExplanation": [
+        {
+          "line": "(d3 * 100) + (d2 * 10) + d1",
+          "noteEn": "Reconstructs swapped integer.",
+          "noteHi": "अदला-बदली करके नया नंबर बनाता है।"
+        }
+      ]
+    }
+  ],
+  "keyPoints": {
+    "en": [
+      "1st digit = num / 100",
+      "2nd digit = (num / 10) % 10",
+      "3rd digit = num % 10",
+      "Reversed = (d3*100)+(d2*10)+d1"
+    ],
+    "hi": [
+      "पहला अंक = num / 100",
+      "दूसरा अंक = (num / 10) % 10",
+      "तीसरा अंक = num % 10",
+      "उल्टा = (d3*100)+(d2*10)+d1"
+    ]
+  },
+  "commonPitfalls": {
+    "en": [
+      "Using % instead of / for first digit.",
+      "Using pow() with float errors."
+    ],
+    "hi": [
+      "पहले अंक के लिए % लगाना।",
+      "pow() में फ्लोट की अशुद्धि होना।"
+    ]
+  }
+  ,
+  "quiz": getTopicQuestionBank("three-digit-logic", "Logic: 3-Digit Number Digits Extraction")
+},
+{
+  "id": "variable",
+  "order": 5,
+  "title": "Variables, Identifiers & Storage Classes",
+  "titleHindi": "वेरिएबल्स, पहचानकर्ता और स्टोरेज क्लासेस (Variable)",
+  "category": "Basics",
+  "summary": "Complete architectural exploration of C variables: Declaration, definition, initialization, lvalue vs rvalue, identifier naming rules, scopes (block, function, file), lifetimes, and the four C storage classes: auto, register, static, and extern.",
+  "summaryHindi": "C भाषा में वेरिएबल्स का आर्किटेक्चरल अध्ययन: घोषणा, परिभाषा, lvalue बनाम rvalue, नामकरण के नियम, स्कोप और लाइफटाइम, तथा चार प्रमुख स्टोरेज क्लासेस: auto, register, static, और extern का गहन विवरण।",
+  "readTimeMinutes": 19,
+  "explanationEn": "1. WHAT IS A VARIABLE IN COMPUTER ARCHITECTURE?\nIn low-level systems programming and C architecture, a Variable is a named, symbolic abstraction representing a specific physical location in Random Access Memory (RAM). When a programmer declares a variable such as 'int age = 21;', the compiler and OS memory allocator perform several coordinated actions:\n1. Symbol Table Binding: The identifier 'age' is recorded in the compiler symbol table mapped to a relative stack frame offset or data segment address.\n2. Memory Allocation: A contiguous block of physical RAM (typically 4 bytes on 32-bit and 64-bit x86/ARM architectures) is reserved.\n3. Value Encoding: The binary integer representation of 21 (00000000 00000000 00000000 00010101) is copied directly into those reserved bytes.\nWithout variables, programmers would be forced to write raw machine memory addresses (e.g., storing data at hex location 0x7ffd98b2c4e0), which is humanly impossible to manage across modern dynamic virtual memory operating systems.\n\n2. DECLARATION VERSUS DEFINITION OF A VARIABLE:\nOne of the most essential distinctions in systems engineering is the difference between declaring and defining a variable:\n- A Declaration informs the compiler about the identifier's name and data type, but does NOT allocate physical storage bytes in memory. It asserts: \"A variable with this signature exists somewhere in this application.\" (Example: extern int globalCounter;).\n- A Definition informs the compiler of the variable's type and name, AND immediately allocates physical memory space in RAM. Every definition is implicitly a declaration, but not all declarations are definitions. (Example: int globalCounter = 0;).\n- Initialization is the optional process of assigning an initial, known value to the variable at the exact moment of its memory definition. If a local variable is defined without initialization, it contains whatever residual electrical charges existed at that RAM location, commonly termed \"garbage data\".\n\n3. RULES FOR CONSTRUCTING C IDENTIFIERS:\nIdentifiers are user-defined names given to variables, functions, structures, and arrays. The ISO C standard mandates strict lexical rules:\n1. Allowed Characters: Only uppercase English letters (A-Z), lowercase English letters (a-z), numeric digits (0-9), and the underscore character (_) are permitted.\n2. Initial Character Restriction: The first character MUST be a letter or an underscore. An identifier can NEVER begin with a digit (e.g., '1stRank' is illegal syntax, whereas 'rank1' or '_rank1' are legal).\n3. Keyword Exclusivity: An identifier cannot be identical to any of the 32 reserved C language keywords (such as int, return, for, if, switch, volatile).\n4. Case Sensitivity: C is strictly case-sensitive. The identifiers 'totalScore', 'TotalScore', and 'TOTALSCORE' reference three entirely distinct memory locations.\n5. Special Characters Prohibited: Spaces, hyphens, and punctuation marks (such as $, @, #, %, &) are illegal inside variable names.\n\n4. SCOPE, VISIBILITY, AND LIFETIME (DURATION):\nEvery variable in C possesses two distinct architectural dimensions: Scope and Lifetime.\n- Scope (Visibility): The syntactic region of source code where the variable's identifier can be legally referenced.\n  - Block Scope (Local Scope): Variables declared inside curly braces { ... } are visible exclusively within that block.\n  - Function Scope: Labels utilized by goto statements are visible anywhere throughout the enclosing function body.\n  - File Scope (Global Scope): Variables declared outside of all functions (at the file top level) are visible from their point of declaration down to the end of the compilation unit.\n- Lifetime (Storage Duration): The duration of execution time during which the allocated physical memory remains reserved and valid for that variable.\n  - Automatic Duration: Memory is allocated upon entering the enclosing block and destroyed immediately upon exiting the block (stack memory).\n  - Static Duration: Memory is allocated before main() begins execution and persists throughout the entire program lifespan until termination (data segment / BSS segment).\n  - Dynamic Duration: Memory allocated explicitly by programmer code via malloc() on the heap, persisting until free() is called.\n\n5. THE FOUR C STORAGE CLASSES:\nStorage classes define four critical properties of a variable: its storage location (RAM vs CPU register), initial default value, scope, and lifetime.\n1. 'auto' (Automatic):\n   - Location: RAM Call Stack.\n   - Default Value: Indeterminate garbage value.\n   - Scope: Local to the enclosing block.\n   - Lifetime: Exists only while the block is executing.\n   - Usage: Every local variable is 'auto' by default, making the explicit 'auto' keyword virtually redundant in C.\n2. 'register':\n   - Location: CPU Registers (or RAM if CPU registers are unavailable).\n   - Default Value: Indeterminate garbage value.\n   - Purpose: Requests the compiler to store high-frequency loop counters or variables directly inside ultra-fast CPU registers rather than system RAM.\n   - Critical Architectural Rule: You CANNOT apply the address-of operator '&' to a register variable (e.g., &regVar is a compile error) because CPU registers do not have memory bus RAM addresses!\n3. 'static':\n   - Location: Static Data Segment (BSS if uninitialized, Data segment if initialized).\n   - Default Value: Automatically initialized to zero (or NULL for pointers).\n   - Scope: Remains local to its declaring block or static to the declaring file.\n   - Lifetime: Persists throughout the entire life of the program!\n   - Magic Behavior: A static local variable retains its value between multiple function invocations. It is initialized only once during program startup.\n4. 'extern' (External):\n   - Location: Global Data Segment.\n   - Default Value: Zero.\n   - Scope: Global across multiple separate C source files (compilation units).\n   - Purpose: Enables sharing of a single global variable across multi-file software projects without duplicating memory definitions.",
+  "explanationHi": "१. कंप्यूटर आर्किटेक्चर में वेरिएबल (Variable) क्या है?\nकंप्यूटर की निम्न-स्तरीय प्रणाली और C भाषा की संरचना में, एक 'वेरिएबल' (Variable या चर) कंप्यूटर की मुख्य मेमोरी (RAM) के एक निश्चित भौतिक स्थान को दिया गया मानव-पठनीय प्रतीकात्मक नाम होता है। जब कोई प्रोग्रामर 'int age = 21;' लिखता है, तो कंपाइलर और ऑपरेटिंग सिस्टम कई महत्वपूर्ण कार्य करते हैं:\n१. सिंबल टेबल मैपिंग: कंपाइलर अपनी सिंबल टेबल में 'age' नाम को स्टैक या डेटा सेगमेंट के एक विशिष्ट मेमोरी एड्रेस के साथ जोड़ लेता है।\n२. मेमोरी आवंटन: रैम (RAM) के अंदर ठीक 4 बाइट्स (32-बिट और 64-बिट सिस्टम पर) की जगह इस वेरिएबल के लिए सुरक्षित कर ली जाती है।\n३. बाइनरी एनकोडिंग: संख्या 21 का बाइनरी रूप (00000000 00000000 00000000 00010101) सीधे उन 4 बाइट्स में लिख दिया जाता है।\nयदि वेरिएबल्स की सुविधा न होती, तो प्रोग्रामर को हर डेटा को हेक्साडेसिमल मेमोरी पते (जैसे 0x7ffd98b2c4e0) पर सीधे लिखना पड़ता, जो आधुनिक ऑपरेटिंग सिस्टम में असंभव कार्य है।\n\n२. वेरिएबल डिक्लेरेशन और डेफिनिशन में मौलिक अंतर:\nC प्रोग्रामिंग में 'Declaration' और 'Definition' के अंतर को समझना अत्यंत आवश्यक है:\n- डिक्लेरेशन (Declaration): यह कंपाइलर को केवल वेरिएबल के नाम और उसके डेटा टाइप की सूचना देता है, परंतु रैम में कोई भौतिक मेमोरी आवंटित नहीं करता। इसका अर्थ है: \"यह वेरिएबल कहीं मौजूद है।\" (जैसे extern int total;)।\n- डेफिनिशन (Definition): यह कंपाइलर को वेरिएबल का नाम और प्रकार बताने के साथ-साथ रैम में उसके लिए वास्तविक मेमोरी स्पेस भी आरक्षित करता है। (जैसे int total = 0;)।\n- इनिशियलाइजेशन (Initialization): मेमोरी आरक्षित करते समय ही वेरिएबल को उसका पहला प्रारंभिक मान देना इनिशियलाइजेशन कहलाता है। यदि किसी लोकल वेरिएबल को मान दिए बिना छोड़ दिया जाए, तो उसमें पुराना कचरा मान (Garbage Value) मौजूद रहता है।\n\n३. आइडेंटिफायर्स (Identifiers) के नामकरण के कड़े नियम:\nवेरिएबल्स, फंक्शन्स और ऐरे के नाम को आइडेंटिफायर कहा जाता है। C मानक के अनुसार इसके कड़े नियम हैं:\n१. मान्य वर्ण: केवल अंग्रेजी के बड़े अक्षर (A-Z), छोटे अक्षर (a-z), अंक (0-9) और अंडरस्कोर (_) का ही उपयोग किया जा सकता है।\n२. पहला अक्षर: वेरिएबल का पहला अक्षर हमेशा एक वर्ण (Letter) या अंडरस्कोर (_) ही होना चाहिए। यह कभी भी किसी अंक से शुरू नहीं हो सकता (जैसे 1value अमान्य है, जबकि value1 या _value मान्य है)।\n३. कीवर्ड्स पर रोक: C भाषा के 32 सुरक्षित शब्दों (जैसे int, float, for, if, switch, return) को वेरिएबल का नाम नहीं बनाया जा सकता।\n४. केस संवेदनशीलता (Case Sensitivity): C भाषा छोटे और बड़े अक्षरों में भेद करती है। 'score', 'Score' और 'SCORE' तीन बिल्कुल अलग वेरिएबल्स माने जाएंगे।\n५. विशेष चिन्ह वर्जित: स्पेस, हाइफन या अन्य चिन्ह (जैसे @, $, #) वेरिएबल के नाम में पूरी तरह वर्जित हैं।\n\n४. स्कोप (Scope), विजिबिलिटी और लाइफटाइम (Lifetime):\nC भाषा में हर वेरिएबल के दो प्रमुख आयाम होते हैं:\n- स्कोप (Scope): प्रोग्राम का वह क्षेत्र जहाँ वेरिएबल का नाम मान्य होता है और उसका उपयोग किया जा सकता है।\n  - ब्लॉक स्कोप (Local): घुंघराले कोष्ठक { ... } के अंदर बने वेरिएबल्स केवल उसी ब्लॉक में दिखाई देते हैं।\n  - फाइल स्कोप (Global): सभी फंक्शन्स के बाहर फाइल के शीर्ष पर बने वेरिएबल्स पूरी फाइल में कहीं भी पढ़े जा सकते हैं।\n- लाइफटाइम (Lifetime): वह समय सीमा जब तक वेरिएबल को आवंटित की गई मेमोरी रैम में सुरक्षित और जीवित रहती है।\n  - ऑटोमैटिक लाइफटाइम: ब्लॉक शुरू होने पर मेमोरी मिलती है और ब्लॉक खत्म होते ही मेमोरी नष्ट हो जाती है।\n  - स्टेटिक लाइफटाइम: प्रोग्राम शुरू होते ही मेमोरी मिलती है और प्रोग्राम बंद होने तक बनी रहती है।\n\n५. C की चार प्रमुख स्टोरेज क्लासेस (Storage Classes):\nस्टोरेज क्लास यह तय करती है कि वेरिएबल कहाँ स्टोर होगा, उसका प्रारंभिक मान क्या होगा, उसका स्कोप क्या होगा और वह कब तक जीवित रहेगा:\n१. 'auto': यह सभी लोकल वेरिएबल्स की डिफ़ॉल्ट क्लास है। यह स्टैक मेमोरी पर बनती है और इसमें गारबेज मान होता है।\n२. 'register': यह सीपीयू से अनुरोध करती है कि वेरिएबल को रैम के बजाय सीधे सीपीयू के अति-तीव्र रजिस्टर्स में रखा जाए। इसके साथ '&' ऑपरेटर का प्रयोग नहीं किया जा सकता क्योंकि सीपीयू रजिस्टर का कोई रैम एड्रेस नहीं होता।\n३. 'static': यह डेटा सेगमेंट में स्टोर होती है। इसका प्रारंभिक मान स्वतः शून्य (0) होता है। सबसे महत्वपूर्ण बात: यह फंक्शन समाप्त होने के बाद भी अपना पुराना मान याद रखती है!\n४. 'extern': यह ग्लोबल वेरिएबल को कई अलग-अलग C फाइलों के बीच साझा करने की सुविधा देती है।\n\n६. मेमोरी लेआउट और डेटा सेगमेंट्स (Memory Segments):\nकंप्यूटर में जब C प्रोग्राम लोड होता है, तो उसकी मेमोरी 5 प्रमुख भागों में विभाजित होती है:\n१. टेक्स्ट सेगमेंट (Text Segment): इसमें कंपाइल किया गया मशीन कोड सुरक्षित रहता है जो केवल पढ़ने योग्य (Read-only) होता है।\n२. इनिशियलाइज्ड डेटा सेगमेंट (.data): इसमें वे ग्लोबल और स्टेटिक वेरिएबल्स रहते हैं जिन्हें प्रोग्रामर ने शुरू में ही मान दिया हो (जैसे int counter = 10;)।\n३. अनइनिशियलाइज्ड डेटा सेगमेंट (.bss - Block Started by Symbol): इसमें वे ग्लोबल और स्टेटिक वेरिएबल्स आते हैं जिन्हें कोई मान नहीं दिया गया हो। ऑपरेटिंग सिस्टम प्रोग्राम शुरू होने से पहले इन्हें स्वतः शून्य (0) से भर देता है।\n४. हीप (Heap): यह गतिशील मेमोरी (Dynamic Memory) के लिए आरक्षित होता है जहाँ malloc() और calloc() से रनटाइम पर मेमोरी मांगी जाती है।\n५. स्टैक (Stack): इसमें फंक्शन कॉल्स, लोकल (auto) वेरिएबल्स और रिटर्न पते स्टोर होते हैं। यह LIFO (लास्ट-इन-फर्स्ट-आउट) सिद्धांत पर अत्यंत तीव्र गति से काम करता है। जब फंक्शन पूरा होता है, तो उसका स्टैक फ्रेम अपने आप नष्ट हो जाता है।",
+  "realLifeAnalogy": {
+    "en": "Think of a variable as a labeled storage box in an Amazon warehouse. The data type defines the size of the box (e.g., shoe box vs refrigerator crate). The variable name is the barcode label. A local 'auto' variable is like a sticky note on your personal desk that gets thrown in the trash at the end of the day. A 'static' variable is like an iron safe in the company hallway: even when everyone goes home for the night, whatever documents were left inside remain completely intact tomorrow!",
+    "hi": "वेरिएबल की तुलना एक लेबल लगे डिब्बे से करें। डेटा टाइप डिब्बे का आकार है। वेरिएबल का नाम डिब्बे पर लगा लेबल है। लोकल 'auto' वेरिएबल आपकी मेज पर रखे उस रफ कागज जैसा है जिसे शाम को फेंक दिया जाता है। जबकि 'static' वेरिएबल कार्यालय की मजबूत तिजोरी जैसा है: रात को सब घर चले जाएँ तब भी तिजोरी के अंदर रखा सामान अगली सुबह बिल्कुल वैसा ही सुरक्षित मिलता है!"
+  },
+  "codeExamples": [
+    {
+      "title": "Static vs Auto Variable Lifetime Demonstration",
+      "titleHindi": "स्टेटिक बनाम ऑटो वेरिएबल के लाइफटाइम का व्यावहारिक प्रदर्शन",
+      "code": "#include <stdio.h>\n\nvoid counterDemonstration() {\n    auto int autoCount = 1;     // Recreated on stack every invocation\n    static int staticCount = 1; // Retains value in static segment across calls\n    \n    printf(\"autoCount: %d | staticCount: %d\n\", autoCount, staticCount);\n    \n    autoCount++;\n    staticCount++;\n}\n\nint main() {\n    printf(\"--- Function Call 1 ---\n\");\n    counterDemonstration();\n    \n    printf(\"--- Function Call 2 ---\n\");\n    counterDemonstration();\n    \n    printf(\"--- Function Call 3 ---\n\");\n    counterDemonstration();\n    \n    return 0;\n}",
+      "output": "--- Function Call 1 ---\nautoCount: 1 | staticCount: 1\n--- Function Call 2 ---\nautoCount: 1 | staticCount: 2\n--- Function Call 3 ---\nautoCount: 1 | staticCount: 3",
+      "explanation": "autoCount is destroyed and reinitialized to 1 on every invocation. staticCount preserves its incremented state across all calls.",
+      "explanationHindi": "autoCount हर बार नष्ट होकर दोबारा 1 बन जाता है, जबकि staticCount अपना पुराना मान सुरक्षित रखकर 1, 2, 3 बढ़ता जाता है।"
+    }
+  ],
+  "practicals": [
+    {
+      "id": "prac-var-1",
+      "title": "Register Variable Constraints and Speed",
+      "titleHindi": "रजिस्टर वेरिएबल की सीमाएं और विशेषता",
+      "objective": "Understand CPU register variable limitations and prohibition of address operator &.",
+      "objectiveHindi": "सीपीयू रजिस्टर वेरिएबल पर & ऑपरेटर के प्रतिबंध को समझें।",
+      "code": "#include <stdio.h>\n\nint main() {\n    register int fastCounter = 0;\n    \n    for (fastCounter = 0; fastCounter < 5; fastCounter++) {\n        printf(\"Loop tick: %d\n\", fastCounter);\n    }\n    \n    // Note: Attempting printf(\"%p\", &fastCounter) would trigger:\n    // error: address of register variable 'fastCounter' requested!\n    return 0;\n}",
+      "expectedOutput": "Loop tick: 0\nLoop tick: 1\nLoop tick: 2\nLoop tick: 3\nLoop tick: 4",
+      "lineByLineExplanation": [
+        {
+          "line": "register int fastCounter = 0;",
+          "noteEn": "Requests CPU register storage for zero-latency memory access.",
+          "noteHi": "सीपीयू से अनुरोध करता है कि वेरिएबल सीधे रजिस्टर में स्टोर हो।"
+        },
+        {
+          "line": "for (fastCounter = 0; ...)",
+          "noteEn": "Executes loop without RAM bus memory latency.",
+          "noteHi": "बिना रैम की देरी के तीव्र गति से लूप चलाता है।"
+        }
+      ]
+    }
+  ],
+  "keyPoints": {
+    "en": [
+      "Declaration introduces type/name; definition allocates RAM bytes.",
+      "Variables cannot begin with digits or use reserved keywords.",
+      "static variables default to 0 and persist across function calls.",
+      "register variables cannot have their memory addresses (&) taken."
+    ],
+    "hi": [
+      "डिक्लेरेशन नाम बताता है; डेफिनिशन रैम में बाइट्स आवंटित करती है।",
+      "वेरिएबल का नाम अंक से शुरू नहीं हो सकता और कीवर्ड नहीं हो सकता।",
+      "static वेरिएबल का प्रारंभिक मान 0 होता है और यह फंक्शन कॉल के बीच मान याद रखता है।",
+      "register वेरिएबल का एड्रेस (&) नहीं लिया जा सकता।"
+    ]
+  },
+  "commonPitfalls": {
+    "en": [
+      "Using uninitialized local variables containing random garbage values.",
+      "Trying to take address of register variable (&regVar causes compiler error).",
+      "Accidentally redeclaring global variable locally, shadowing outer scope."
+    ],
+    "hi": [
+      "बिना इनिशियलाइज किए लोकल वेरिएबल का उपयोग करना जिसमें कचरा मान होता है।",
+      "रजिस्टर वेरिएबल का एड्रेस (&) लेने का प्रयास करना।",
+      "ग्लोबल वेरिएबल के नाम से ही अंदर नया लोकल वेरिएबल बनाकर बाहरी वेरिएबल को छिपा देना।"
+    ]
+  }
+  ,
+  "quiz": getTopicQuestionBank("variable", "Variables, Identifiers & Storage Classes")
+},
+{
+  "id": "input-output",
+  "order": 6,
+  "title": "Standard Input & Output Operations (printf & scanf)",
+  "titleHindi": "मानक इनपुट और आउटपुट ऑपरेशन्स (Input / Output)",
+  "category": "Basics",
+  "summary": "Deep architectural analysis of standard I/O in C: The stream abstraction (stdin, stdout, stderr), stream buffering mechanics (unbuffered, line-buffered, block-buffered), printf formatted output with format specifiers, field widths, precision, and return codes, scanf input parsing with the & address operator, scansets, buffer overflow hazards, and safe stream flushing.",
+  "summaryHindi": "C भाषा में मानक I/O का आर्किटेक्चरल अध्ययन: स्ट्रीम्स (stdin, stdout, stderr), स्ट्रीम बफरिंग के प्रकार, printf द्वारा फॉर्मेटेड आउटपुट, फॉर्मेट विनिर्देशक, फील्ड विड्थ, प्रेसिजन, scanf द्वारा इनपुट पार्सिंग, & ऑपरेटर की अनिवार्यता, स्कैन्सेट्स, बफर ओवरफ्लो के खतरे और सुरक्षित इनपुट बफर हैंडलिंग।",
+  "readTimeMinutes": 21,
+  "explanationEn": "1. THE STREAM ABSTRACTION & HARDWARE I/O IN C:\nIn the C runtime standard library (<stdio.h>), input and output operations are abstracted through the unified concept of Streams. Rather than forcing developers to interface directly with keyboard interrupt controllers, video graphics display memory, or hard drive disk sectors, C treats all peripheral communication as a continuous, unidirectional sequence of bytes called a Stream.\nWhen a C application launches, the runtime environment and operating system automatically initialize three standard file streams:\n1. stdin (Standard Input - file descriptor 0): Connected by default to the user's interactive keyboard input stream.\n2. stdout (Standard Output - file descriptor 1): Connected by default to the display console terminal screen.\n3. stderr (Standard Error - file descriptor 2): Connected directly to the display terminal screen for critical diagnostic error output.\n\n2. STREAM BUFFERING MECHANISMS (FULLY, LINE, AND UNBUFFERED):\nTo optimize CPU throughput and minimize expensive hardware system calls to the operating system kernel, C streams employ three distinct buffering strategies:\n- Line-Buffered (Typical of stdout to interactive terminals): Characters written to the stream are accumulated in an internal RAM memory buffer and flushed (sent to the physical screen) only when a newline character ('\n') is encountered, when the internal buffer fills completely, or when input is requested from stdin.\n- Block-Buffered / Fully Buffered (Typical of file I/O): Data is retained until a large block (typically 4096 or 8192 bytes) fills up before triggering a physical disk write.\n- Unbuffered (Typical of stderr): Every single byte written is dispatched immediately to the destination hardware with zero intermediate buffering, ensuring diagnostic messages appear even if the program crashes in the very next instruction!\nDevelopers can explicitly control buffering behavior via setvbuf() or force immediate buffer flushing using fflush(stdout).\n\n3. FORMATTED OUTPUT WITH PRINTF():\nThe standard output function printf() stands for \"Print Formatted\". It transforms internal binary data formats into human-readable ASCII/UTF-8 character sequences based on a control format string.\nFunction Prototype:\n```c\nint printf(const char *format, ...);\n```\n- Return Value: printf() returns an integer representing the exact number of characters successfully written to the output stream. If an output error occurs, it returns a negative integer.\n- The Anatomy of a Format Specifier (%[flags][width][.precision][length]specifier):\n  1. Flags:\n     - Minus (-): Left-align the output within the designated field width.\n     - Plus (+): Explicitly print a sign (+ or -) for signed numeric values.\n     - Space: Print a leading space if the number is positive.\n     - Zero (0): Pad numeric output with leading zeroes instead of default spaces.\n     - Hash (#): For hex (%#x), prefixes '0x'; for octal (%#o), prefixes '0'.\n  2. Field Width: Specifies the minimum number of character columns reserved for output. If the actual value occupies fewer columns, it is padded with spaces or zeroes.\n  3. Precision (.):\n     - For integers: Specifies the minimum number of digits to appear.\n     - For floating-point: Specifies the exact number of digits to print after the decimal point (rounded mathematically).\n     - For strings: Specifies the maximum number of characters to print.\n  4. Length Modifiers:\n     - %hhd / %hd: Signed char / short integer.\n     - %ld / %lld: Long int / Long Long 64-bit integer.\n     - %zu: size_t (standard type returned by sizeof operator).\n     - %Lf: Long double high-precision floating point.\n  5. Core Type Specifiers:\n     - %d or %i: Signed decimal 32-bit integer.\n     - %u: Unsigned decimal integer.\n     - %c: Single character.\n     - %s: Null-terminated character string.\n     - %f: Standard float / double in decimal notation.\n     - %e / %E: Scientific exponential notation (e.g., 1.234e+02).\n     - %x / %X: Hexadecimal integer (lowercase / uppercase).\n     - %p: Void pointer memory address formatted in hexadecimal.\n     - %%: Literal percent character.\n\n4. FORMATTED INPUT WITH SCANF():\nThe companion input function scanf() stands for \"Scan Formatted\". It reads byte characters from stdin, parses them according to specified format conversion specifiers, and writes the converted binary values directly into designated memory locations.\nFunction Prototype:\n```c\nint scanf(const char *format, ...);\n```\n- The Critical Mandate of the Address-of Operator '&':\nC functions pass parameters strictly by value. When you pass an argument to a function, the function receives an isolated copy of that value on its call stack. If you wrote 'scanf(\"%d\", num);', scanf would receive a copy of num's contents; any modification made by scanf would affect only that stack copy, leaving the original variable unchanged. By passing '&num' (the memory address), scanf receives a direct pointer to the variable's physical RAM location and writes the parsed input directly into the variable's memory slot!\n- Why Strings and Arrays Omit the '&' Operator:\nWhen reading a string into a character array (e.g., char name[50]; scanf(\"%s\", name);), the identifier 'name' automatically decays into a pointer pointing to its base address &name[0]. Adding an extra '&' would pass a pointer to the entire array type, which is unnecessary and syntactically sloppy.\n- Return Value of scanf():\nscanf() returns the total count of input items successfully scanned, converted, and stored. If a user provides text where an integer was requested (e.g., typing 'apple' for %d), conversion fails, the input character remains stuck in the stream buffer, and scanf returns 0. If end-of-file is encountered before any conversion, EOF (-1) is returned.\n\n5. INPUT BUFFER TRAPS, SCANSETS, AND SAFER ALTERNATIVES:\n- The Infamous Trailing Newline Bug:\nWhen reading numbers with scanf(\"%d\", &val), the user types digits and presses the Enter key. The %d specifier reads the numeric digits but leaves the newline character '\n' sitting in the stdin buffer. If your program immediately attempts to read a character with scanf(\"%c\", &ch), the %c specifier immediately swallows that leftover '\n' without pausing for user input!\nSolution: Use a leading whitespace in the format string: scanf(\" %c\", &ch); which instructs scanf to skip any preceding whitespace characters including '\n'.\n- Scansets (%[...]):\nscanf allows regex-like scanset parsing. For instance, scanf(\"%[^\n]\", str); reads all characters up to the next newline, allowing string inputs that contain spaces!\n- Buffer Overflow Prevention:\nWriting 'scanf(\"%s\", buffer);' into a 50-byte array allows an attacker to enter 1000 characters, causing a disastrous buffer overflow crash. Always specify maximum width: 'scanf(\"%49s\", buffer);'.\n- gets() Deprecation vs fgets() Standard:\nThe historic gets() function was permanently deleted from the ISO C standard (C11) because it lacked any buffer limit parameter. Always use fgets():\n```c\nfgets(str, sizeof(str), stdin);\n```\n- Safe Input Buffer Clearing Idiom:\nNever use fflush(stdin) because the C standard defines fflush behavior only on output streams; its effect on stdin is undefined behavior. The universal standard portable idiom is:\n```c\nint c;\nwhile ((c = getchar()) != '\n' && c != EOF);\n```",
+  "explanationHi": "१. C भाषा में स्ट्रीम अमूर्तीकरण (Stream Abstraction) और हार्डवेयर I/O:\nC भाषा के मानक इनपुट/आउटपुट पुस्तकालय (<stdio.h>) में कंप्यूटर के हार्डवेयर उपकरणों (कीबोर्ड, मॉनिटर, हार्ड डिस्क) से संचार करने के लिए 'स्ट्रीम्स' (Streams) की अवधारणा का उपयोग किया जाता है। प्रोग्रामर को सीधे कीबोर्ड चिपसेट या ग्राफिक्स कार्ड के मेमोरी पतों से संवाद करने की आवश्यकता नहीं होती; C सभी डेटा आदान-प्रदान को बाइट्स की एक सतत श्रृंखला (Stream) के रूप में प्रबंधित करता है।\nजब भी कोई C प्रोग्राम निष्पादित होना प्रारंभ होता है, ऑपरेटिंग सिस्टम स्वतः तीन मानक स्ट्रीम्स स्थापित कर देता है:\n१. stdin (Standard Input): यह डिफ़ॉल्ट रूप से उपयोगकर्ता के कीबोर्ड से जुड़ा होता है।\n२. stdout (Standard Output): यह सामान्य आउटपुट प्रदर्शित करने के लिए मॉनिटर टर्मिनल से जुड़ा होता है।\n३. stderr (Standard Error): यह गंभीर एरर और चेतावनी संदेशों को तुरंत स्क्रीन पर भेजने के लिए समर्पित होता है।\n\n२. स्ट्रीम बफरिंग के प्रकार (Buffering Mechanics):\nकंप्यूटर के सीपीयू की गति अत्यंत तीव्र होती है, जबकि कीबोर्ड और मॉनिटर अत्यंत धीमे होते हैं। प्रदर्शन को अनुकूलित करने के लिए C स्ट्रीम्स बफरिंग का उपयोग करती हैं:\n- लाइन-बफर्ड (Line-Buffered): टर्मिनल स्क्रीन (stdout) पर आउटपुट तुरंत नहीं जाता, बल्कि रैम के एक आंतरिक बफर में जमा होता रहता है। जैसे ही कोड में न्यूलाइन वर्ण ('\n') आता है या इनपुट माँगा जाता है, पूरा बफर एक साथ स्क्रीन पर खाली (Flush) कर दिया जाता है।\n- ब्लॉक-बफर्ड (Block-Buffered): फाइलों में डेटा लिखते समय जब तक 4096 या 8192 बाइट्स का पूरा ब्लॉक नहीं भर जाता, तब तक डिस्क पर राइट ऑपरेशन नहीं होता।\n- अनबफर्ड (Unbuffered): stderr में कोई बफरिंग नहीं होती; एरर संदेश का प्रत्येक बाइट तुरंत स्क्रीन पर भेज दिया जाता है ताकि प्रोग्राम क्रैश होने की स्थिति में भी एरर दिख सके।\n\n३. printf() द्वारा फॉर्मेटेड आउटपुट:\nprintf का पूरा नाम \"Print Formatted\" है। यह कंप्यूटर की आंतरिक बाइनरी मेमोरी में रखे डेटा को मनुष्य के पढ़ने योग्य अक्षरों में बदलकर स्क्रीन पर प्रदर्शित करता है।\nफंक्शन सिंटैक्स:\n```c\nint printf(const char *format, ...);\n```\n- रिटर्न मान: printf() एक पूर्णांक संख्या लौटाता है, जो यह बताती है कि स्क्रीन पर कुल कितने अक्षर (Characters) सफलतापूर्वक प्रिंट किए गए।\n- फॉर्मेट विनिर्देशकों (Format Specifiers) की संरचना:\n  १. फ्लैग्स (Flags):\n     - माइनस (-): डेटा को बाईं ओर अलाइन करता है।\n     - प्लस (+): धनात्मक संख्याओं के आगे भी + चिन्ह प्रदर्शित करता है।\n     - जीरो (0): खाली स्थानों की जगह आगे शून्य (0) भर देता है (जैसे %05d से 00042 बनेगा)।\n  २. फील्ड विड्थ (Width): आउटपुट के लिए न्यूनतम आरक्षित कॉलमों की संख्या (जैसे %10s)।\n  ३. प्रेसिजन (.Precision): दशमलव के बाद कितने अंक दिखाने हैं (जैसे %.2f से 19.995 राउंड होकर 20.00 बनेगा)।\n  ४. प्रमुख विनिर्देशक:\n     - %d / %i: साइन्ड 32-बिट पूर्णांक।\n     - %u: अनसाइन्ड पूर्णांक।\n     - %c: अकेला कैरेक्टर।\n     - %s: नल-टर्मिनेटेड स्ट्रिंग (शब्द या वाक्य)।\n     - %f: फ्लोट दशमलव संख्या।\n     - %lf: डबल प्रिसिजन फ्लोट।\n     - %p: हेक्साडेसिमल मेमोरी एड्रेस (पॉइंटर एड्रेस)।\n     - %x / %X: हेक्साडेसिमल संख्या।\n     - %zu: sizeof ऑपरेटर द्वारा लौटाया गया size_t प्रकार।\n     - %%: प्रतिशत (%) का चिन्ह प्रिंट करने के लिए।\n\n४. scanf() द्वारा फॉर्मेटेड इनपुट और '&' की अनिवार्यता:\nscanf का पूरा नाम \"Scan Formatted\" है। यह कीबोर्ड से टेक्स्ट इनपुट पढ़कर उसे उचित बाइनरी मान में बदलकर प्रोग्राम के वेरिएबल्स में लिखता है।\n- '&' (Address-of) ऑपरेटर क्यों अनिवार्य है?\nC भाषा में फंक्शन्स को मान केवल कॉपी के रूप में भेजे जाते हैं (Pass by Value)। यदि हम 'scanf(\"%d\", num)' लिखें, तो scanf के पास केवल num के मान की एक अलग नकल जाएगी। scanf उस नकल को बदल भी दे तो मुख्य प्रोग्राम का वेरिएबल नहीं बदलेगा! जब हम '&num' (मेमोरी एड्रेस) भेजते हैं, तो scanf को रैम में उस वेरिएबल के भौतिक स्थान का सीधा पॉइंटर मिल जाता है और वह कीबोर्ड से पढ़ा गया नया मान सीधे उसी पते पर लिख देता है।\n- स्ट्रिंग्स में '&' क्यों नहीं लगाते?\nजब हम 'scanf(\"%s\", str)' लिखते हैं, जहाँ str एक कैरेक्टर ऐरे है, तो C नियमों के अनुसार ऐरे का नाम स्वतः अपने पहले तत्व के पते (&str[0]) को दर्शाता है। अतः अलग से '&' लगाना अनावश्यक होता है।\n- scanf का रिटर्न मान:\nscanf यह संख्या लौटाता है कि उसने कितने इनपुट सफलतापूर्वक पढ़े और वेरिएबल्स में असाइन किए। यदि यूजर से संख्या माँगी जाए और वह अक्षर टाइप कर दे, तो मिलान विफल हो जाता है और scanf शून्य (0) लौटाता है।\n\n५. इनपुट बफर की समस्याएं और सुरक्षित कोडिंग:\n- न्यूलाइन वर्ण ('\n') के अटकने की समस्या:\nजब आप संख्या इनपुट करके Enter दबाते हैं, तो scanf(\"%d\") संख्या तो पढ़ लेता है लेकिन Enter कुंजी वाला '\n' कीबोर्ड बफर में ही छोड़ देता है। इसके तुरंत बाद यदि आप 'scanf(\"%c\", &ch)' चलाते हैं, तो वह नया इनपुट लेने के बजाय बफर में पहले से मौजूद उस '\n' को तुरंत पढ़ लेता है!\nसमाधान: फॉर्मेट स्ट्रिंग में आगे एक स्पेस जोड़ें: 'scanf(\" %c\", &ch);'। स्पेस scanf को आदेश देता है कि वह पहले की सभी खाली जगहों और न्यूलाइन को नजरअंदाज करे।\n- बफर ओवरफ्लो और fgets():\nपुरानी C में उपयोग होने वाला gets() असुरक्षित होने के कारण C11 मानक से हमेशा के लिए हटा दिया गया है। स्ट्रिंग्स के सुरक्षित इनपुट के लिए हमेशा fgets() का उपयोग करें: 'fgets(str, sizeof(str), stdin);'।\n- बफर खाली करने का मानक तरीका:\nfflush(stdin) का उपयोग गैर-मानक है। मानक तरीका getchar() लूप चलाकर बफर खाली करना है:\n```c\nint c;\nwhile ((c = getchar()) != '\n' && c != EOF);\n```",
+  "realLifeAnalogy": {
+    "en": "Think of printf as an announcement screen at an airport that translates internal flight data into clearly formatted departure boards with aligned flight numbers and gate names. Think of scanf as a passport verification officer: you must provide the physical location (& address) of the traveler's seat so the officer can stamp their specific document directly in place!",
+    "hi": "printf की तुलना हवाई अड्डे के सूचना बोर्ड से करें जो उड़ानों के डेटा को सुंदर तालिकाओं में दिखाता है। scanf की तुलना पासपोर्ट अधिकारी से करें: यात्री को अपनी सीट का सटीक पता (& एड्रेस) देना पड़ता है ताकि अधिकारी सीधे उसके मूल दस्तावेज पर मोहर लगा सके!"
+  },
+  "codeExamples": [
+    {
+      "title": "Advanced printf Flags and scanf Return Validation",
+      "titleHindi": "printf की फॉर्मेटिंग और scanf इनपुट सत्यापन का सी कोड",
+      "code": "#include <stdio.h>\n\nint main() {\n    int id = 7;\n    double price = 24.956;\n    char code[] = \"PROD\";\n    \n    // Width padding, precision rounding, and sign flags\n    printf(\"Item ID:     [%06d]\n\", id);\n    printf(\"Code:        [%-8s]\n\", code);\n    printf(\"Price:       [%+8.2f]\n\", price);\n    \n    // Return value demonstration of printf\n    int count = printf(\"Welcome to C Language\n\");\n    printf(\"Previous line output exactly %d characters.\n\", count);\n    \n    // Input validation with scanf return value\n    int age;\n    printf(\"\nEnter your age: \");\n    if (scanf(\"%d\", &age) == 1) {\n        printf(\"Valid input! Age stored: %d\n\", age);\n    } else {\n        printf(\"Invalid input! You did not enter a numeric integer.\n\");\n    }\n    \n    return 0;\n}",
+      "output": "Item ID:     [000007]\nCode:        [PROD    ]\nPrice:       [  +24.96]\nWelcome to C Language\nPrevious line output exactly 22 characters.\n\nEnter your age: 25\nValid input! Age stored: 25",
+      "explanation": "Demonstrates zero-padding, left justification, forced sign flag, printf return count, and scanf return code verification.",
+      "explanationHindi": "जीरो पैडिंग, बाईं ओर अलाइनमेंट, + चिन्ह प्रदर्शन, printf का कैरेक्टर काउंट और scanf रिटर्न कोड से इनपुट सत्यापन दिखाता है।"
+    }
+  ],
+  "practicals": [
+    {
+      "id": "prac-io-1",
+      "title": "Safe Multi-Input Reading with Buffer Drainage",
+      "titleHindi": "बफर सफाई के साथ सुरक्षित बहु-प्रकार इनपुट",
+      "objective": "Read integer, character, and multi-word string safely without input skipping.",
+      "objectiveHindi": "बिना बफर स्किपिंग के संख्या, कैरेक्टर और स्ट्रिंग का सुरक्षित इनपुट लें।",
+      "code": "#include <stdio.h>\n\nint main() {\n    int roll;\n    char section;\n    char fullName[60];\n    \n    printf(\"Enter Roll Number: \");\n    scanf(\"%d\", &roll);\n    \n    // Leading space fixes newline skipping\n    printf(\"Enter Section (A/B/C): \");\n    scanf(\" %c\", &section);\n    \n    // Drain remaining buffer characters before line reading\n    int c;\n    while ((c = getchar()) != '\n' && c != EOF);\n    \n    printf(\"Enter Full Name: \");\n    fgets(fullName, sizeof(fullName), stdin);\n    \n    printf(\"\n--- Verified Student Card ---\n\");\n    printf(\"Roll: %d | Section: %c | Name: %s\", roll, section, fullName);\n    \n    return 0;\n}",
+      "expectedOutput": "--- Verified Student Card ---\nRoll: 101 | Section: A | Name: Rahul Sharma",
+      "lineByLineExplanation": [
+        {
+          "line": "scanf(\" %c\", &section);",
+          "noteEn": "Leading whitespace skips leftover newline from preceding integer scan.",
+          "noteHi": "आगे का स्पेस पिछले इनपुट से बची न्यूलाइन को छोड़कर सही अक्षर पढ़ता है।"
+        },
+        {
+          "line": "fgets(fullName, sizeof(fullName), stdin);",
+          "noteEn": "Reads full line including spaces safely without buffer overflow.",
+          "noteHi": "बिना बफर ओवरफ्लो के स्पेस सहित पूरा नाम सुरक्षित रूप से पढ़ता है।"
+        }
+      ]
+    }
+  ],
+  "keyPoints": {
+    "en": [
+      "printf returns character count; scanf returns successfully scanned item count.",
+      "Mandatory '&' in scanf provides RAM variable address.",
+      "Leading space in scanf(\" %c\") prevents whitespace/newline skipping.",
+      "Always replace unsafe gets() with fgets()."
+    ],
+    "hi": [
+      "printf प्रिंट हुए कुल अक्षरों की संख्या और scanf पढ़े गए मानों की संख्या लौटाता है।",
+      "scanf में '&' लगाना अनिवार्य है ताकि मेमोरी का पता मिल सके।",
+      "scanf(\" %c\") में आगे का स्पेस न्यूलाइन छूटने की समस्या को हल करता है।",
+      "gets() के स्थान पर हमेशा fgets() का उपयोग करें।"
+    ]
+  },
+  "commonPitfalls": {
+    "en": [
+      "Omitting '&' in scanf causes memory segmentation faults.",
+      "Using unsafe gets() causing critical buffer overflow security flaws.",
+      "Using undefined fflush(stdin) instead of standard getchar() loop."
+    ],
+    "hi": [
+      "scanf में '&' भूल जाना जिससे प्रोग्राम सेग्मेंटेशन फॉल्ट से क्रैश हो जाता है।",
+      "असुरक्षित gets() का उपयोग जिससे बफर ओवरफ्लो होता है।",
+      "fflush(stdin) का उपयोग करना जो C मानक में अपरिभाषित है।"
+    ]
+  }
+  ,
+  "quiz": getTopicQuestionBank("input-output", "Standard Input & Output Operations (printf & scanf)")
+},
+{
+  "id": "operator",
+  "order": 7,
+  "title": "Operators, Precedence & Expression Evaluation",
+  "titleHindi": "ऑपरेटर्स, प्राथमिकता और एक्सप्रेशन्स (Operators)",
+  "category": "Basics",
+  "summary": "Exhaustive breakdown of C operators: Arithmetic, Relational, Logical with short-circuit evaluation, Bitwise manipulation (shifts, masking, bit toggling), Assignment, Increment/Decrement (++ / --), Conditional Ternary (?:), sizeof, Comma operator, Type promotion rules, Sequence points, and the 15-level Precedence and Associativity hierarchy.",
+  "summaryHindi": "C भाषा के ऑपरेटर्स का संपूर्ण वर्गीकरण: अंकगणितीय, रिलेशनल, लॉजिकल (शॉर्ट-सर्किट), बिटवाइज़ मैनिपुलेशन (मास्किंग, शिफ्ट्स), असाइनमेंट, इंक्रीमेंट/डिक्रीमेंट, टर्नरी ऑपरेटर, sizeof, कॉमा ऑपरेटर, टाइप प्रमोशन के नियम, सीक्वेंस पॉइंट्स और 15-स्तरीय ऑपरेटर प्राथमिकता तालिका।",
+  "readTimeMinutes": 22,
+  "explanationEn": "1. WHAT IS AN OPERATOR, OPERAND, AND EXPRESSION IN C?\nIn computer programming, an Operator is a designated syntactic symbol that instructs the Central Processing Unit's Arithmetic Logic Unit (ALU) to execute a specific mathematical, logical, relational, or bitwise operation. The data items upon which the operator acts are called Operands. An Expression is any syntactically valid combination of operators, constants, variables, and function calls that evaluates to a single resultant value (e.g., result = (a + b) * 5;).\nOperators are classified by arity (the number of operands required):\n- Unary Operators: Operate upon a single operand (e.g., ++x, -num, !flag, ~mask, &var, *ptr, sizeof).\n- Binary Operators: Require two operands (e.g., a + b, x == y, m && n, p | q).\n- Ternary Operators: Take three operands (the conditional operator: condition ? expr1 : expr2).\n\n2. TAXONOMY OF C OPERATORS:\n1. Arithmetic Operators:\n   - Addition (+) and Subtraction (-)\n   - Multiplication (*)\n   - Division (/): Performs integer truncation if both operands are integers (17 / 5 yields 3); performs IEEE floating-point division if either operand is a float or double (17.0 / 5 yields 3.4).\n   - Modulus (%): Computes the integer remainder after division (17 % 5 yields 2). Crucial Rule: The modulus operator is strictly restricted to integer types in C; applying % to float or double is a compile error!\n2. Relational / Comparison Operators:\n   Evaluate the relationship between two operands, returning integer 1 for TRUE and integer 0 for FALSE:\n   < (less than), > (greater than), <= (less than or equal), >= (greater than or equal), == (equality test), != (inequality test).\n3. Logical Operators & Short-Circuit Evaluation:\n   - Logical AND (&&): Evaluates to 1 if and only if BOTH operands are non-zero (true).\n   - Logical OR (||): Evaluates to 1 if AT LEAST ONE operand is non-zero.\n   - Logical NOT (!): Inverts truth value (!1 is 0; !0 is 1).\n   - Short-Circuit Guarantee: C mandates strict left-to-right evaluation for logical operators with early termination:\n     - In A && B: If A evaluates to 0 (false), operand B is NEVER evaluated, because false AND anything is guaranteed to be false!\n     - In A || B: If A evaluates to non-zero (true), operand B is NEVER evaluated, because true OR anything is guaranteed to be true!\n     Practical Application: This safely guards against null pointer dereferences and division-by-zero crashes:\n     ```c\n     if (ptr != NULL && *ptr == 100) { /* Safe! *ptr is never accessed if ptr is NULL */ }\n     if (denominator != 0 && (numerator / denominator) > 5) { /* Safe from division crash */ }\n     ```\n4. Bitwise Operators & Hardware Bitmasking:\n   Operate directly on the individual binary bits of integer data types:\n   - Bitwise AND (&): Result bit is 1 only if both operand bits are 1. Used for clearing bits and bit testing: (num & (1 << k)) checks if bit k is set.\n   - Bitwise OR (|): Result bit is 1 if either operand bit is 1. Used for setting bits: num |= (1 << k) turns bit k ON.\n   - Bitwise XOR (^): Result bit is 1 if bits differ. Used for bit toggling: num ^= (1 << k) flips bit k. Also used for in-place swapping without temporary variables: a ^= b; b ^= a; a ^= b;.\n   - Bitwise NOT (~): Inverts every bit (one's complement: ~x = -(x + 1)).\n   - Left Shift (<<): Shifts bits left by N positions, shifting in zeroes from the right. Multiplying unsigned integer by 2^N (x << 1 multiplies by 2).\n   - Right Shift (>>): Shifts bits right by N positions. For unsigned numbers, shifts in zeroes; for signed numbers, behavior depends on the CPU architecture (arithmetic shift preserves sign bit).\n5. Increment and Decrement Operators (++ and --):\n   - Pre-increment (++x): Increments variable by 1 FIRST, then yields the newly incremented value in the enclosing expression.\n   - Post-increment (x++): Yields the current value of the variable FIRST in the expression, then increments the variable in memory afterwards.\n6. Assignment and Compound Assignment Operators:\n   Simple assignment (=) evaluates the right-hand expression and stores it into the left-hand modifiable L-value.\n   Compound operators perform the operation in-place: +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=.\n7. Special Operators:\n   - Conditional / Ternary Operator (? :): Compact inline decision-making: max = (a > b) ? a : b;.\n   - sizeof: Compile-time operator returning size in bytes (type size_t). Expressions placed inside sizeof are NOT evaluated at runtime! (e.g., sizeof(x++) does NOT increment x!).\n   - Comma Operator (,): Evaluates sub-expressions left-to-right sequentially and discards intermediate results, returning the value of the rightmost sub-expression: x = (a = 2, b = 4, a + b); sets x to 6.\n\n3. USUAL ARITHMETIC CONVERSIONS & INTEGER PROMOTION:\nWhen an operator acts on operands of different types, C automatically converts them to a common type following strict promotion rules:\n1. Integer Promotion: All types smaller than int (such as char, signed char, unsigned char, short, unsigned short) are automatically promoted to int (or unsigned int) before any arithmetic operation.\n2. Conversion Hierarchy: The lower type is promoted to the higher type without data loss:\n   int -> unsigned int -> long -> unsigned long -> long long -> float -> double -> long double.\n\n4. SEQUENCE POINTS & UNDEFINED BEHAVIOR:\nA Sequence Point is a designated point in program execution where all side effects of previous evaluations are guaranteed to be complete. In C, modifying the same variable more than once between consecutive sequence points (e.g., i = i++; or arr[i] = i++; or func(i++, i++)) invokes Undefined Behavior (UB). The compiler is free to generate any arbitrary machine code!\n\n5. OPERATOR PRECEDENCE & ASSOCIATIVITY TABLE:\nWhen multiple operators appear together, Precedence determines which operator binds first, while Associativity dictates the evaluation direction for operators having equal precedence:\n1. Primary / Postfix: () [] -> . ++ -- (Left-to-Right)\n2. Unary: ++ -- + - ! ~ * & (type) sizeof (Right-to-Left)\n3. Multiplicative: * / % (Left-to-Right)\n4. Additive: + - (Left-to-Right)\n5. Bitwise Shifts: << >> (Left-to-Right)\n6. Relational: < <= > >= (Left-to-Right)\n7. Equality: == != (Left-to-Right)\n8. Bitwise AND: & (Left-to-Right)\n9. Bitwise XOR: ^ (Left-to-Right)\n10. Bitwise OR: | (Left-to-Right)\n11. Logical AND: && (Left-to-Right)\n12. Logical OR: || (Left-to-Right)\n13. Conditional Ternary: ? : (Right-to-Left)\n14. Assignment: = += -= *= /= %= &= |= ^= <<= >>= (Right-to-Left)\n15. Comma: , (Left-to-Right)",
+  "explanationHi": "१. C भाषा में ऑपरेटर, ऑपरेंड और एक्सप्रेशन क्या हैं?\nकंप्यूटर प्रोग्रामिंग में 'ऑपरेटर' (Operator) एक ऐसा विशेष प्रतीकात्मक चिन्ह होता है जो कंप्यूटर के प्रोसेसर (ALU) को एक विशिष्ट गणितीय, तार्किक, तुलनात्मक या बिटवाइज़ क्रिया करने का आदेश देता है। जिन डेटा मानों पर ऑपरेटर अपनी क्रिया करता है, उन्हें 'ऑपरेंड' (Operands) कहा जाता है। \nऑपरेटर्स, वेरिएबल्स, कॉन्स्टेंट्स और फंक्शन कॉल्स के वैध संयोजन से जो व्यंजक बनता है और जिसका एक अंतिम मान निकलता है, उसे 'एक्सप्रेशन' (Expression) कहते हैं (जैसे result = (a + b) * 5;)।\nऑपरेंड्स की संख्या के आधार पर ऑपरेटर्स को तीन भागों में बांटा जाता है:\n- यूनेरी ऑपरेटर (Unary Operators): जो केवल एक ऑपरेंड पर कार्य करते हैं (जैसे ++x, -val, !flag, ~mask, &var, *ptr, sizeof)।\n- बाइनरी ऑपरेटर (Binary Operators): जिन्हें कार्य करने के लिए दो ऑपरेंड्स की आवश्यकता होती है (जैसे a + b, x == y, m && n, p | q)।\n- टर्नरी ऑपरेटर (Ternary Operator): जो तीन ऑपरेंड्स लेता है (कंडीशनल ऑपरेटर ? :)।\n\n२. C भाषा के सभी प्रमुख ऑपरेटर्स का संपूर्ण वर्गीकरण:\n१. अंकगणितीय ऑपरेटर (Arithmetic Operators):\n   - जोड़ (+), घटाव (-)\n   - गुणा (*)\n   - भाग (/): यदि दोनों ऑपरेंड पूर्णांक हों, तो दशमलव का हिस्सा कट जाता है (17 / 5 = 3); यदि कोई एक भी फ्लोट या डबल हो, तो सटीक दशमलव मान मिलता है (17.0 / 5 = 3.4)।\n   - मॉड्यूलस (%): पूर्णांक विभाजन का शेषफल देता है (17 % 5 = 2)। अत्यंत महत्वपूर्ण नियम: C में % ऑपरेटर केवल और केवल पूर्णांकों (int, char) पर काम करता है; float या double पर % लगाना सिंटेक्स एरर है!\n२. तुलनात्मक ऑपरेटर (Relational Operators):\n   दो मानों की तुलना करते हैं और सत्य होने पर पूर्णांक 1 तथा असत्य होने पर पूर्णांक 0 लौटाते हैं:\n   < (छोटा), > (बड़ा), <= (छोटा या बराबर), >= (बड़ा या बराबर), == (समानता जांच), != (असमानता)।\n३. तार्किक ऑपरेटर और शॉर्ट-सर्किट मूल्यांकन (Short-Circuit Evaluation):\n   - तार्किक AND (&&): दोनों शर्तें सत्य होने पर ही 1 देता है।\n   - तार्किक OR (||): कोई भी एक शर्त सत्य होने पर 1 देता है।\n   - तार्किक NOT (!): सत्य (non-zero) को 0 और असत्य (0) को 1 बना देता है।\n   - शॉर्ट-सर्किट का नियम: C भाषा में तार्किक एक्सप्रेशन्स बाएँ से दाएँ जाँचे जाते हैं:\n     - A && B में: यदि A असत्य (0) है, तो B को कभी जाँचा ही नहीं जाता, क्योंकि परिणाम पहले ही निश्चित रूप से असत्य है!\n     - A || B में: यदि A सत्य (1) है, तो B को कभी नहीं जाँचा जाता, क्योंकि परिणाम पहले ही सत्य हो चुका है!\n     यह नियम शून्य से भाग देने और नल पॉइंटर क्रैश से सुरक्षा प्रदान करता है:\n     ```c\n     if (ptr != NULL && *ptr == 10) { /* सुरक्षित: यदि ptr नल है तो दायाँ हिस्सा चलेगा ही नहीं */ }\n     ```\n४. बिटवाइज़ ऑपरेटर और हार्डवेयर बिट मास्किंग:\n   सीधे बाइनरी बिट्स (0 और 1) पर कार्य करते हैं:\n   - बिटवाइज़ AND (&): दोनों बिट 1 होने पर 1। इसका उपयोग किसी बिट को जांचने और क्लियर करने के लिए किया जाता है।\n   - बिटवाइज़ OR (|): कोई भी बिट 1 होने पर 1। इसका उपयोग किसी विशिष्ट बिट को 1 (ON) करने के लिए किया जाता है।\n   - बिटवाइज़ XOR (^): दोनों बिट्स अलग होने पर 1। इसका उपयोग बिट्स को पलटने (Toggle) और बिना तीसरे वेरिएबल के दो संख्याओं की अदला-बदली (a^=b; b^=a; a^=b;) के लिए किया जाता है।\n   - बिटवाइज़ NOT (~): सभी बिट्स को उलट देता है (~x = -(x + 1))।\n   - लेफ्ट शिफ्ट (<<): बिट्स को बाईं ओर खिसकाता है (x << 1 का अर्थ x को 2 से गुणा करना है)।\n   - राइट शिफ्ट (>>): बिट्स को दाईं ओर खिसकाता है (x >> 1 का अर्थ x को 2 से भाग देना है)।\n५. इंक्रीमेंट और डिक्रीमेंट (++ और --):\n   - प्री-इंक्रीमेंट (++x): पहले वेरिएबल का मान 1 बढ़ाता है, फिर एक्सप्रेशन में उसका उपयोग करता है।\n   - पोस्ट-इंक्रीमेंट (x++): पहले वेरिएबल का वर्तमान मान एक्सप्रेशन में देता है, फिर बाद में मेमोरी में मान 1 बढ़ाता है।\n६. असाइनमेंट और कंपाउंड असाइनमेंट:\n   = साधारण असाइनमेंट है। +=, -=, *=, /=, %=, &=, |= आदि इन-प्लेस गणना करते हैं (जैसे x += 5 का अर्थ x = x + 5 है)।\n७. विशेष ऑपरेटर्स:\n   - टर्नरी ऑपरेटर (? :): if-else का संक्षिप्त रूप (max = (a > b) ? a : b;)।\n   - sizeof: कंपाइल-टाइम ऑपरेटर जो डेटा का बाइट्स में आकार लौटाता है। sizeof के अंदर लिखे एक्सप्रेशन्स रनटाइम पर कभी निष्पादित नहीं होते (sizeof(x++) लिखने पर x का मान नहीं बढ़ता!)।\n   - कॉमा ऑपरेटर (,): बाएँ से दाएँ गणना करता है और सबसे दाईं ओर का परिणाम लौटाता है (x = (a=2, b=4, a+b); में x = 6 बनेगा)।\n\n३. डेटा टाइप प्रमोशन और अंकगणितीय रूपांतरण:\nजब किसी एक्सप्रेशन में अलग-अलग प्रकार के डेटा आते हैं, तो C स्वचालित रूप से छोटे प्रकार को बड़े प्रकार में बदल देती है:\n१. इंटिजर प्रमोशन: int से छोटे सभी प्रकार (char, short) गणना से पहले स्वतः int में बदल दिए जाते हैं।\n२. पदानुक्रम: int -> unsigned int -> long -> float -> double -> long double।\n\n४. ऑपरेटर प्राथमिकता और साहचर्य तालिका (Precedence & Associativity):\n१. पोस्टफिक्स: () [] -> . ++ -- (बाएँ से दाएँ)\n२. यूनेरी: ++ -- ! ~ + - * & sizeof (दाएँ से बाएँ)\n३. गुणा, भाग, शेषफल: * / % (बाएँ से दाएँ)\n४. जोड़, घटाव: + - (बाएँ से दाएँ)\n५. बिटवाइज़ शिफ्ट्स: << >> (बाएँ से दाएँ)\n६. रिलेशनल: < <= > >= (बाएँ से दाएँ)\n७. समानता: == != (बाएँ से दाएँ)\n८. बिटवाइज़ AND: & (बाएँ से दाएँ)\n९. बिटवाइज़ XOR: ^ (बाएँ से दाएँ)\n१०. बिटवाइज़ OR: | (बाएँ से दाएँ)\n११. तार्किक AND: && (बाएँ से दाएँ)\n१२. तार्किक OR: || (बाएँ से दाएँ)\n१३. टर्नरी ऑपरेटर: ? : (दाएँ से बाएँ)\n१४. असाइनमेंट: = += -= *= /= (दाएँ से बाएँ)\n१५. कॉमा: , (बाएँ से दाएँ)",
+  "realLifeAnalogy": {
+    "en": "Think of operator precedence like the BODMAS/PEMDAS rule in algebra: 2 + 3 * 4 is 14, not 20, because multiplication has higher priority than addition. Short-circuit evaluation is like an airport boarding gate: if your boarding pass is expired (Condition 1 is False), the security guard immediately stops you without wasting time examining your passport (Condition 2 is skipped)!",
+    "hi": "ऑपरेटर प्राथमिकता गणित के BODMAS नियम जैसी है: 2 + 3 * 4 का मान 14 होता है, 20 नहीं, क्योंकि गुणा की प्राथमिकता जोड़ से ऊपर है। शॉर्ट-सर्किट एयरपोर्ट के सुरक्षा गार्ड जैसा है: यदि आपका बोर्डिंग पास ही एक्सपायर हो चुका है, तो गार्ड आपको वहीं रोक देता है और पासपोर्ट देखने में समय नष्ट नहीं करता!"
+  },
+  "codeExamples": [
+    {
+      "title": "Short-Circuit Logic, Bitwise Operations, and Precedence",
+      "titleHindi": "शॉर्ट-सर्किट लॉजिक, बिटवाइज़ ऑपरेशन्स और प्राथमिकता का सी कोड",
+      "code": "#include <stdio.h>\n\nint main() {\n    int a = 0, b = 10;\n    \n    // Short circuit demonstration: ++b is skipped!\n    if (a != 0 && ++b > 10) {\n        printf(\"Condition True\n\");\n    } else {\n        printf(\"Condition False\n\");\n    }\n    printf(\"b is still %d (not 11 because ++b was skipped!)\n\", b);\n    \n    // Bitwise shift and XOR in-place swap\n    int x = 5; // binary: 00000101\n    printf(\"5 << 1 (multiply by 2) = %d\n\", x << 1);\n    printf(\"5 >> 1 (divide by 2)   = %d\n\", x >> 1);\n    \n    int p = 15, q = 30;\n    p ^= q; q ^= p; p ^= q; // XOR swap without temp variable\n    printf(\"After XOR swap: p = %d, q = %d\n\", p, q);\n    \n    // sizeof compile-time expression evaluation check\n    int k = 50;\n    printf(\"sizeof(k++) = %zu bytes\n\", sizeof(k++));\n    printf(\"k is still %d (k++ inside sizeof is never executed!)\n\", k);\n    \n    return 0;\n}",
+      "output": "Condition False\nb is still 10 (not 11 because ++b was skipped!)\n5 << 1 (multiply by 2) = 10\n5 >> 1 (divide by 2)   = 2\nAfter XOR swap: p = 30, q = 15\nsizeof(k++) = 4 bytes\nk is still 50 (k++ inside sizeof is never executed!)",
+      "explanation": "Demonstrates short-circuit skipping of ++b, bitwise shift arithmetic, XOR swap, and proof that sizeof expressions are purely compile-time.",
+      "explanationHindi": "शॉर्ट-सर्किट द्वारा ++b का छूटना, बिटवाइज़ शिफ्ट द्वारा गुणा/भाग, XOR से अदला-बदली और यह प्रमाण कि sizeof के अंदर का कोड रनटाइम पर नहीं चलता।"
+    }
+  ],
+  "practicals": [
+    {
+      "id": "prac-op-1",
+      "title": "Prefix vs Postfix Increment in Complex Expressions",
+      "titleHindi": "जटिल एक्सप्रेशन्स में प्रीफिक्स बनाम पोस्टफिक्स इंक्रीमेंट",
+      "objective": "Understand how pre-increment and post-increment produce distinct evaluation results.",
+      "objectiveHindi": "प्री और पोस्ट इंक्रीमेंट के कारण एक्सप्रेशन के परिणामों में अंतर को समझें।",
+      "code": "#include <stdio.h>\n\nint main() {\n    int i = 5, j = 5;\n    int res1 = ++i * 2; // i becomes 6 first, then 6 * 2 = 12\n    int res2 = j++ * 2; // uses original 5 * 2 = 10, then j becomes 6\n    \n    printf(\"res1 (++i * 2) = %d | final i = %d\n\", res1, i);\n    printf(\"res2 (j++ * 2) = %d | final j = %d\n\", res2, j);\n    return 0;\n}",
+      "expectedOutput": "res1 (++i * 2) = 12 | final i = 6\nres2 (j++ * 2) = 10 | final j = 6",
+      "lineByLineExplanation": [
+        {
+          "line": "int res1 = ++i * 2;",
+          "noteEn": "Pre-increment updates i to 6 immediately, evaluating 6 * 2 = 12.",
+          "noteHi": "प्री-इंक्रीमेंट पहले i को 6 करता है, फिर 6 * 2 = 12 बनता है।"
+        },
+        {
+          "line": "int res2 = j++ * 2;",
+          "noteEn": "Post-increment supplies original 5 for 5 * 2 = 10, incrementing j afterwards.",
+          "noteHi": "पोस्ट-इंक्रीमेंट पहले पुराना 5 देता है जिससे 10 आता है, फिर j को 6 बनाता है।"
+        }
+      ]
+    }
+  ],
+  "keyPoints": {
+    "en": [
+      "&& and || strictly short-circuit left-to-right.",
+      "Left shift (<< 1) doubles an integer; right shift (>> 1) halves it.",
+      "Prefix ++ increments before value access; postfix ++ increments after.",
+      "Modulus operator % is valid strictly on integers."
+    ],
+    "hi": [
+      "&& और || बाएँ से दाएँ शॉर्ट-सर्किट होते हैं।",
+      "लेफ्ट शिफ्ट 2 से गुणा और राइट शिफ्ट 2 से भाग करता है।",
+      "प्रीफिक्स पहले बढ़ाता है; पोस्टफिक्स बाद में बढ़ाता है।",
+      "% ऑपरेटर केवल पूर्णांकों पर ही मान्य है।"
+    ]
+  },
+  "commonPitfalls": {
+    "en": [
+      "Writing assignment = instead of comparison == inside if conditions.",
+      "Modifying the same variable twice without sequence points (i = i++ causes undefined behavior).",
+      "Assuming bitwise & has higher precedence than comparison =="
+    ],
+    "hi": [
+      "if कंडीशन में तुलना (==) के स्थान पर गलती से असाइनमेंट (=) लिख देना।",
+      "एक ही एक्सप्रेशन में दो बार i++ लिखना (i = i++) जो अनडिफाइंड बिहेवियर है।",
+      "यह समझना कि बिटवाइज़ & की प्राथमिकता == से अधिक है (वास्तव में == पहले चलता है)।"
+    ]
+  }
+  ,
+  "quiz": getTopicQuestionBank("operator", "Operators, Precedence & Expression Evaluation")
+},
+{
+  "id": "control-statement",
+  "order": 8,
+  "title": "Control Statements: Branching, Iteration & Jump Tables",
+  "titleHindi": "कंट्रोल स्टेटमेंट्स: कंडीशन्स, लूप्स और जंप स्टेटमेंट्स (Control Statements)",
+  "category": "Control Flow",
+  "summary": "Master the flow of control in C: Selection statements (if, if-else, nested branching, else-if ladders), switch-case mechanics and compiler jump tables, iteration loops (for, while, do-while), jump statements (break, continue, goto), infinite loop traps, and loop optimization.",
+  "summaryHindi": "C भाषा के नियंत्रण प्रवाह का संपूर्ण अध्ययन: कंडीशनल स्टेटमेंट्स (if, if-else, नेस्टेड, else-if ladder), switch-case और कंपाइलर जंप टेबल्स, लूप्स (for, while, do-while), जंप स्टेटमेंट्स (break, continue, goto), अनंत लूप्स की रोकथाम और लूप परफॉर्मेंस ऑप्टिमाइजेशन।",
+  "readTimeMinutes": 22,
+  "explanationEn": "1. WHY CONTROL FLOW IS ESSENTIAL IN SYSTEMS PROGRAMMING:\nBy default, the Central Processing Unit executes machine instructions strictly sequentially, advancing the Program Counter (PC) line-by-line from top to bottom. However, real-world software must make dynamic decisions based on runtime conditions (e.g., verifying access permissions, handling network errors) and repeat tasks millions of times (e.g., matrix processing, rendering graphics frames, searching databases). Control Statements are architectural constructs that alter this sequential instruction flow.\nIn C, control statements are categorized into three core domains:\n1. Decision Making / Selection Statements: if, if-else, nested if, else-if ladder, switch-case.\n2. Iteration / Looping Statements: while, do-while, for.\n3. Jump / Transfer Statements: break, continue, goto, return.\n\n2. SELECTION & BRANCHING STATEMENTS IN DETAIL:\n- The 'if' Statement:\nEvaluates a boolean condition. In C, any non-zero value represents TRUE, and exactly zero (0) represents FALSE.\n```c\nif (balance >= withdrawalAmount) {\n    balance -= withdrawalAmount;\n}\n```\n- The 'if-else' Statement:\nGuarantees execution of exactly one of two mutually exclusive code blocks based on truth value.\n- The 'else-if' Ladder:\nEvaluates a chain of conditions sequentially from top to bottom. The moment any condition evaluates to true, its corresponding code block executes, and the entire remainder of the ladder is bypassed. If no condition succeeds, the trailing 'else' block executes.\n- The 'switch-case' Statement & Compiler Jump Tables:\nA multi-way branching statement testing an expression against multiple discrete constant values.\nRigid Syntactic Constraints of switch:\n1. The evaluated expression MUST strictly produce an integer or character type (float, double, and string are illegal!).\n2. Case labels must be compile-time constants (case 1: or case 'A':; dynamic variables like case x: are strictly prohibited!).\n3. The 'break;' statement is essential at the end of each case block. Without break, execution continues unconditionally into all subsequent cases (known as Fall-Through). While fall-through is occasionally utilized intentionally (e.g., grouping lowercase and uppercase letters case 'a': case 'A':), accidental omission is a notorious bug.\n4. The 'default:' block executes if no cases match.\n- Why switch is Faster than else-if (Jump Tables):\nWhen case values are densely clustered, optimizing C compilers do not generate a slow chain of sequential compare-and-jump instructions. Instead, the compiler generates a direct Jump Table in memory (an array of code address pointers). The CPU computes the jump target in O(1) constant time, leaping directly to the matching case in a single instruction!\n\n3. ITERATION STATEMENTS (LOOPS) IN DETAIL:\nLoops repeat a code block until a designated termination condition evaluates to false (0).\n1. 'while' Loop (Entry-Controlled Loop):\nThe condition is tested BEFORE entering the loop body. If the condition is false on the very first evaluation, the loop body executes zero times.\n```c\nint count = 1;\nwhile (count <= 5) {\n    printf(\"%d \", count);\n    count++;\n}\n```\n2. 'do-while' Loop (Exit-Controlled Loop):\nThe loop body is executed AT LEAST ONCE before the condition is tested at the bottom.\nCrucial Syntactic Mandate: A do-while loop MUST conclude with a terminating semicolon (;):\n```c\nint input;\ndo {\n    printf(\"Enter a positive number: \");\n    scanf(\"%d\", &input);\n} while (input <= 0); // Semicolon is mandatory!\n```\n3. 'for' Loop (Header-Controlled Loop):\nConsolidates initialization, condition check, and iteration update into a single unified header:\n```c\nfor (int i = 0; i < N; i++) {\n    // Loop body executes N times\n}\n```\nExecution Cycle of a for Loop:\nStep 1: Initialization runs exactly once upon entry.\nStep 2: Condition is evaluated. If false (0), the loop terminates immediately.\nStep 3: The body statements execute.\nStep 4: The increment/update expression executes.\nStep 5: Control jumps back to Step 2.\n\n4. JUMP STATEMENTS: BREAK, CONTINUE, GOTO:\n- 'break':\nImmediately terminates the innermost enclosing loop or switch block, jumping execution directly to the statement immediately following the loop.\n- 'continue':\nBypasses all remaining statements in the CURRENT iteration and jumps directly to the loop's next iteration. In a 'for' loop, continue jumps to the increment step; in a 'while' loop, it jumps to the condition test.\n- 'goto':\nPerforms an unconditional jump to a labeled statement within the same function. While unrestricted use leads to tangled \"spaghetti code\", disciplined use is universally accepted in Linux kernel systems programming for centralized multi-step error recovery and cleanup.\n\n5. INFINITE LOOPS & PERFORMANCE PITFALLS:\n- Intentional Infinite Loops: Server listeners and embedded microcontrollers run perpetual loops:\n```c\nwhile (1) { /* polling */ }\nfor (;;) { /* standard C idiom for infinite loop */ }\n```\n- The Floating-Point Loop Counter Trap:\nNever use float variables as exact loop counters:\n```c\nfor (float f = 0.0f; f != 1.0f; f += 0.1f) { ... } // INFINITE LOOP!\n```\nBecause decimal 0.1 cannot be represented precisely in binary IEEE-754 floating-point, f will be 0.99999994 then 1.0999999, never matching 1.0 exactly!\n\n6. STRUCTURED PROGRAMMING PRINCIPLES & CYCLOMATIC COMPLEXITY:\nStructured programming, pioneered by computer science luminary Edsger W. Dijkstra, establishes that any algorithmic procedure can be fully implemented using only three foundational control topologies: Sequence, Selection (branching), and Iteration (looping). In enterprise and kernel development, avoiding spaghetti code is critical. Software engineers track Cyclomatic Complexity (the quantitative count of linearly independent paths through code). Keeping cyclomatic complexity under 10 prevents defect proliferation. Using early guard clauses with 'return' or 'break' eliminates deep pyramids of nested if-statements, transforming spaghetti into clean, linear code.",
+  "explanationHi": "१. सिस्टम्स प्रोग्रामिंग में कंट्रोल फ्लो (Control Flow) की अनिवार्यता:\nसामान्यतः कंप्यूटर का प्रोसेसर (CPU) प्रोग्राम के निर्देशों को ऊपर से नीचे की ओर एक सीधी रेखा में, एक के बाद एक क्रमिक रूप से चलाता है। लेकिन वास्तविक सॉफ्टवेयर में हमें बदलती परिस्थितियों के आधार पर निर्णय लेने होते हैं (जैसे यूजर का पासवर्ड सही है या नहीं) और किसी कार्य को लाखों बार दोहराना पड़ता है (जैसे 10,000 कर्मचारियों के वेतन की गणना करना या स्क्रीन पर पिक्सल रेंडर करना)।\nकंट्रोल स्टेटमेंट्स (Control Statements) वे प्रोग्रामिंग निर्देश हैं जो निष्पादन के इस सीधे प्रवाह को बदलकर प्रोग्राम को निर्णय लेने और दोहराव करने की क्षमता प्रदान करते हैं।\nC भाषा में इन्हें तीन प्रमुख श्रेणियों में विभाजित किया गया है:\n१. निर्णय लेने वाले स्टेटमेंट्स (Decision Making): if, if-else, nested if, else-if ladder, switch-case।\n२. दोहराव वाले स्टेटमेंट्स (Loops / Iteration): while, do-while, for।\n३. जंप स्टेटमेंट्स (Jump / Transfer): break, continue, goto, return।\n\n२. निर्णय लेने वाले स्टेटमेंट्स का गहन अध्ययन:\n- 'if' स्टेटमेंट:\nयह दी गई शर्त का मूल्यांकन करता है। C भाषा में कोई भी गैर-शून्य संख्या (Non-zero) सत्य (TRUE) मानी जाती है, और केवल शून्य (0) ही असत्य (FALSE) माना जाता है।\n- 'if-else' स्टेटमेंट:\nसत्य होने पर 'if' वाला ब्लॉक चलता है, और असत्य होने पर 'else' वाला ब्लॉक चलता है। दोनों में से कोई एक ही ब्लॉक चलेगा।\n- 'else-if' लैडर (Ladder):\nजब कई परस्पर विरोधी शर्तों की एक के बाद एक क्रमिक जांच करनी हो। ऊपर से नीचे की ओर जैसे ही पहली शर्त सत्य होती है, उसका कोड चलता है और बाकी पूरी लैडर छोड़ दी जाती है।\n- 'switch-case' स्टेटमेंट और कंपाइलर जंप टेबल्स:\nजब किसी एक चर के कई अलग-अलग निश्चित मानों की तुलना करनी हो।\nswitch के कड़े नियम:\n१. switch के अंदर केवल पूर्णांक (int) या कैरेक्टर (char) ही मान्य हैं; float, double या स्ट्रिंग का उपयोग अवैध है!\n२. case लेबल्स केवल स्थिर मान (Constants जैसे case 1:, case 'A':) ही हो सकते हैं; वेरिएबल्स (case x:) लिखना वर्जित है।\n३. प्रत्येक केस के अंत में 'break;' लगाना अनिवार्य है। यदि break नहीं लगाया गया, तो कंट्रोल नीचे वाले सभी केसों को भी बिना शर्त चला देगा (जिसे Fall-Through कहते हैं)।\n४. जब कोई भी केस मैच नहीं होता, तब 'default:' ब्लॉक चलता है।\n- switch स्टेटमेंट else-if से तेज क्यों होता है?\nजब केस मान पास-पास होते हैं, तो C कंपाइलर तुलना की लंबी श्रृंखला बनाने के बजाय मेमोरी में एक 'जंप टेबल' (Jump Table) बना देता है। सीपीयू O(1) समय में सीधे सही केस पर छलांग लगा देता है!\n\n३. लूप्स (Loops) का विस्तृत अध्ययन:\nलूप किसी कोड ब्लॉक को तब तक दोहराते हैं जब तक कि समाप्ति की शर्त असत्य (0) न हो जाए।\n१. 'while' लूप (Entry-Controlled Loop):\nशर्त लूप बॉडी में घुसने से पहले जांची जाती है। यदि शर्त शुरू में ही असत्य हो, तो लूप 0 बार चलता है।\n२. 'do-while' लूप (Exit-Controlled Loop):\nशर्त लूप बॉडी चलने के बाद सबसे नीचे जांची जाती है। इसलिए do-while लूप कम से कम एक बार जरूर चलता है, चाहे शर्त शुरू में ही गलत क्यों न हो!\nअनिवार्य सिंटेक्स नियम: do-while के अंत में सेमीकोलन (;) लगाना अनिवार्य होता है: 'do { ... } while (शर्त);'।\n३. 'for' लूप (Header-Controlled Loop):\nयह इनिशियलाइजेशन, शर्त की जांच और इंक्रीमेंट/डिक्रीमेंट तीनों को एक ही पंक्ति में समेट लेता है।\nfor लूप के चलने का चरणबद्ध क्रम:\nचरण १: इनिशियलाइजेशन (केवल एक बार शुरू में चलता है)।\nचरण २: शर्त की जांच। यदि असत्य है, तो लूप तुरंत बंद हो जाता है।\nचरण ३: लूप बॉडी का कोड चलता है।\nचरण ४: इंक्रीमेंट या डिक्रीमेंट होता है।\nचरण ५: वापस चरण २ पर जाकर शर्त जांची जाती है।\n\n४. जंप स्टेटमेंट्स (break, continue, goto):\n- 'break': लूप या switch को तुरंत बीच में ही समाप्त करके बाहर निकाल देता है।\n- 'continue': वर्तमान चक्कर के बचे हुए कोड को छोड़कर तुरंत अगले चक्कर (Iteration) पर कूद जाता है।\n- 'goto': बिना शर्त प्रोग्राम को उसी फंक्शन के किसी लेबल पर भेज देता है। लिनक्स कर्नल में इसका उपयोग एरर हैंडलिंग और मेमोरी फ्री करने के लिए सुरक्षित रूप से किया जाता है।\n\n५. फ्लोटिंग पॉइंट लूप काउंटर की घातक गलती:\nकभी भी float वेरिएबल को लूप काउंटर के रूप में exact equality (!=) के साथ न चलाएं:\n'for (float f = 0.0f; f != 1.0f; f += 0.1f)'\nक्योंकि बाइनरी IEEE-754 में 0.1 का सटीक मान नहीं होता, इसलिए f कभी भी ठीक 1.0 नहीं बनेगा और यह अनंत लूप बन जाएगा!\n\n६. स्ट्रक्चर्ड प्रोग्रामिंग का सिद्धांत और चक्रीय जटिलता (Cyclomatic Complexity):\nमहान कंप्यूटर वैज्ञानिक एड्सगर डिज्क्स्ट्रा (Edsger W. Dijkstra) द्वारा प्रतिपादित स्ट्रक्चर्ड प्रोग्रामिंग का नियम कहता है कि दुनिया के किसी भी जटिल से जटिल प्रोग्राम को केवल तीन बुनियादी संरचनाओं से बनाया जा सकता है: क्रम (Sequence), चयन (Selection/Decision) और दोहराव (Iteration/Loop)।\nयदि प्रोग्रामर अत्यधिक goto स्टेटमेंट्स या 6-7 स्तर गहरे नेस्टेड if-else का उपयोग करता है, तो कोड 'स्पघेटी कोड' बन जाता है जिसे समझना और डीबग करना लगभग असंभव हो जाता है। आधुनिक सॉफ्टवेयर इंजीनियरिंग में यह नियम है कि किसी भी फंक्शन की चक्रीय जटिलता (Cyclomatic Complexity - अलग-अलग स्वतंत्र रास्तों की संख्या) 10 से कम होनी चाहिए। यदि किसी लूप में कोई शर्त पूरी न हो, तो तुरंत 'break' या 'return' (Guard Clause) लगाकर बाहर निकल जाना चाहिए ताकि कोड साफ-सुथरा और पठनीय रहे।",
+  "realLifeAnalogy": {
+    "en": "Think of control flow like driving on a highway. An 'if-else' is a fork in the road: exit left for Airport or stay right for Downtown. A 'switch' is an elevator with labeled buttons: press 4 and the elevator moves directly to Floor 4 via a counterweight pulley. A 'while' loop is waiting at a railroad crossing until the barrier lifts. A 'for' loop is running exactly 10 laps on an athletic track. And 'break' is pulling the emergency brake immediately!",
+    "hi": "कंट्रोल फ्लो हाईवे पर गाड़ी चलाने जैसा है। if-else सड़क का तिराहा है: दाएँ मुड़ें या बाएँ। switch लिफ्ट के बटन जैसा है: 4 नंबर दबाया तो लिफ्ट सीधे चौथी मंजिल पर रुकती है। while लूप रेलवे फाटक पर ट्रेन गुजरने तक इंतजार करना है। for लूप मैदान के ठीक 10 चक्कर लगाना है। और break आपातकालीन ब्रेक लगाकर गाड़ी को तुरंत रोक देना है!"
+  },
+  "codeExamples": [
+    {
+      "title": "Switch-Case Menu Driven System with Guarded Fall-Through",
+      "titleHindi": "switch-case आधारित कैलकुलेटर और केस ग्रुपिंग का सी कोड",
+      "code": "#include <stdio.h>\n\nint main() {\n    char op;\n    double num1, num2;\n    \n    printf(\"Enter operator (+, -, *, /): \");\n    scanf(\" %c\", &op);\n    printf(\"Enter two numbers: \");\n    scanf(\"%lf %lf\", &num1, &num2);\n    \n    switch (op) {\n        case '+':\n            printf(\"Result: %.2lf + %.2lf = %.2lf\n\", num1, num2, num1 + num2);\n            break;\n        case '-':\n            printf(\"Result: %.2lf - %.2lf = %.2lf\n\", num1, num2, num1 - num2);\n            break;\n        case '*':\n            printf(\"Result: %.2lf * %.2lf = %.2lf\n\", num1, num2, num1 * num2);\n            break;\n        case '/':\n            if (num2 != 0.0) {\n                printf(\"Result: %.2lf / %.2lf = %.2lf\n\", num1, num2, num1 / num2);\n            } else {\n                printf(\"Runtime Error: Division by zero is mathematically undefined!\n\");\n            }\n            break;\n        default:\n            printf(\"Error: Unrecognized operator '%c'\n\", op);\n    }\n    return 0;\n}",
+      "output": "Enter operator (+, -, *, /): *\nEnter two numbers: 12.5 4\nResult: 12.50 * 4.00 = 50.00",
+      "explanation": "Demonstrates multi-branching with switch on char, explicit break statements, and zero division guarding.",
+      "explanationHindi": "कैरेक्टर पर switch-case, break स्टेटमेंट और शून्य से विभाजन की सुरक्षा को प्रदर्शित करता है।"
+    }
+  ],
+  "practicals": [
+    {
+      "id": "prac-cs-1",
+      "title": "Nested Loops Triangle Pattern and Loop Skipping",
+      "titleHindi": "नेस्टेड लूप्स द्वारा त्रिभुज पैटर्न और continue का उपयोग",
+      "objective": "Use nested loops to generate a triangle pattern while skipping specific numbers with continue.",
+      "objectiveHindi": "नेस्टेड लूप्स द्वारा स्टार पैटर्न बनाएं और continue का व्यवहार समझें।",
+      "code": "#include <stdio.h>\n\nint main() {\n    int rows = 4;\n    \n    for (int i = 1; i <= rows; i++) {\n        for (int j = 1; j <= i; j++) {\n            printf(\"%d \", j);\n        }\n        printf(\"\n\");\n    }\n    return 0;\n}",
+      "expectedOutput": "1 \n1 2 \n1 2 3 \n1 2 3 4 ",
+      "lineByLineExplanation": [
+        {
+          "line": "for (int i = 1; i <= rows; i++)",
+          "noteEn": "Outer loop controls rows from 1 to 4.",
+          "noteHi": "बाहरी लूप पंक्तियों (1 से 4) को नियंत्रित करता है।"
+        },
+        {
+          "line": "for (int j = 1; j <= i; j++)",
+          "noteEn": "Inner loop prints digits up to current row index.",
+          "noteHi": "अंदरूनी लूप वर्तमान पंक्ति संख्या तक अंक प्रिंट करता है।"
+        }
+      ]
+    }
+  ],
+  "keyPoints": {
+    "en": [
+      "0 is false; any non-zero value is true in C.",
+      "switch expression must be int or char; float is illegal.",
+      "do-while executes at least once and requires trailing semicolon.",
+      "break exits enclosing loop; continue skips to next iteration."
+    ],
+    "hi": [
+      "0 असत्य है; कोई भी गैर-शून्य मान सत्य है।",
+      "switch में केवल int या char मान्य हैं; float अमान्य है।",
+      "do-while कम से कम एक बार चलता है और अंत में सेमीकोलन मांगता है।",
+      "break लूप से बाहर निकालता है; continue अगले चक्कर पर भेजता है।"
+    ]
+  },
+  "commonPitfalls": {
+    "en": [
+      "Putting accidental semicolon after if: if(x > 5);",
+      "Forgetting break in switch causes fall-through into next cases.",
+      "Using float in loop counter termination condition causing infinite loops."
+    ],
+    "hi": [
+      "if के बाद गलती से सेमीकोलन लगाना: if(x > 5); जिससे if खाली हो जाता है।",
+      "switch में break भूलने से नीचे के केस भी चल जाना।",
+      "फ्लोट वेरिएबल को लूप काउंटर बनाकर अनंत लूप में फँस जाना।"
+    ]
+  }
+  ,
+  "quiz": getTopicQuestionBank("control-statement", "Control Statements: Branching, Iteration & Jump Tables")
+},
+{
+  "id": "array",
+  "order": 9,
+  "title": "Arrays, Multi-Dimensional Matrices & Character Strings",
+  "titleHindi": "ऐरे, बहु-आयामी मैट्रिसेस और स्ट्रिंग्स (Array)",
+  "category": "Data Structures",
+  "summary": "Master contiguous linear collections in C: 1D array indexing, base address arithmetic, cache locality, 2D matrix row-major storage layout, matrix addition and multiplication algorithms, character string representation, null-terminator byte '\\0', string.h functions, and array decaying to pointers.",
+  "summaryHindi": "C भाषा में ऐरे और स्ट्रिंग्स का संपूर्ण अध्ययन: 1D ऐरे इंडेक्सिंग, बेस एड्रेस, रैम में रो-मेजर मेमोरी लेआउट, मैट्रिक्स जोड़ और गुणा कलन-विधि, नल-टर्मिनेटर '\\0', string.h के महत्वपूर्ण फंक्शन्स और ऐरे का पॉइंटर में बदलना।",
+  "readTimeMinutes": 22,
+  "explanationEn": "1. WHAT IS AN ARRAY IN LOW-LEVEL MEMORY ARCHITECTURE?\nIn the C programming language and hardware memory architecture, an Array is a contiguous collection of homogeneous (identical data type) elements stored sequentially in Random Access Memory (RAM). When an array is declared, such as 'int numbers[5];', the memory management subsystem allocates an unbroken, consecutive block of bytes:\n- Total Byte Size = Number of Elements * sizeof(element_type). For an array of 5 32-bit integers, exactly 5 * 4 = 20 contiguous bytes are reserved.\n- Zero-Based Indexing & The Base Address Formula:\nC arrays are zero-indexed because an index is fundamentally a mathematical offset from the starting memory location (called the Base Address). If an array 'numbers' begins at memory address 0x1000, the address of element numbers[i] is computed directly in hardware as:\nAddress(&numbers[i]) = Base_Address + (i * sizeof(element_type))\nFor index 0: 0x1000 + (0 * 4) = 0x1000 (Base address itself!).\nFor index 1: 0x1000 + (1 * 4) = 0x1004.\nFor index 2: 0x1000 + (2 * 4) = 0x1008.\nBecause the CPU calculates this address using a single multiply-add instruction, accessing any arbitrary element numbers[i] occurs in O(1) instantaneous constant time!\n\n2. HARDWARE CACHE LOCALITY & PERFORMANCE ADVANTAGE:\nUnlike linked lists or node-based graphs where items are scattered randomly across the heap, arrays reside in contiguous physical memory addresses. When the CPU accesses numbers[0], modern hardware memory controllers automatically prefetch an entire 64-byte Cache Line from system RAM into the ultra-fast L1/L2 CPU hardware cache. Consequently, subsequent accesses to numbers[1], numbers[2], and numbers[3] result in instantaneous Cache Hits, making linear array iteration significantly faster than non-contiguous data structures.\n\n3. LACK OF BOUNDS CHECKING & SECURITY HAZARDS:\nC was engineered for raw operating system performance and minimal runtime overhead. Therefore, the C compiler does NOT perform runtime Array Bounds Checking. If you declare 'int arr[5];' and attempt to access 'arr[10] = 99;', C does not throw an IndexOutOfBoundsException. Instead, it computes the address 0x1000 + (10 * 4) and writes 99 into whatever external memory happens to reside there! This leads to data corruption, mysterious crashes, or catastrophic security vulnerabilities (Buffer Overflow attacks). It is the programmer's absolute responsibility to enforce boundary validation.\n\n4. MULTI-DIMENSIONAL ARRAYS & ROW-MAJOR ORDER:\nA two-dimensional array represents a grid of rows and columns (e.g., int matrix[3][4];).\nPhysical RAM is strictly linear (one-dimensional). To map a 2D grid onto a 1D linear memory bus, C strictly employs Row-Major Order:\nRow 0 is placed in memory first, followed immediately by Row 1, followed by Row 2.\nMemory Address Formula for matrix[row][col]:\nAddress(&matrix[i][j]) = Base_Address + ((i * Total_Columns + j) * sizeof(type))\nTraversing a 2D matrix with the outer loop iterating rows and the inner loop iterating columns accesses memory sequentially, maximizing CPU cache efficiency. Inverting the loops (iterating columns outer, rows inner) causes frequent cache misses, degrading execution speed.\n\n5. PASSING ARRAYS TO FUNCTIONS & POINTER DECAY:\nWhen an array is passed as an argument to a function, C NEVER copies the entire array contents. Instead, the array name automatically \"decays\" into a pointer pointing to its first element (&arr[0]).\nFunction Prototype:\n```c\nvoid printArray(int arr[], int size); // Equivalent to: void printArray(int *arr, int size);\n```\nInside the function, 'sizeof(arr)' returns the size of a pointer (8 bytes on 64-bit systems), NOT the byte size of the array! Therefore, the programmer MUST pass the array size as a separate parameter.\n\n6. CHARACTER STRINGS & THE NULL TERMINATOR ('\\0'):\nIn C, there is no primitive \"string\" keyword. A String is simply a one-dimensional array of characters terminated by a special sentinel byte called the Null Character ('\\0', ASCII value 0).\n- Declaring Strings:\n```c\nchar greeting[] = \"Hello\"; // Occupies 6 bytes in memory: 'H', 'e', 'l', 'l', 'o', '\\0'\n```\nWithout the '\\0' terminator, standard string functions (like printf(\"%s\"), strlen, strcpy) would continue reading random bytes past the end of the array until they hit a random zero byte in memory, causing segmentation faults.\n- Standard Library Functions (<string.h>):\n1. strlen(str): Returns character count excluding '\\0'.\n2. strcpy(dest, src) / strncpy: Copies characters from src to dest.\n3. strcat(dest, src) / strncat: Concatenates src to end of dest.\n4. strcmp(str1, str2): Compares two strings lexicographically; returns 0 if equal, negative if str1 < str2, positive if str1 > str2.\n\n7. VARIABLE LENGTH ARRAYS (VLAs) VS DYNAMIC HEAP ALLOCATION:\nIntroduced in ISO C99, Variable Length Arrays allow array dimensions to be determined dynamically at runtime based on an integer expression (e.g., int n; scanf(\"%d\", &n); int arr[n];).\n- The Architectural Hazard of VLAs:\nVLAs are allocated on the program's Call Stack rather than the Heap. Because the thread call stack has a very limited default size (typically 1MB to 8MB depending on the operating system), requesting a large VLA (e.g., n = 2,000,000 integers) triggers an unrecoverable Stack Overflow crash with no error return! Consequently, the C11 standard made VLA support optional for compilers (signaled by __STDC_NO_VLA__).\n- The Production Heap Alternative:\nIn robust enterprise and systems code, dynamic arrays whose sizes depend on user input or file contents should always be allocated on the heap via malloc() or calloc():\n```c\nint *arr = (int*)malloc(n * sizeof(int));\nif (arr == NULL) { /* handle out-of-memory error */ }\n// ... perform computations ...\nfree(arr);\narr = NULL;\n```\nFor two-dimensional dynamic matrices, allocating a single contiguous 1D block of (rows * cols * sizeof(element)) provides optimal cache line locality and avoids the multiple pointer-dereference overhead associated with array-of-pointer (int**) representations.",
+  "explanationHi": "१. कंप्यूटर मेमोरी आर्किटेक्चर में ऐरे (Array) क्या है?\nC प्रोग्रामिंग भाषा और कंप्यूटर हार्डवेयर में, ऐरे (Array) समान डेटा टाइप के तत्वों का एक ऐसा रैखिक संग्रह है जो मुख्य मेमोरी (RAM) में एक के बाद एक लगातार (Contiguous Memory) क्रम में स्टोर होता है। जब प्रोग्रामर 'int numbers[5];' लिखता है, तो मेमोरी प्रबंधक रैम में 20 बाइट्स (5 तत्व * 4 बाइट्स) की एक अखंड जगह आरक्षित करता है।\n- शून्य-आधारित इंडेक्सिंग और बेस एड्रेस (Base Address):\nC भाषा में ऐरे का इंडेक्स हमेशा 0 से शुरू होता है क्योंकि इंडेक्स वास्तव में शुरुआती मेमोरी पते से दूरी (Offset) को दर्शाता है। यदि ऐरे 'numbers' का पहला मेमोरी पता 0x1000 है, तो किसी भी तत्व numbers[i] का मेमोरी एड्रेस इस गणितीय सूत्र से निकाला जाता है:\nAddress(&numbers[i]) = Base_Address + (i * sizeof(element_type))\nइंडेक्स 0 के लिए: 0x1000 + (0 * 4) = 0x1000 (शुरुआती पता ही)।\nइंडेक्स 1 के लिए: 0x1000 + (1 * 4) = 0x1004।\nइंडेक्स 2 के लिए: 0x1000 + (2 * 4) = 0x1008।\nचूंकि कंप्यूटर का प्रोसेसर एक ही निर्देश में इस पते की गणना कर लेता है, इसलिए ऐरे के किसी भी तत्व को पढ़ने में O(1) यानी स्थिर समय लगता है।\n\n२. हार्डवेयर कैश लोकैलिटी और परफॉर्मेंस लाभ:\nलिंक्ड लिस्ट के विपरीत जहाँ डेटा रैम में अलग-अलग बिखरा होता है, ऐरे का डेटा एक पंक्ति में होता है। जब सीपीयू numbers[0] को पढ़ता है, तो कंप्यूटर का हार्डवेयर कंट्रोलर पूरी 64-बाइट कैश लाइन को रैम से उठाकर सुपर-फास्ट L1/L2 कैश मेमोरी में भर देता है। इसके कारण अगले तत्वों (numbers[1], numbers[2]) को पढ़ते समय डेटा तुरंत कैश से मिल जाता है (Cache Hit), जिससे प्रोग्राम की गति अत्यधिक तेज हो जाती है।\n\n३. बाउंड्स चेकिंग का अभाव और बफर ओवरफ्लो:\nC भाषा को तेज गति और ऑपरेटिंग सिस्टम बनाने के लिए डिजाइन किया गया था। इसलिए C कंपाइलर यह जांच नहीं करता कि इंडेक्स ऐरे की सीमा के अंदर है या बाहर (No Bounds Checking)। यदि आप 5 तत्वों के ऐरे में 'arr[10] = 99;' लिखेंगे, तो C कोई एरर नहीं देगा बल्कि उस पते पर 99 लिख देगा जहाँ कोई दूसरा डेटा हो सकता है! इसे 'बफर ओवरफ्लो' (Buffer Overflow) कहते हैं, जिससे प्रोग्राम क्रैश हो सकता है या सुरक्षा में सेंध लग सकती है। ऐरे की सीमा की जांच करना प्रोग्रामर की निजी जिम्मेदारी है।\n\n४. बहु-आयामी ऐरे और रो-मेजर ऑर्डर (Row-Major Order):\nदो-आयामी ऐरे (2D Array) को मैट्रिक्स या टेबल के रूप में देखा जाता है (जैसे int matrix[3][4];)।\nपरंतु कंप्यूटर की रैम एक सीधी रेखा (1D) होती है। C भाषा 2D मैट्रिक्स को रैम में स्टोर करने के लिए 'रो-मेजर ऑर्डर' (Row-Major Order) का उपयोग करती है:\nपहले पूरी पंक्ति 0 स्टोर होती है, फिर उसके ठीक बाद पंक्ति 1, और फिर पंक्ति 2।\nmatrix[i][j] का मेमोरी पता सूत्र:\nAddress = Base_Address + ((i * कुल_कॉलम + j) * sizeof(type))\nमैट्रिक्स को लूप में चलाते समय हमेशा बाहरी लूप पंक्ति (Rows) का और अंदरूनी लूप कॉलम (Columns) का चलाना चाहिए ताकि डेटा लगातार पढ़ा जा सके और कैश का पूरा फायदा मिले।\n\n५. फंक्शन में ऐरे भेजना और पॉइंटर डिके (Pointer Decay):\nजब किसी ऐरे को फंक्शन में भेजा जाता है, तो C कभी भी पूरे ऐरे की नकल नहीं बनाता। इसके बजाय ऐरे का नाम स्वतः अपने पहले तत्व के पते (&arr[0]) में बदल जाता है जिसे 'Pointer Decay' कहते हैं।\nफंक्शन के अंदर 'sizeof(arr)' पूरे ऐरे का आकार नहीं बताता बल्कि केवल पॉइंटर का आकार (8 बाइट्स) बताता है। इसलिए फंक्शन में ऐरे के साथ उसका साइज (आकार) अलग से भेजना अनिवार्य होता है।\n\n६. कैरेक्टर स्ट्रिंग्स और नल टर्मिनेटर ('\\0'):\nC भाषा में स्ट्रिंग नाम का कोई अलग डेटा टाइप नहीं होता। स्ट्रिंग केवल कैरेक्टर्स का 1D ऐरे होती है जिसके अंत में एक विशेष शून्य बाइट होता है जिसे 'नल कैरेक्टर' ('\\0', ASCII 0) कहते हैं।\n- स्ट्रिंग की घोषणा:\n'char name[] = \"Hello\";' मेमोरी में 6 बाइट्स लेता है: 'H', 'e', 'l', 'l', 'o', और अंत में '\\0'।\nयदि नल कैरेक्टर न हो, तो printf(\"%s\") और strlen जैसे फंक्शन्स मेमोरी में तब तक आगे बढ़ते रहेंगे जब तक उन्हें कोई शून्य न मिल जाए, जिससे प्रोग्राम क्रैश हो जाएगा।\n- string.h के प्रमुख फंक्शन्स:\n१. strlen(str): स्ट्रिंग में अक्षरों की कुल संख्या लौटाता है ('\\0' को छोड़कर)।\n२. strcpy(dest, src): एक स्ट्रिंग को दूसरी में कॉपी करता है।\n३. strcat(dest, src): दो स्ट्रिंग्स को आपस में जोड़ता है।\n४. strcmp(str1, str2): दो स्ट्रिंग्स की तुलना करता है; समान होने पर 0 लौटाता है।\n\n७. वेरिएबल लेंथ ऐरे (VLA) बनाम डायनेमिक हीप एलोकेशन:\nC99 मानक में वेरिएबल लेंथ ऐरे (VLA) की सुविधा जोड़ी गई थी जिसके द्वारा ऐरे का साइज रनटाइम पर तय किया जा सकता है (जैसे 'int n; scanf(\"%d\", &n); int arr[n];')।\n- VLA का गंभीर खतरा:\nVLA की मेमोरी स्टैक (Stack) पर आवंटित होती है। चूंकि ऑपरेटिंग सिस्टम में स्टैक मेमोरी का आकार बहुत छोटा होता है (सामान्यतः 1MB से 8MB), इसलिए यदि यूजर ने 10 लाख का इनपुट दे दिया, तो स्टैक तुरंत भर जाएगा और प्रोग्राम बिना किसी चेतावनी के स्टैक ओवरफ्लो से क्रैश हो जाएगा। इसी कारण C11 मानक ने VLA को अनिवार्य से ऐच्छिक बना दिया।\n- उत्पादन स्तर का सुरक्षित तरीका (malloc):\nवास्तविक सॉफ्टवेयर में जब ऐरे का आकार यूजर या फाइल पर निर्भर हो, तो मेमोरी हमेशा हीप (Heap) से malloc() द्वारा ली जानी चाहिए:\n```c\nint *arr = (int*)malloc(n * sizeof(int));\nif (arr == NULL) { /* मेमोरी न मिलने पर सुरक्षित रूप से बाहर निकलें */ }\n// कार्य समाप्त होने पर:\nfree(arr);\narr = NULL;\n```\n2D मैट्रिक्स के लिए भी अलग-अलग पॉइंटर्स बनाने के बजाय एक ही समतल (Flat) 1D ब्लॉक (rows * cols) आरक्षित करना सबसे तेज होता है क्योंकि इससे सीपीयू कैश का शत-प्रतिशत लाभ मिलता है।",
+  "realLifeAnalogy": {
+    "en": "Think of an array like a row of identical numbered mailboxes in an apartment lobby. Because each box is the exact same width and they are physically bolted side-by-side in a straight line, the mail carrier can instantly calculate the exact physical location of Mailbox #15 without checking boxes 1 through 14 first! A string is like a train with a special caboose at the end: the conductor knows the train is finished when they see the caboose ('\\0')!",
+    "hi": "ऐरे की तुलना एक अपार्टमेंट की दीवार पर लगे एक समान लेटरबॉक्सों से करें। चूंकि सभी बॉक्स एक ही आकार के हैं और एक सीधी लाइन में जुड़े हैं, डाकिया बिना 1 से 14 बॉक्स गिने सीधे 15वें बॉक्स पर पहुँच सकता है! स्ट्रिंग एक रेलगाड़ी जैसी है जिसके सबसे पीछे गार्ड का लाल डिब्बा ('\\0') लगा होता है; गार्ड का डिब्बा देखते ही पता चल जाता है कि गाड़ी यहाँ समाप्त हो गई है!"
+  },
+  "codeExamples": [
+    {
+      "title": "2D Matrix Addition and Row-Major Memory Inspection",
+      "titleHindi": "2D मैट्रिक्स जोड़ और मेमोरी एड्रेस का C कोड",
+      "code": "#include <stdio.h>\n\nint main() {\n    int A[2][2] = {{1, 2}, {3, 4}};\n    int B[2][2] = {{5, 6}, {7, 8}};\n    int Sum[2][2];\n    \n    // Matrix Addition\n    for (int i = 0; i < 2; i++) {\n        for (int j = 0; j < 2; j++) {\n            Sum[i][j] = A[i][j] + B[i][j];\n        }\n    }\n    \n    printf(\"Resultant 2x2 Matrix:\n\");\n    for (int i = 0; i < 2; i++) {\n        for (int j = 0; j < 2; j++) {\n            printf(\"%d \", Sum[i][j]);\n        }\n        printf(\"\n\");\n    }\n    \n    // Inspect contiguous row-major memory addresses\n    printf(\"\nMemory Addresses of Array Elements:\n\");\n    for (int i = 0; i < 2; i++) {\n        for (int j = 0; j < 2; j++) {\n            printf(\"Sum[%d][%d] at %p (value %d)\n\", i, j, (void*)&Sum[i][j], Sum[i][j]);\n        }\n    }\n    return 0;\n}",
+      "output": "Resultant 2x2 Matrix:\n6 8 \n10 12 \n\nMemory Addresses of Array Elements:\nSum[0][0] at 0x7ffd98b2c4e0 (value 6)\nSum[0][1] at 0x7ffd98b2c4e4 (value 8)\nSum[1][0] at 0x7ffd98b2c4e8 (value 10)\nSum[1][1] at 0x7ffd98b2c4ec (value 12)",
+      "explanation": "Demonstrates 2D nested iteration for matrix arithmetic and proves that elements are stored consecutively with exactly 4-byte spacing.",
+      "explanationHindi": "मैट्रिक्स जोड़ के लिए नेस्टेड लूप्स का उपयोग और यह प्रमाण कि सभी तत्व मेमोरी में ठीक 4-4 बाइट्स की दूरी पर लगातार क्रम में स्टोर होते हैं।"
+    }
+  ],
+  "practicals": [
+    {
+      "id": "prac-arr-1",
+      "title": "Reverse a String In-Place Without Extra Memory",
+      "titleHindi": "बिना अतिरिक्त मेमोरी के स्ट्रिंग को उलटना",
+      "objective": "Reverse a character string array using two-pointer swap technique.",
+      "objectiveHindi": "स्ट्रिंग को टू-पॉइंटर तकनीक से उसी स्थान पर उल्टा करें।",
+      "code": "#include <stdio.h>\n#include <string.h>\n\nvoid reverseString(char str[]) {\n    int left = 0;\n    int right = strlen(str) - 1;\n    \n    while (left < right) {\n        char temp = str[left];\n        str[left] = str[right];\n        str[right] = temp;\n        left++;\n        right--;\n    }\n}\n\nint main() {\n    char word[] = \"PROGRAMMING\";\n    printf(\"Original: %s\n\", word);\n    \n    reverseString(word);\n    printf(\"Reversed: %s\n\", word);\n    return 0;\n}",
+      "expectedOutput": "Original: PROGRAMMING\nReversed: GNIMMARGORP",
+      "lineByLineExplanation": [
+        {
+          "line": "int right = strlen(str) - 1;",
+          "noteEn": "Points to last valid character before null terminator.",
+          "noteHi": "नल टर्मिनेटर से पहले के अंतिम अक्षर को इंगित करता है।"
+        },
+        {
+          "line": "str[left] = str[right];",
+          "noteEn": "Swaps characters symmetrically from outside inwards in O(N/2) time.",
+          "noteHi": "बाहर से अंदर की ओर अक्षरों की अदला-बदली करता है।"
+        }
+      ]
+    }
+  ],
+  "keyPoints": {
+    "en": [
+      "Array elements are stored contiguously in RAM.",
+      "Array index i is calculated as Base + i * sizeof(type).",
+      "C does not perform bounds checking; buffer overflow is possible.",
+      "Strings must terminate with '\\0' byte."
+    ],
+    "hi": [
+      "ऐरे के सभी तत्व रैम में लगातार क्रम में स्टोर होते हैं।",
+      "इंडेक्स i का एड्रेस Base + i * sizeof(type) से निकलता है।",
+      "C में बाउंड्स चेकिंग नहीं होती जिससे बफर ओवरफ्लो हो सकता है।",
+      "स्ट्रिंग के अंत में '\\0' (नल कैरेक्टर) होना अनिवार्य है।"
+    ]
+  },
+  "commonPitfalls": {
+    "en": [
+      "Accessing out of bounds elements (arr[size] instead of arr[size-1]).",
+      "Forgetting space for '\\0' when sizing char arrays for strings.",
+      "Using sizeof(arr) inside functions expecting whole array byte size."
+    ],
+    "hi": [
+      "ऐरे की सीमा से बाहर जाना (arr[size] लिखना जबकि अंतिम इंडेक्स size-1 होता है)।",
+      "स्ट्रिंग ऐरे बनाते समय '\\0' के लिए 1 अतिरिक्त बाइट न छोड़ना।",
+      "फंक्शन के अंदर sizeof(arr) से पूरे ऐरे का आकार नापने की भूल करना।"
+    ]
+  }
+  ,
+  "quiz": getTopicQuestionBank("array", "Arrays, Multi-Dimensional Matrices & Character Strings")
+},
+{
+  "id": "pointer",
+  "order": 10,
+  "title": "Pointers, Memory Addressing & Pointer Arithmetic",
+  "titleHindi": "पॉइंटर्स, मेमोरी एड्रेसिंग और पॉइंटर अंकगणित (Pointer)",
+  "category": "Basics",
+  "summary": "Master the defining superpower of C: Pointer variable declaration, address-of operator &, indirection/dereference operator *, pointer arithmetic scaling, relationship between arrays and pointers, NULL pointers, void generic pointers, pointer-to-pointer (**ptr), pass-by-reference simulation, and dangling pointer hazards.",
+  "summaryHindi": "C भाषा की सबसे शक्तिशाली विशेषता पॉइंटर्स का संपूर्ण अध्ययन: पॉइंटर डिक्लेरेशन, एड्रेस ऑपरेटर &, डीरेफरेंसिंग ऑपरेटर *, पॉइंटर अंकगणित, ऐरे और पॉइंटर का संबंध, NULL पॉइंटर, void जेनेरिक पॉइंटर, डबल पॉइंटर (**ptr), कॉल बाई रेफरेंस और डैंगलिंग पॉइंटर्स की रोकथाम।",
+  "readTimeMinutes": 23,
+  "explanationEn": "1. WHAT IS A POINTER IN HARDWARE & OPERATING SYSTEM ARCHITECTURE?\nIn low-level systems programming, a Pointer is a variable whose assigned value is NOT a direct piece of data (such as an integer or character), but the physical or virtual Hexadecimal Memory Address of another variable located in Random Access Memory (RAM).\nUnderstanding Virtual Address Space:\nIn modern 64-bit operating systems (Linux, Windows, macOS), every process runs in its own 64-bit Virtual Address Space.\n- On a 64-bit CPU architecture, any pointer variable occupies exactly 8 bytes (64 bits) of memory, regardless of whether it points to a 1-byte char, a 4-byte int, or an 8000-byte structure!\n- On a 32-bit architecture, all pointers occupy exactly 4 bytes (32 bits).\n\n2. THE TWO ESSENTIAL POINTER OPERATORS (& AND *):\nPointers operate using two complementary unary operators:\n1. The Address-of Operator (&):\nReturns the memory address where a variable is physically stored in RAM.\nExample: 'int x = 42; printf(\"%p\", (void*)&x);' prints an address such as 0x7ffd98b2c4e0.\n2. The Indirection / Dereference Operator (*):\nWhen applied to a pointer variable, the asterisk accesses (\"dereferences\") the actual value stored at the memory address currently held by that pointer.\n```c\nint x = 42;\nint *ptr = &x;   // ptr holds the address of x\nprintf(\"%d\", *ptr); // Dereferences ptr to read 42\n*ptr = 100;         // Mutates the value of x directly through memory!\n```\n\n3. POINTER ARITHMETIC & TYPE SCALING:\nPointer arithmetic behaves entirely differently from standard integer arithmetic. You cannot perform multiplication or division on pointers, but you CAN add or subtract integers.\nThe Type Scaling Rule:\nWhen you add 1 to a pointer (ptr + 1), the memory address does NOT increment by 1 byte. Instead, it advances by 1 * sizeof(*ptr) bytes!\n- If 'int *p = 0x1000;', then 'p + 1' equals 0x1004 (advances by 4 bytes because sizeof(int) is 4).\n- If 'double *dp = 0x1000;', then 'dp + 1' equals 0x1008 (advances by 8 bytes because sizeof(double) is 8).\n- If 'char *cp = 0x1000;', then 'cp + 1' equals 0x1001 (advances by 1 byte).\nPointer Subtraction (p2 - p1):\nSubtracting two pointers of the same type yields the number of elements situated between them, NOT the raw byte difference!\n\n4. THE INTRINSIC EQUIVALENCE OF ARRAYS AND POINTERS:\nIn C, arrays and pointers are deeply intertwined. The name of an array acts as a constant pointer to its first element:\n'arr' is equivalent to '&arr[0]'.\nArray subscript notation is actually syntactic sugar for pointer arithmetic:\n'arr[i]' is translated by the compiler directly into '*(arr + i)'.\nBecause addition is mathematically commutative, '*(arr + i)' is identical to '*(i + arr)', meaning that the bizarre syntax 'i[arr]' is 100% valid in C and compiles cleanly!\n\n5. SPECIAL TYPES OF POINTERS:\n1. NULL Pointer:\nA pointer explicitly assigned the value 0 or NULL (macro defined as ((void*)0)). It represents a pointer that points to nothing. Dereferencing a NULL pointer triggers a hardware memory protection fault, terminating the process with a Segmentation Fault (SIGSEGV).\n2. Void Pointer (Generic Pointer - void*):\nA generic pointer type that can hold the address of ANY data type without an explicit cast. Used by dynamic memory functions (malloc returns void*). Crucial limitation: You CANNOT directly dereference a void* without casting it first, because the compiler does not know how many bytes to read!\n3. Pointer to Pointer (Double Pointer - **ptr):\nA pointer variable that stores the memory address of another pointer variable. Extensively used when a function needs to modify a pointer passed into it (such as allocating memory inside a helper function or managing 2D dynamic matrices).\n4. Dangling Pointer & Wild Pointer:\n- A Wild Pointer is an uninitialized pointer containing random garbage memory addresses.\n- A Dangling Pointer points to a memory block that has already been deallocated (e.g., pointing to freed heap memory or a local stack variable of an exited function). Accessing it invokes catastrophic Undefined Behavior.\n\n6. PASS-BY-REFERENCE SIMULATION:\nC functions strictly use Pass-by-Value. To modify a caller's variable inside a function, we pass the variable's memory address (&x). The function receives a pointer copy and dereferences it to modify the original variable, perfectly simulating Pass-by-Reference (e.g., the classic swap(&a, &b) function).\n\n7. FUNCTION POINTERS & CALLBACK SYSTEM ARCHITECTURE:\nIn compiled C architecture, functions are not abstract mathematical formulas; they compile into machine code instructions residing at fixed physical memory addresses inside the Text Segment of the process address space.\nA Function Pointer is a pointer variable that stores the entry point memory address of a compiled function.\n- Function Pointer Declaration Syntax:\n```c\nreturn_type (*pointer_name)(parameter_types);\n```\nExample:\n```c\nint add(int a, int b) { return a + b; }\nint (*mathOp)(int, int) = add;\nint result = mathOp(10, 20); // Calls add() indirectly through memory!\n```\n- Real-World Systems Applications:\n1. Callback Functions: Passing a function pointer as an argument to another function enables dynamic behavior customization. The C standard library function qsort() takes a comparator callback function pointer (int (*cmp)(const void*, const void*)) to sort any arbitrary data type.\n2. State Machines & Jump Tables: An array of function pointers (e.g., void (*eventHandlers[5])(void);) replaces large, slow switch-case statements with O(1) instantaneous direct dispatch!\n3. Object-Oriented Simulation: Structures containing function pointers simulate C++ virtual method tables (vtables), forming the foundation of the Linux Kernel Virtual File System (VFS struct file_operations).",
+  "explanationHi": "१. कंप्यूटर आर्किटेक्चर में पॉइंटर (Pointer) क्या है?\nC प्रोग्रामिंग भाषा में 'पॉइंटर' (Pointer) एक ऐसा विशिष्ट वेरिएबल होता है जिसके अंदर कोई साधारण डेटा (जैसे संख्या या अक्षर) स्टोर नहीं होता, बल्कि मुख्य मेमोरी (RAM) के किसी दूसरे वेरिएबल का हेक्साडेसिमल मेमोरी एड्रेस (पॉइंटर एड्रेस) स्टोर होता है।\nवर्चुअल मेमोरी और पॉइंटर का आकार:\nआधुनिक 64-बिट कंप्यूटर सिस्टम में प्रत्येक प्रोग्राम अपनी अलग 64-बिट वर्चुअल मेमोरी में चलता है।\n- 64-बिट सिस्टम पर सभी पॉइंटर्स का आकार ठीक 8 बाइट्स (64 बिट्स) होता है, चाहे वह 1-बाइट के char को इंगित कर रहा हो या 1000-बाइट के स्ट्रक्चर को!\n- 32-बिट सिस्टम पर सभी पॉइंटर्स का आकार हमेशा 4 बाइट्स (32 बिट्स) होता है।\n\n२. पॉइंटर्स के दो बुनियादी ऑपरेटर (& और *):\nपॉइंटर्स का उपयोग करने के लिए दो प्रमुख ऑपरेटर होते हैं:\n१. एड्रेस ऑपरेटर (& - Address-of Operator):\nयह किसी भी वेरिएबल का वह भौतिक मेमोरी पता लौटाता है जहाँ वह रैम में स्टोर है।\nउदाहरण: 'int x = 42; printf(\"%p\", (void*)&x);' स्क्रीन पर 0x7ffd98b2c4e0 जैसा हेक्साडेसिमल एड्रेस दिखाएगा।\n२. डीरेफरेंसिंग ऑपरेटर (* - Dereference / Indirection Operator):\nजब किसी पॉइंटर के आगे तारा (*) लगाया जाता है, तो यह उस मेमोरी पते पर जाकर वहाँ रखे वास्तविक मान को पढ़ता है या बदलता है।\n```c\nint x = 42;\nint *ptr = &x;     // ptr में x का पता आ गया\nprintf(\"%d\", *ptr); // पते पर जाकर मान पढ़ा = 42\n*ptr = 100;         // मेमोरी पते पर जाकर x का मान सीधे 100 कर दिया!\n```\n\n३. पॉइंटर अंकगणित और टाइप स्केलिंग (Pointer Arithmetic):\nपॉइंटर का अंकगणित साधारण गणित से पूरी तरह अलग होता है। पॉइंटर में गुणा या भाग नहीं किया जा सकता, केवल जोड़ और घटाव मान्य हैं।\nटाइप स्केलिंग का नियम:\nजब आप किसी पॉइंटर में 1 जोड़ते हैं (ptr + 1), तो उसका मेमोरी एड्रेस 1 बाइट नहीं बढ़ता, बल्कि उसके डेटा टाइप के आकार (sizeof) के बराबर बढ़ता है!\n- यदि 'int *p = 0x1000;' है, तो 'p + 1' का मान 0x1004 होगा (क्योंकि int 4 बाइट्स का होता है)।\n- यदि 'double *dp = 0x1000;' है, तो 'dp + 1' का मान 0x1008 होगा (क्योंकि double 8 बाइट्स का होता है)।\n- यदि 'char *cp = 0x1000;' है, तो 'cp + 1' का मान 0x1001 होगा।\nपॉइंटर घटाव (p2 - p1): दो पॉइंटर्स को आपस में घटाने पर बाइट्स का अंतर नहीं मिलता, बल्कि उनके बीच मौजूद तत्वों की संख्या मिलती है!\n\n४. ऐरे और पॉइंटर्स का अटूट संबंध:\nC भाषा में ऐरे का नाम वास्तव में उसके पहले तत्व के पते (&arr[0]) के बराबर होता है।\nऐरे में 'arr[i]' लिखना वास्तव में पॉइंटर अंकगणित '*(arr + i)' का ही सुंदर रूप है।\nचूंकि जोड़ में क्रम बदलने से फर्क नहीं पड़ता, इसलिए '*(arr + i)' और '*(i + arr)' एक समान हैं, जिसका अर्थ है कि C में 'i[arr]' लिखना भी 100% मान्य है और सही काम करता है!\n\n५. पॉइंटर्स के विशेष प्रकार:\n१. NULL पॉइंटर: एक ऐसा पॉइंटर जिसका मान 0 या NULL होता है। यह किसी भी वैध मेमोरी को इंगित नहीं करता। NULL पॉइंटर को डीरेफरेंस (*ptr) करने पर प्रोग्राम तुरंत सेग्मेंटेशन फॉल्ट (SIGSEGV) से क्रैश हो जाता है।\n२. Void पॉइंटर (void* - जेनेरिक पॉइंटर): यह किसी भी प्रकार के डेटा का पता रख सकता है। malloc() फंक्शन void* लौटाता है। इसे सीधे डीरेफरेंस नहीं किया जा सकता; पहले उचित प्रकार में टाइपकास्ट करना पड़ता है।\n३. डबल पॉइंटर (**ptr): पॉइंटर का पॉइंटर। यह किसी दूसरे पॉइंटर वेरिएबल का मेमोरी एड्रेस स्टोर करता है।\n४. डैंगलिंग पॉइंटर (Dangling Pointer): एक ऐसा पॉइंटर जो उस मेमोरी को इंगित कर रहा है जिसे पहले ही डिलीट (free) किया जा चुका है या जो फंक्शन खत्म होने से नष्ट हो चुकी है। इसका उपयोग करने पर अनपेक्षित परिणाम आते हैं।\n\n६. कॉल बाई रेफरेंस (Pass by Reference) का अनुकरण:\nC में सभी मान केवल कॉपी के रूप में भेजे जाते हैं। यदि किसी फंक्शन के अंदर मुख्य प्रोग्राम के वेरिएबल्स को बदलना हो, तो हम उनके मेमोरी पते (&a, &b) भेजते हैं। फंक्शन पॉइंटर के जरिए सीधे मुख्य मेमोरी में बदलाव कर देता है (जैसे swap फंक्शन)।\n\n७. फंक्शन पॉइंटर्स और कॉलबैक सिस्टम आर्किटेक्चर (Function Pointers):\nकंप्यूटर में कंपाइल होने के बाद फंक्शन्स कोई अमूर्त विचार नहीं रहते, बल्कि वे मेमोरी के टेक्स्ट सेगमेंट (Text Segment) में रखे मशीन कोड निर्देशों का एक समूह बन जाते हैं जिसका एक निश्चित हेक्साडेसिमल मेमोरी एड्रेस होता है।\nफंक्शन पॉइंटर एक ऐसा पॉइंटर है जो किसी वेरिएबल के पते के बजाय सीधे किसी फंक्शन के शुरुआती मशीन कोड का पता स्टोर करता है।\n- फंक्शन पॉइंटर का सिंटैक्स:\n```c\nint (*funcPtr)(int, int); // दो पूर्णांक लेने वाले और पूर्णांक लौटाने वाले फंक्शन का पॉइंटर\n```\n- वास्तविक सॉफ्टवेयर में इसका उपयोग:\n१. कॉलबैक फंक्शन्स (Callbacks): किसी फंक्शन के अंदर दूसरे फंक्शन को तर्क के रूप में भेजना। उदाहरण के लिए C का मानक फंक्शन qsort() किसी भी ऐरे को सॉर्ट करने के लिए तुलना करने वाले कॉलबैक फंक्शन पॉइंटर का उपयोग करता है।\n२. स्टेट मशीन और जंप टेबल: फंक्शन पॉइंटर्स का ऐरे बनाकर हम बड़े-बड़े switch-case को हटाकर O(1) समय में सीधे सही फंक्शन पर छलांग लगा सकते हैं।\n३. लिनक्स कर्नल में ऑब्जेक्ट-ओरिएंटेड प्रोग्रामिंग: स्ट्रक्चर के अंदर फंक्शन पॉइंटर्स रखकर लिनक्स कर्नल विभिन्न हार्डवेयर ड्राइवर्स के लिए एक समान इंटरफेस बनाता है (जैसे file_operations में read, write फंक्शन्स के पॉइंटर्स)।",
+  "realLifeAnalogy": {
+    "en": "Think of a regular variable as your physical house, and a pointer as a piece of paper with your GPS home address written on it. Giving someone the piece of paper (passing a pointer) allows them to travel directly to your house and paint your front door (modifying the variable in memory) without needing to clone your entire house!",
+    "hi": "साधारण वेरिएबल की तुलना अपने घर से करें, और पॉइंटर की तुलना एक पर्ची से करें जिस पर आपके घर का जीपीएस पता लिखा है। किसी को वह पर्ची देने से वह सीधे आपके घर पहुँचकर दरवाजे पर पेंट कर सकता है (मेमोरी में बदलाव), इसके लिए उसे पूरे घर की नकल बनाने की आवश्यकता नहीं होती!"
+  },
+  "codeExamples": [
+    {
+      "title": "Pass-by-Reference Swap and Pointer Arithmetic",
+      "titleHindi": "पॉइंटर द्वारा दो संख्याओं की अदला-बदली और अंकगणित",
+      "code": "#include <stdio.h>\n\nvoid swap(int *x, int *y) {\n    int temp = *x; // Read value at address x\n    *x = *y;       // Store value at y into address x\n    *y = temp;     // Store temp into address y\n}\n\nint main() {\n    int a = 10, b = 20;\n    printf(\"Before Swap: a = %d, b = %d\n\", a, b);\n    \n    swap(&a, &b); // Pass memory addresses\n    printf(\"After Swap:  a = %d, b = %d\n\", a, b);\n    \n    // Pointer Arithmetic demonstration\n    int arr[3] = {100, 200, 300};\n    int *ptr = arr;\n    \n    printf(\"\nPointer Traversal of Array:\n\");\n    for (int i = 0; i < 3; i++) {\n        printf(\"Element %d = %d at address %p\n\", i, *(ptr + i), (void*)(ptr + i));\n    }\n    return 0;\n}",
+      "output": "Before Swap: a = 10, b = 20\nAfter Swap:  a = 20, b = 10\n\nPointer Traversal of Array:\nElement 0 = 100 at address 0x7ffd98b2c4e0\nElement 1 = 200 at address 0x7ffd98b2c4e4\nElement 2 = 300 at address 0x7ffd98b2c4e8",
+      "explanation": "Demonstrates successful modification of caller variables via memory pointers and pointer arithmetic address scaling.",
+      "explanationHindi": "मेमोरी पतों द्वारा कॉलर वेरिएबल्स की सफल अदला-बदली और पॉइंटर अंकगणित द्वारा 4-4 बाइट्स आगे बढ़ने का प्रदर्शन।"
+    }
+  ],
+  "practicals": [
+    {
+      "id": "prac-ptr-1",
+      "title": "Dynamic Array Allocation and Safe Memory Release",
+      "titleHindi": "डायनेमिक मेमोरी आवंटन और सुरक्षित रिलीज",
+      "objective": "Allocate memory dynamically on the heap using malloc and prevent memory leaks with free.",
+      "objectiveHindi": "malloc से हीप मेमोरी आवंटित करें और free से मेमोरी लीक रोकें।",
+      "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main() {\n    int n = 3;\n    int *arr = (int*)malloc(n * sizeof(int));\n    \n    if (arr == NULL) {\n        printf(\"Memory allocation failed!\n\");\n        return 1;\n    }\n    \n    for (int i = 0; i < n; i++) {\n        arr[i] = (i + 1) * 10;\n    }\n    \n    printf(\"Dynamically allocated values: \");\n    for (int i = 0; i < n; i++) {\n        printf(\"%d \", *(arr + i));\n    }\n    printf(\"\n\");\n    \n    free(arr);    // Free heap memory\n    arr = NULL;   // Prevent dangling pointer!\n    printf(\"Memory freed safely.\n\");\n    return 0;\n}",
+      "expectedOutput": "Dynamically allocated values: 10 20 30 \nMemory freed safely.",
+      "lineByLineExplanation": [
+        {
+          "line": "if (arr == NULL)",
+          "noteEn": "Always verify malloc succeeded before dereferencing.",
+          "noteHi": "मेमोरी का उपयोग करने से पहले हमेशा NULL की जांच करें।"
+        },
+        {
+          "line": "arr = NULL;",
+          "noteEn": "Assigning NULL prevents accidental dangling pointer usage.",
+          "noteHi": "free करने के बाद पॉइंटर को NULL बनाना डैंगलिंग पॉइंटर से बचाता है।"
+        }
+      ]
+    }
+  ],
+  "keyPoints": {
+    "en": [
+      "All pointers are 8 bytes on 64-bit systems and 4 bytes on 32-bit systems.",
+      "& gives memory address; * dereferences address.",
+      "ptr + 1 advances address by sizeof(*ptr) bytes.",
+      "Always set freed pointers to NULL."
+    ],
+    "hi": [
+      "64-बिट पर सभी पॉइंटर्स 8 बाइट्स और 32-बिट पर 4 बाइट्स के होते हैं।",
+      "& मेमोरी का पता देता है; * उस पते पर रखा मान देता है।",
+      "ptr + 1 एड्रेस को sizeof(*ptr) बाइट्स आगे बढ़ाता है।",
+      "मेमोरी फ्री करने के बाद पॉइंटर को हमेशा NULL करें।"
+    ]
+  },
+  "commonPitfalls": {
+    "en": [
+      "Dereferencing NULL or uninitialized wild pointers (causes immediate crash).",
+      "Memory leaks by forgetting to call free() on malloc-allocated memory.",
+      "Using dangling pointers after memory has been freed."
+    ],
+    "hi": [
+      "NULL या अनइनिशियलाइज्ड पॉइंटर को डीरेफरेंस करना जिससे प्रोग्राम क्रैश हो जाता है।",
+      "malloc से ली गई मेमोरी को free() करना भूल जाना जिससे मेमोरी लीक होती है।",
+      "फ्री की जा चुकी मेमोरी वाले डैंगलिंग पॉइंटर का उपयोग करना।"
+    ]
+  }
+  ,
+  "quiz": getTopicQuestionBank("pointer", "Pointers, Memory Addressing & Pointer Arithmetic")
+},
+{
+  "id": "user-defined-data-type",
+  "order": 11,
+  "title": "User-Defined Data Types: Struct, Union, Enum & Typedef",
+  "titleHindi": "यूजर डिफाइंड डेटा टाइप्स: स्ट्रक्चर्स, यूनियन्स और इनम (User Defined Types)",
+  "category": "Data Structures",
+  "summary": "Master custom composite data types in C: Struct declarations, member access dot (.) and arrow (->) operators, CPU memory alignment and struct padding bytes, Unions and shared overlapping memory, Enumerations (enum) integer naming, typedef aliases, and hardware bit-fields.",
+  "summaryHindi": "C भाषा में कस्टम डेटा टाइप्स का गहन अध्ययन: स्ट्रक्चर (struct) डिक्लेरेशन, डॉट (.) और एरो (->) ऑपरेटर्स, सीपीयू मेमोरी अलाइनमेंट और स्ट्रक्चर पैडिंग, यूनियन (union) की साझा मेमोरी, इनम (enum) और टाइपडेफ (typedef) का उपयोग, तथा हार्डवेयर बिट-फील्ड्स।",
+  "readTimeMinutes": 21,
+  "explanationEn": "1. WHY USER-DEFINED DATA TYPES ARE NECESSARY:\nPrimitive data types (int, float, char) represent isolated, single values. However, real-world software entities are inherently composite: a Student has a name (string), roll number (integer), and GPA (float); an Operating System Thread has an ID, stack pointer, priority, and state. Grouping these related attributes into a single unified construct creates high-level domain abstractions while maintaining C's bare-metal performance.\nC provides four foundational mechanisms for creating user-defined types:\n1. Structures ('struct')\n2. Unions ('union')\n3. Enumerations ('enum')\n4. Type Aliasing ('typedef')\n\n2. STRUCTURES ('struct') & MEMBER ACCESS:\nA Structure is a composite user-defined data type that groups variables of DIFFERENT data types under a single unified name. Each variable within a structure is called a Member.\nSyntax:\n```c\nstruct Student {\n    int id;\n    char name[50];\n    float gpa;\n};\n```\n- Member Access Operators:\n  1. The Dot Operator (.): Used to access members when working with a direct structure variable:\n     'student1.id = 101;'\n  2. The Arrow Operator (->): Used when accessing members through a POINTER to a structure:\n     'struct Student *ptr = &student1; ptr->id = 101;'\n     The arrow operator 'ptr->id' is shorthand syntactic sugar for '(*ptr).id'. The parentheses are strictly required because the dot operator (.) has higher precedence than the dereference operator (*).\n\n3. MEMORY ALIGNMENT & STRUCT PADDING:\nA common misconception among beginners is that the total byte size of a struct equals the exact sum of its members' individual sizes. On modern CPUs, this is rarely true!\nWhy Struct Padding Exists:\nModern 32-bit and 64-bit microprocessors do not read memory from RAM one byte at a time; they read in 4-byte or 8-byte Word-aligned chunks. Accessing an unaligned 4-byte integer spanning across two word boundaries requires two separate RAM memory read cycles plus bit shifting. To optimize CPU throughput, C compilers automatically insert invisible Padding Bytes between members so that each data type aligns to an address divisible by its own size.\nExample:\n```c\nstruct Sample {\n    char a;    // 1 byte\n    // 3 compiler padding bytes inserted here!\n    int b;     // 4 bytes (aligned to 4-byte boundary)\n    char c;    // 1 byte\n    // 3 compiler trailing padding bytes inserted here!\n};\n```\nEven though the actual data occupies 1 + 4 + 1 = 6 bytes, 'sizeof(struct Sample)' is 12 bytes!\nOptimization Rule: Declare structure members in descending order of size (largest to smallest) to minimize wasted padding bytes.\n\n4. UNIONS ('union') & SHARED OVERLAPPING MEMORY:\nA Union syntactically resembles a struct, but fundamentally differs in how it allocates physical memory:\n- In a struct, every member has its own independent memory location; total size is the sum of all members (plus padding).\n- In a union, ALL members share the EXACT SAME physical memory location!\n- Total Size of a Union: The size of a union is equal to the size of its LARGEST member (padded for alignment).\n- Usage: Only ONE member can hold a valid value at any given moment. Writing to member B immediately overwrites and corrupts the value of member A. Unions are extensively utilized in embedded systems, network packet parsers, and hardware register mapping where the same memory chunk represents different data types under different contexts.\n\n5. ENUMERATIONS ('enum'):\nAn Enumeration is a user-defined type consisting of named integral constants:\n```c\nenum Days { SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY };\n```\nBy default, the compiler assigns integer 0 to the first identifier (SUNDAY = 0), 1 to the second (MONDAY = 1), and so forth. Custom values can be assigned at will (e.g., enum Status { ERR = -1, OK = 0, PENDING = 1 };). Enums dramatically enhance code readability and maintainability compared to magic numbers.\n\n6. TYPEDEF & HARDWARE BIT-FIELDS:\n- 'typedef':\nThe typedef keyword creates a new, memorable alias for an existing data type:\n```c\ntypedef struct Student Student; // Now we can write 'Student s1;' without the 'struct' keyword!\n```\n- Bit-Fields:\nAllow precise bit-level packing of structure members to match hardware registers or conserve RAM in microcontrollers:\n```c\nstruct Flags {\n    unsigned int isReady : 1;  // Occupies exactly 1 bit!\n    unsigned int mode    : 3;  // Occupies exactly 3 bits (values 0-7)\n};\n```\n\n7. NESTED STRUCTURES & SELF-REFERENTIAL DATA STRUCTURES:\n- Nested Structures:\nA structure can contain another structure as a member, enabling clean hierarchical modeling of real-world entities:\n```c\nstruct Date { int day, month, year; };\nstruct Employee { int id; char name[40]; struct Date joinDate; };\n```\nMember access traverses through dot operators: emp.joinDate.year = 2026;\n- Self-Referential Structures (The Backbone of Dynamic Data Structures):\nA Self-Referential Structure contains a pointer member that points to an instance of the EXACT SAME structure type.\nSyntax:\n```c\nstruct Node {\n    int data;\n    struct Node *next; // Self-referential pointer!\n};\n```\nSelf-referential structures cannot contain an entire instance of themselves directly (which would require infinite recursive memory bytes!), but they CAN contain a pointer to themselves because all pointers have a fixed known size (8 bytes on 64-bit systems).\nSelf-referential structures are the universal building blocks for implementing non-contiguous dynamic data structures in C, including Singly Linked Lists, Doubly Linked Lists, Circular Lists, Binary Search Trees, AVL Trees, Heaps, and Graph adjacency lists.\n- C99 Flexible Array Members:\nA structure can declare an unsized array as its final member (e.g., struct Packet { int len; char data[]; };), enabling allocation of dynamic variable-sized payload packets with zero wasted memory overhead.",
+  "explanationHi": "१. यूजर डिफाइंड डेटा टाइप्स की आवश्यकता क्यों है?\nप्राथमिक डेटा टाइप्स (int, float, char) केवल अकेले, बिखरे हुए मानों को स्टोर करते हैं। लेकिन वास्तविक जीवन की चीजें जटिल होती हैं: जैसे किसी छात्र का रोल नंबर (int), नाम (string) और अंक (float) होते हैं। यदि हम अलग-अलग वेरिएबल्स बनाएंगे तो कोड बिखर जाएगा।\nC भाषा विभिन्न प्रकार के डेटा को एक साथ बांधकर नए कस्टम डेटा प्रकार बनाने के लिए चार शक्तिशाली साधन प्रदान करती है:\n१. स्ट्रक्चर्स ('struct')\n२. यूनियन्स ('union')\n३. इन्यूमरेशन्स ('enum')\n४. टाइपडेफ ('typedef')\n\n२. स्ट्रक्चर्स ('struct') और सदस्य एक्सेस:\nस्ट्रक्चर एक ऐसा यूजर-डिफाइंड डेटा टाइप है जो अलग-अलग प्रकार के डेटा तत्वों को एक नाम के अंतर्गत समेटता है। इसके अंदर के वेरिएबल्स को 'मेम्बर्स' (Members) कहा जाता है।\n- मेम्बर्स को एक्सेस करने के दो ऑपरेटर:\n१. डॉट ऑपरेटर (.): जब हम सीधे स्ट्रक्चर वेरिएबल के साथ काम करते हैं (जैसे s1.id = 101)।\n२. एरो ऑपरेटर (->): जब हम स्ट्रक्चर के पॉइंटर के जरिए मेम्बर्स को एक्सेस करते हैं (जैसे ptr->id = 101)। एरो ऑपरेटर '(*ptr).id' का संक्षिप्त रूप है।\n\n३. मेमोरी अलाइनमेंट और स्ट्रक्चर पैडिंग (Struct Padding):\nअधिकांश नए प्रोग्रामर सोचते हैं कि स्ट्रक्चर का कुल आकार उसके सभी सदस्यों के आकारों का सीधा जोड़ होता है। लेकिन आधुनिक कंप्यूटरों में ऐसा नहीं होता!\nपैडिंग क्यों होती है?\nआधुनिक सीपीयू रैम से डेटा एक-एक बाइट करके नहीं पढ़ते, बल्कि 4-बाइट या 8-बाइट के 'वर्ड' (Word) में पढ़ते हैं। यदि कोई 4-बाइट का int किसी विषम पते पर होगा, तो सीपीयू को उसे पढ़ने के लिए दो बार मेमोरी पढ़नी पड़ेगी जिससे सिस्टम धीमा हो जाएगा। सीपीयू की गति बढ़ाने के लिए C कंपाइलर सदस्यों के बीच में कुछ खाली बाइट्स (Padding Bytes) स्वतः जोड़ देता है ताकि हर डेटा अपने आकार के गुणक पते पर ही शुरू हो।\nउदाहरण के लिए, यदि स्ट्रक्चर में char (1 बाइट), int (4 बाइट) और char (1 बाइट) हों, तो कुल डेटा 6 बाइट्स का है, लेकिन कंपाइलर पैडिंग जोड़कर इसका कुल आकार 12 बाइट्स कर देता है!\nमेमोरी बचाने का नियम: स्ट्रक्चर में हमेशा बड़े डेटा प्रकार पहले और छोटे डेटा प्रकार बाद में लिखें।\n\n४. यूनियन्स ('union') और साझा मेमोरी:\nयूनियन दिखने में स्ट्रक्चर जैसा होता है, लेकिन मेमोरी के मामले में पूरी तरह विपरीत होता है:\n- स्ट्रक्चर में हर सदस्य को अलग मेमोरी मिलती है।\n- यूनियन में सभी सदस्य एक ही साझा मेमोरी (Same Memory Location) का उपयोग करते हैं!\n- यूनियन का कुल आकार उसके सबसे बड़े सदस्य के आकार के बराबर होता है।\n- एक समय में केवल एक ही सदस्य का मान सुरक्षित रहता है। जैसे ही आप दूसरे सदस्य में मान लिखेंगे, पहले वाले का मान मिट जाएगा। इसका उपयोग एम्बेडेड सिस्टम्स और हार्डवेयर में मेमोरी बचाने के लिए किया जाता है।\n\n५. इन्यूमरेशन ('enum'):\nenum पूर्णांक कॉन्स्टेंट्स को मानव-पठनीय नाम देने का तरीका है:\n'enum Days { SUN, MON, TUE, WED, THU, FRI, SAT };'\nकंपाइलर SUN को स्वतः 0, MON को 1 आदि मान देता है। इससे कोड में जादुई संख्याओं (Magic Numbers) के बजाय सुंदर नाम उपयोग किए जा सकते हैं।\n\n६. टाइपडेफ ('typedef') और बिट-फील्ड्स:\n- 'typedef': किसी लंबे डेटा टाइप को एक छोटा और सरल उपनाम देने के लिए उपयोग होता है (जैसे 'typedef unsigned long long uint64;' या स्ट्रक्चर को सरल नाम देना)।\n- बिट-फील्ड्स (Bit-Fields): स्ट्रक्चर के सदस्यों को बाइट्स के बजाय सीधे बिट्स के स्तर पर आकार देना (जैसे किसी फ्लैग के लिए केवल 1 बिट आरक्षित करना) ताकि माइक्रोकंट्रोलर में मेमोरी की भारी बचत हो सके।\n\n७. नेस्टेड स्ट्रक्चर्स और सेल्फ-रेफरेंशियल डेटा संरचनाएं (Self-Referential Structures):\n- नेस्टेड स्ट्रक्चर (Nested Structures):\nएक स्ट्रक्चर के अंदर किसी दूसरे स्ट्रक्चर को सदस्य बनाना नेस्टेड स्ट्रक्चर कहलाता है (जैसे Employee स्ट्रक्चर के अंदर Date of Birth का स्ट्रक्चर होना)। इसे 'emp.dob.year = 2000;' जैसे डॉट ऑपरेटर्स से एक्सेस किया जाता है।\n- सेल्फ-रेफरेंशियल स्ट्रक्चर (Self-Referential Structure):\nयह C भाषा की सबसे महत्वपूर्ण अवधारणाओं में से एक है। एक ऐसा स्ट्रक्चर जिसके अंदर एक पॉइंटर सदस्य होता है जो उसी के प्रकार के दूसरे स्ट्रक्चर को इंगित करता है:\n```c\nstruct Node {\n    int data;\n    struct Node *next; // खुद के प्रकार का पॉइंटर!\n};\n```\nकोई भी स्ट्रक्चर अपने अंदर खुद की पूरी नकल नहीं रख सकता (क्योंकि इसके लिए अनंत मेमोरी चाहिए होगी), लेकिन वह अपने ही प्रकार का पॉइंटर रख सकता है क्योंकि पॉइंटर का आकार हमेशा निश्चित (8 बाइट्स) होता है।\nयही सेल्फ-रेफरेंशियल स्ट्रक्चर लिंक्ड लिस्ट (Linked List), बाइनरी ट्री (Binary Tree), स्टैक, क्यू और ग्राफ जैसी सभी जटिल डायनेमिक डेटा संरचनाओं का आधार है।\n- C99 फ्लेक्सिबल ऐरे मेम्बर्स (Flexible Array Members):\nस्ट्रक्चर के अंतिम सदस्य के रूप में बिना साइज का ऐरे घोषित करना (जैसे char data[];) ताकि नेटवर्क पैकेट्स के लिए रनटाइम पर मनचाही मेमोरी आरक्षित की जा सके।\n- स्ट्रक्चर बनाम यूनियन का गहन अंतर और मेमोरी संरेखण नियम:\nस्ट्रक्चर में प्रत्येक सदस्य को अलग-अलग स्वतंत्र मेमोरी मिलती है, इसलिए इसका कुल आकार सभी सदस्यों के आकारों के योग या पैडिंग के बराबर होता है। इसके विपरीत, यूनियन में सभी सदस्य एक ही मेमोरी लोकेशन को साझा करते हैं, और इसका आकार केवल सबसे बड़े सदस्य के बराबर होता है। यूनियन का उपयोग तब किया जाता है जब एक समय में केवल एक ही डेटा स्टोर करना हो (जैसे विभिन्न प्रकार के नेटवर्क पैकेट या वेरिएंट प्रकार)। टाइपडेफ (typedef) का मुख्य लाभ जटिल प्रकारों जैसे फंक्शन पॉइंटर्स और नेस्टेड स्ट्रक्चर्स को सरल और पठनीय उपनाम प्रदान करना है।",
+  "realLifeAnalogy": {
+    "en": "Think of a 'struct' like a student backpack with separate pockets for a laptop, a water bottle, and a pen: all items exist simultaneously in their own space. Think of a 'union' like a single convertible sofa-bed in a studio apartment: it can be a comfortable sofa OR a bed, but you cannot use both simultaneously because they occupy the exact same physical furniture space!",
+    "hi": "स्ट्रक्चर की तुलना एक स्कूल बैग से करें जिसमें लैपटॉप, पानी की बोतल और पेन के लिए अलग-अलग जेबें हैं: सभी वस्तुएं अपनी-अपनी जगह एक साथ रह सकती हैं। यूनियन की तुलना एक सोफा-कम-बेड से करें: वह या तो सोफा बन सकता है या बिस्तर, दोनों एक साथ नहीं हो सकते क्योंकि दोनों एक ही भौतिक स्थान साझा करते हैं!"
+  },
+  "codeExamples": [
+    {
+      "title": "Struct Padding vs Union Shared Memory Demonstration",
+      "titleHindi": "स्ट्रक्चर पैडिंग बनाम यूनियन की साझा मेमोरी का C कोड",
+      "code": "#include <stdio.h>\n\nstruct StudentStruct {\n    char grade;      // 1 byte (+ 3 padding bytes)\n    int roll;        // 4 bytes\n    double fee;      // 8 bytes\n};\n\nunion DataUnion {\n    int intVal;      // 4 bytes\n    float floatVal;  // 4 bytes\n    char charVal;    // 1 byte\n};\n\nint main() {\n    printf(\"Size of struct StudentStruct: %zu bytes (1+4+8 = 13 + padding = 16!)\n\", sizeof(struct StudentStruct));\n    printf(\"Size of union DataUnion:       %zu bytes (largest member size = 4)\n\", sizeof(union DataUnion));\n    \n    // Demonstrate union shared memory overwriting\n    union DataUnion u;\n    u.intVal = 65;\n    printf(\"\nu.intVal set to: %d\n\", u.intVal);\n    printf(\"u.charVal reads:  '%c' (ASCII 65 is 'A'!)\n\", u.charVal);\n    \n    u.floatVal = 3.14f;\n    printf(\"After setting u.floatVal = 3.14, u.intVal is corrupted: %d\n\", u.intVal);\n    return 0;\n}",
+      "output": "Size of struct StudentStruct: 16 bytes (1+4+8 = 13 + padding = 16!)\nSize of union DataUnion:       4 bytes (largest member size = 4)\n\nu.intVal set to: 65\nu.charVal reads:  'A' (ASCII 65 is 'A'!)\nAfter setting u.floatVal = 3.14, u.intVal is corrupted: 1078523331",
+      "explanation": "Demonstrates struct padding expansion to 16 bytes and proves that union members share identical memory bytes.",
+      "explanationHindi": "स्ट्रक्चर में पैडिंग के कारण 16 बाइट्स आकार और यूनियन में सभी सदस्यों द्वारा एक ही मेमोरी साझा करने का व्यावहारिक प्रदर्शन।"
+    }
+  ],
+  "practicals": [
+    {
+      "id": "prac-udt-1",
+      "title": "Array of Structures with Pointer Arrow Operator",
+      "titleHindi": "स्ट्रक्चर्स का ऐरे और एरो (->) ऑपरेटर का उपयोग",
+      "objective": "Manage multiple records using an array of structures and traverse with a pointer.",
+      "objectiveHindi": "स्ट्रक्चर ऐरे बनाएं और पॉइंटर एरो ऑपरेटर से डेटा प्रोसेस करें।",
+      "code": "#include <stdio.h>\n\ntypedef struct {\n    int id;\n    char grade;\n    float marks;\n} Record;\n\nint main() {\n    Record students[2] = {\n        {101, 'A', 92.5f},\n        {102, 'B', 81.0f}\n    };\n    \n    Record *ptr = students; // Points to first record\n    \n    for (int i = 0; i < 2; i++) {\n        printf(\"Student %d -> ID: %d | Grade: %c | Marks: %.1f\n\", \n               i + 1, (ptr + i)->id, (ptr + i)->grade, (ptr + i)->marks);\n    }\n    return 0;\n}",
+      "expectedOutput": "Student 1 -> ID: 101 | Grade: A | Marks: 92.5\nStudent 2 -> ID: 102 | Grade: B | Marks: 81.0",
+      "lineByLineExplanation": [
+        {
+          "line": "(ptr + i)->id",
+          "noteEn": "Advances pointer by sizeof(Record) and dereferences id member.",
+          "noteHi": "पॉइंटर को अगले रिकॉर्ड पर ले जाकर एरो से id सदस्य पढ़ता है।"
+        },
+        {
+          "line": "typedef struct { ... } Record;",
+          "noteEn": "Defines clean type alias eliminating repeated 'struct' keyword.",
+          "noteHi": "स्ट्रक्चर को संक्षिप्त नाम देता है ताकि बार-बार struct न लिखना पड़े।"
+        }
+      ]
+    }
+  ],
+  "keyPoints": {
+    "en": [
+      "struct members have separate memory; union members share the same memory.",
+      "Compiler inserts padding bytes for CPU word alignment.",
+      "Use dot (.) for direct variables and arrow (->) for structure pointers.",
+      "typedef creates type aliases."
+    ],
+    "hi": [
+      "struct के सभी सदस्यों को अलग मेमोरी मिलती है; union के सभी सदस्य एक ही मेमोरी साझा करते हैं।",
+      "सीपीयू स्पीड के लिए कंपाइलर स्ट्रक्चर में पैडिंग बाइट्स जोड़ता है।",
+      "वेरिएबल के लिए डॉट (.) और पॉइंटर के लिए एरो (->) ऑपरेटर का उपयोग करें।",
+      "typedef डेटा टाइप को सरल उपनाम देता है।"
+    ]
+  },
+  "commonPitfalls": {
+    "en": [
+      "Assuming sizeof(struct) is exact mathematical sum of member sizes.",
+      "Reading from a union member that was not the most recently written.",
+      "Using dot operator on a pointer instead of arrow operator."
+    ],
+    "hi": [
+      "स्ट्रक्चर के आकार को केवल सदस्यों के आकारों का जोड़ समझना (पैडिंग भूल जाना)।",
+      "यूनियन के उस सदस्य को पढ़ना जिसमें हाल ही में मान नहीं लिखा गया था।",
+      "पॉइंटर पर एरो (->) के स्थान पर गलती से डॉट (.) ऑपरेटर लगाना।"
+    ]
+  }
+  ,
+  "quiz": getTopicQuestionBank("user-defined-data-type", "User-Defined Data Types: Struct, Union, Enum & Typedef")
+},
+{
+  "id": "error",
+  "order": 12,
+  "title": "Errors, Debugging, Segmentation Faults & Undefined Behavior",
+  "titleHindi": "त्रुटियों के प्रकार, डिबगिंग और अनडिफाइंड बिहेवियर (Errors & Debugging)",
+  "category": "Basics",
+  "summary": "Master software defect triage in C: Syntax compile-time errors, Linker unresolved symbols (LNK2019 / undefined reference to main), Runtime crashes, Logical calculation bugs, Segmentation faults (SIGSEGV), Stack overflow, Undefined Behavior (UB) compiler optimization hazards, Defensive assertions with assert.h, and gdb debugging.",
+  "summaryHindi": "C भाषा में त्रुटियों का संपूर्ण वर्गीकरण: सिंटैक्स एरर, लिंकर एरर (undefined reference to main), रनटाइम एरर, लॉजिकल एरर, सेग्मेंटेशन फॉल्ट (SIGSEGV), स्टैक ओवरफ्लो, अनडिफाइंड बिहेवियर (UB) के खतरे, assert.h द्वारा रक्षात्मक प्रोग्रामिंग और डिबगिंग तकनीक।",
+  "readTimeMinutes": 21,
+  "explanationEn": "1. TAXONOMY OF SOFTWARE DEFECTS IN C:\nDeveloping production-grade systems software in C requires deep familiarity with the distinct phases where errors manifest. Unlike managed languages (Java, Python, C#) that throw safe, catchable virtual machine exceptions, C operates directly on bare metal. An unhandled defect in C causes silent memory corruption, catastrophic security breaches, or immediate operating system termination signals.\nErrors in C fall into four fundamental categories:\n1. Compile-Time Errors (Syntax & Semantic Errors)\n2. Linker Errors (Unresolved External Symbols)\n3. Runtime Errors (Faults, Exceptions, System Signals)\n4. Logical Errors (Algorithmic Flaws)\n\n2. COMPILE-TIME ERRORS (SYNTAX & SEMANTIC):\nOccur during the preprocessing, lexical analysis, parsing, and type-checking phases of the compiler (gcc / clang / msvc).\n- Syntax Errors: Violations of the grammatical grammar rules of C (e.g., missing semicolons, unmatched curly braces, misspelled keywords like 'whlie' instead of 'while'). The compiler halts and refuses to emit an object (.o / .obj) file.\n- Semantic Errors: Syntactically valid statements that violate C type system constraints (e.g., assigning a string literal to an integer variable, passing the wrong number of arguments to a function, or attempting to modify a const variable).\n\n3. LINKER ERRORS (UNRESOLVED REFERENCES):\nThe linker combines multiple compiled object files and libraries into a final executable binary. Linker errors occur when code references a symbol (function or global variable) whose actual compiled definition cannot be located:\n- Classic Linker Error: 'undefined reference to `main`': Occurs if the program entry point main() is missing or misspelled (e.g., typing 'mian()').\n- 'undefined reference to `sqrt`': Occurs when header <math.h> is included but the math library is not linked via the '-lm' compiler flag.\n- Multiple Definition Error: Occurs when the same global variable or non-inline function is defined across multiple source files without 'extern'.\n\n4. RUNTIME ERRORS & OPERATING SYSTEM SIGNALS:\nRuntime errors occur while the compiled binary is actively executing on the physical CPU:\n1. Segmentation Fault (SIGSEGV - Signal 11):\nTriggered by the CPU's Memory Management Unit (MMU) when a program attempts to access a virtual memory address that it does not own or has no permission to access.\nCommon Causes:\n- Dereferencing a NULL pointer (*(int*)NULL = 5;).\n- Dereferencing an uninitialized wild pointer.\n- Writing to read-only string literal memory (char *s = \"Hello\"; s[0] = 'M'; -> CRASH!).\n- Buffer overflow walking past stack boundaries into protected OS pages.\n2. Bus Error (SIGBUS):\nTriggered when CPU hardware attempts unaligned memory access on architectures that strictly enforce alignment.\n3. Floating Point Exception (SIGFPE):\nTriggered by mathematical hardware faults, most commonly integer division by zero (e.g., int x = 10 / 0;). Note: Float division by zero in IEEE-754 yields INFINITY, not SIGFPE!\n4. Stack Overflow:\nOccurs when deep or infinite recursion exhausts the call stack boundary (typically 8MB on Linux).\n\n5. THE DARK REALM OF UNDEFINED BEHAVIOR (UB):\nIn the ISO C standard, certain operations are categorized as Undefined Behavior (UB). When UB is encountered, the C standard places ZERO requirements on the compiler or hardware. The program is not required to crash; it may appear to work today, produce garbage tomorrow, or the optimizing compiler may delete entire blocks of code assuming UB can never happen!\nFamous Undefined Behaviors in C:\n- Signed integer overflow (INT_MAX + 1).\n- Modifying a variable twice without an intervening sequence point (i = i++; or func(i++, i++)).\n- Accessing memory after calling free() (use-after-free).\n- Reading uninitialized automatic local variables.\n- Shifting a 32-bit integer by 32 or more bits.\n\n6. DEFENSIVE PROGRAMMING & ASSERTIONS:\nTo detect bugs early during development, professional systems engineers employ assertions from standard header <assert.h>:\n```c\nassert(ptr != NULL);\nassert(divisor != 0);\n```\nIf the condition evaluates to false (0), assert() immediately prints the failing expression, source file name, and line number to stderr, and terminates execution via abort(). In production release builds, compiling with '-DNDEBUG' completely disables all assert checks without runtime performance penalty!\n\n7. STATIC ANALYSIS, VALGRIND & ADDRESS SANITIZER (ASAN):\nDiagnosing complex memory corruptions and segmentation faults purely by visual inspection is extremely difficult. Modern systems engineering utilizes automated diagnostic tooling:\n1. Aggressive Compiler Diagnostics:\nAlways compile with comprehensive warning flags:\n```bash\ngcc -Wall -Wextra -Werror -pedantic -std=c11 program.c\n```\nThis forces the compiler to treat all suspicious constructs (such as unused variables, implicit type conversions, and uninitialized reads) as fatal errors before binary generation.\n2. AddressSanitizer (ASan) & UndefinedBehaviorSanitizer (UBSan):\nIntegrated directly into GCC and Clang, ASan instruments memory loads and stores with fast shadow memory checks:\n```bash\ngcc -fsanitize=address,undefined -g program.c -o program\n```\nWhen executed, ASan instantly catches out-of-bounds stack/heap accesses, use-after-free, double-free, and integer overflows at the exact instruction they occur, printing full source line stack traces!\n3. Valgrind Memcheck:\nAn external CPU emulation suite that intercepts all heap allocations and deallocations, reporting the exact byte counts of memory leaks and uninitialized memory reads without requiring source recompilation.",
+  "explanationHi": "१. C भाषा में सॉफ्टवेयर त्रुटियों का संपूर्ण वर्गीकरण:\nC भाषा में मजबूत और सुरक्षित सॉफ्टवेयर बनाने के लिए यह समझना अनिवार्य है कि गलतियाँ प्रोग्राम के किस चरण में सामने आती हैं। पायथन या जावा जैसी भाषाओं के विपरीत जहाँ गलतियाँ सुरक्षित अपवादों (Exceptions) के रूप में पकड़ी जा सकती हैं, C भाषा सीधे कंप्यूटर के हार्डवेयर और मेमोरी पर काम करती है। C में एक छोटी सी भूल पूरे प्रोग्राम को क्रैश कर सकती है या ऑपरेटिंग सिस्टम को सेग्मेंटेशन फॉल्ट देने पर मजबूर कर देती है।\nC भाषा में त्रुटियों को 4 प्रमुख श्रेणियों में बांटा गया है:\n१. कंपाइल-टाइम त्रुटियाँ (Compile-Time Errors - सिंटैक्स और सेमांटिक)\n२. लिंकर त्रुटियाँ (Linker Errors)\n३. रनटाइम त्रुटियाँ (Runtime Errors - क्रैश और सिग्नल्स)\n४. लॉजिकल त्रुटियाँ (Logical Errors - कलन-विधि की गलतियाँ)\n\n२. कंपाइल-टाइम त्रुटियाँ (Syntax & Semantic Errors):\nये त्रुटियाँ प्रोग्राम को कंपाइल करते समय सामने आती हैं। जब तक इन्हें ठीक न किया जाए, कंपाइलर प्रोग्राम की मशीन फाइल (.exe या .o) नहीं बनाता।\n- सिंटैक्स एरर (Syntax Error): C भाषा के व्याकरण के नियमों का उल्लंघन। जैसे सेमीकोलन (;) भूल जाना, ब्रैकेट बंद न करना, या कीवर्ड्स की गलत स्पेलिंग लिखना (जैसे while की जगह whlie)।\n- सेमांटिक एरर (Semantic Error): वाक्य रचना सही होने पर भी डेटा टाइप या भाषा के नियमों का उल्लंघन। जैसे const वेरिएबल का मान बदलने का प्रयास करना या संख्या वाले वेरिएबल में स्ट्रिंग डालना।\n\n३. लिंकर त्रुटियाँ (Linker Errors):\nलिंकर कंपाइल की गई अलग-अलग फाइलों और पुस्तकालयों को जोड़कर अंतिम सॉफ्टवेयर बनाता है।\n- सबसे प्रसिद्ध लिंकर एरर: 'undefined reference to `main`': यह तब आता है जब मुख्य फंक्शन main() गायब हो या उसकी स्पेलिंग गलत (जैसे mian) लिख दी गई हो।\n- 'undefined reference to `sqrt`': गणितीय लाइब्रेरी <math.h> का उपयोग करने पर यदि कंपाइलर को '-lm' फ्लैग न दिया जाए।\n- मल्टीपल डेफिनिशन: जब एक ही ग्लोबल वेरिएबल को दो अलग-अलग C फाइलों में बिना 'extern' के दोबारा बना दिया जाए।\n\n४. रनटाइम त्रुटियाँ और ऑपरेटिंग सिस्टम सिग्नल्स:\nये त्रुटियाँ तब आती हैं जब प्रोग्राम सफलतापूर्वक कंपाइल होकर कंप्यूटर पर चल रहा होता है:\n१. सेग्मेंटेशन फॉल्ट (Segmentation Fault - SIGSEGV):\nयह C का सबसे कुख्यात क्रैश है। जब प्रोग्राम मेमोरी (रैम) के ऐसे पते को छूने या लिखने की कोशिश करता है जो उसका नहीं है, तो ऑपरेटिंग सिस्टम सुरक्षा के लिए प्रोग्राम को तुरंत मार (Kill) देता है।\nइसके प्रमुख कारण:\n- NULL पॉइंटर को डीरेफरेंस करना (*(int*)NULL = 10;)।\n- अनइनिशियलाइज्ड जंगली पॉइंटर का उपयोग।\n- स्ट्रिंग लिटरल्स (Read-only मेमोरी) में लिखने की कोशिश करना (जैसे char *s = \"Hello\"; s[0]='M';)।\n- ऐरे की सीमा से बहुत बाहर निकल जाना।\n२. शून्य से भाग (SIGFPE):\nजब पूर्णांक में शून्य से भाग दिया जाता है (जैसे 10 / 0), तो हार्डवेयर क्रैश हो जाता है।\n३. स्टैक ओवरफ्लो (Stack Overflow):\nजब कोई फंक्शन खुद को बार-बार अनंत बार कॉल करता है (Infinite Recursion), तो कंप्यूटर की स्टैक मेमोरी भर जाती है और प्रोग्राम क्रैश हो जाता है।\n\n५. अनडिफाइंड बिहेवियर (Undefined Behavior - UB) का खतरा:\nC भाषा के मानक में कुछ कार्यों को 'अनडिफाइंड बिहेवियर' कहा गया है। इसका अर्थ है कि यदि प्रोग्रामर ऐसा कोड लिखेगा, तो कंपाइलर और कंप्यूटर कुछ भी करने के लिए स्वतंत्र हैं!\nप्रमुख अनडिफाइंड बिहेवियर:\n- साइन्ड इंटीजर ओवरफ्लो (INT_MAX + 1)।\n- एक ही एक्सप्रेशन में दो बार i++ लिखना (i = i++;)।\n- फ्री की जा चुकी मेमोरी का उपयोग करना (Use-after-free)।\n- बिना मान दिए लोकल वेरिएबल को पढ़ना।\n\n६. रक्षात्मक प्रोग्रामिंग और असर्शन्स (assert.h):\nकोड की गलतियों को तुरंत पकड़ने के लिए पेशेवर इंजीनियर assert.h का उपयोग करते हैं:\n'assert(ptr != NULL);'\nयदि शर्त गलत होती है, तो प्रोग्राम तुरंत फाइल नाम और लाइन नंबर स्क्रीन पर दिखाकर बंद हो जाता है, जिससे बग को तुरंत पकड़ा जा सकता है।\n\n७. आधुनिक स्टेटिक एनालिसिस, Valgrind और AddressSanitizer (ASan):\nC भाषा में मेमोरी की गलतियों और सेग्मेंटेशन फॉल्ट को केवल आँखों से कोड देखकर पकड़ना बहुत कठिन होता है। आधुनिक सॉफ्टवेयर इंजीनियरिंग में स्वचालित टूल्स का उपयोग किया जाता है:\n१. कंपाइलर के सख्त वॉर्निंग फ्लैग्स:\nकोड कंपाइल करते समय हमेशा सख्त फ्लैग्स का उपयोग करें:\n'gcc -Wall -Wextra -Werror -pedantic program.c'\nयह कंपाइलर को आदेश देता है कि वह किसी भी संदिग्ध कोड (जैसे बिना उपयोग किए गए वेरिएबल्स या टाइप मिसमैच) को एरर मानकर तुरंत कंपाइल रोक दे।\n२. AddressSanitizer (ASan) और UBSan:\nGCC और Clang कंपाइलर में शामिल ASan मेमोरी सुरक्षा का सबसे आधुनिक टूल है:\n'gcc -fsanitize=address,undefined -g program.c'\nजब इस प्रोग्राम को चलाया जाता है, तो ऐरे से बाहर निकलते ही (Buffer Overflow) या मेमोरी फ्री करने के बाद छूते ही (Use-After-Free) यह तुरंत सटीक लाइन नंबर के साथ एरर स्क्रीन पर दिखा देता है।\n३. Valgrind Memcheck:\nयह प्रोग्राम की हर मेमोरी मांग और रिलीज की निगरानी करता है और प्रोग्राम बंद होते ही बताता है कि कितनी बाइट्स मेमोरी लीक हुई और किस फंक्शन में free() लगाना छूट गया था।",
+  "realLifeAnalogy": {
+    "en": "Think of a Syntax Error like a spelling mistake on a blueprint that prevents the factory from even starting construction. A Linker Error is like ordering a custom door from the catalog, but the delivery truck never shows up to the construction site. A Runtime Segmentation Fault is like walking into a bank vault without authorization: the silent alarm trips and armed security guards instantly tackle you to the ground!",
+    "hi": "सिंटैक्स एरर मकान के नक्शे पर हुई ऐसी गलती है जिसे देखते ही ठेकेदार काम शुरू करने से मना कर देता है। लिंकर एरर ऐसा है कि नक्शे में खिड़की बनी है लेकिन बाजार में वह खिड़की मिली ही नहीं। और सेग्मेंटेशन फॉल्ट किसी बैंक की तिजोरी में बिना अनुमति घुसने जैसा है: अलार्म बजते ही सुरक्षा गार्ड आपको तुरंत पकड़कर बाहर फेंक देते हैं!"
+  },
+  "codeExamples": [
+    {
+      "title": "Demonstration of Assertions and Division by Zero Guard",
+      "titleHindi": "assert.h द्वारा रक्षात्मक कोडिंग और शून्य विभाजन से सुरक्षा",
+      "code": "#include <stdio.h>\n#include <assert.h>\n\ndouble safeDivide(double numerator, double denominator) {\n    // Assert guards against fatal zero division\n    assert(denominator != 0.0 && \"Denominator cannot be zero!\");\n    return numerator / denominator;\n}\n\nint main() {\n    double n = 50.0, d = 5.0;\n    printf(\"Result 50 / 5 = %.2f\n\", safeDivide(n, d));\n    \n    printf(\"Testing safe divide with valid numbers complete.\n\");\n    // safeDivide(50.0, 0.0); // Would trigger assertion failure on line 6!\n    return 0;\n}",
+      "output": "Result 50 / 5 = 10.00\nTesting safe divide with valid numbers complete.",
+      "explanation": "Demonstrates defensive assertion checking before arithmetic operations to prevent runtime crashes.",
+      "explanationHindi": "रनटाइम क्रैश से बचने के लिए अंकगणितीय क्रिया से पहले assert द्वारा सुरक्षा जांच का प्रदर्शन।"
+    }
+  ],
+  "practicals": [
+    {
+      "id": "prac-err-1",
+      "title": "Fixing a Segmentation Fault and Pointer Inspection",
+      "titleHindi": "सेग्मेंटेशन फॉल्ट को पहचानना और सुरक्षित समाधान",
+      "objective": "Identify the cause of segmentation faults and implement defensive NULL checking.",
+      "objectiveHindi": "NULL पॉइंटर चेकिंग द्वारा सेग्मेंटेशन फॉल्ट को रोकें।",
+      "code": "#include <stdio.h>\n\nvoid printNumber(int *ptr) {\n    // Defensive check prevents SIGSEGV crash!\n    if (ptr == NULL) {\n        printf(\"Error: Attempted to dereference NULL pointer! Aborting safely.\n\");\n        return;\n    }\n    printf(\"Value at address %p is: %d\n\", (void*)ptr, *ptr);\n}\n\nint main() {\n    int value = 42;\n    int *validPtr = &value;\n    int *nullPtr = NULL;\n    \n    printf(\"Testing with valid pointer:\n\");\n    printNumber(validPtr);\n    \n    printf(\"\nTesting with NULL pointer:\n\");\n    printNumber(nullPtr);\n    return 0;\n}",
+      "expectedOutput": "Testing with valid pointer:\nValue at address 0x7ffd98b2c4e0 is: 42\n\nTesting with NULL pointer:\nError: Attempted to dereference NULL pointer! Aborting safely.",
+      "lineByLineExplanation": [
+        {
+          "line": "if (ptr == NULL)",
+          "noteEn": "Defensive guard prevents MMU memory violation.",
+          "noteHi": "मेमोरी सुरक्षा के लिए पॉइंटर का NULL होना जांचता है।"
+        },
+        {
+          "line": "printf(\"Value at address ...\", *ptr);",
+          "noteEn": "Safe dereference guaranteed only after NULL check passes.",
+          "noteHi": "NULL जांच पास होने के बाद ही सुरक्षित डीरेफरेंस करता है।"
+        }
+      ]
+    }
+  ],
+  "keyPoints": {
+    "en": [
+      "Syntax errors prevent compilation; linker errors occur when symbols are missing.",
+      "SIGSEGV happens when dereferencing NULL or invalid memory.",
+      "assert(condition) halts with line number on failure.",
+      "Undefined Behavior (UB) allows compiler to generate arbitrary code."
+    ],
+    "hi": [
+      "सिंटैक्स एरर कंपाइल होने से रोकते हैं; लिंकर एरर सिंबल न मिलने पर आते हैं।",
+      "SIGSEGV तब आता है जब NULL या अवैध मेमोरी को छुआ जाता है।",
+      "assert गलत होने पर फाइल और लाइन नंबर के साथ प्रोग्राम रोक देता है।",
+      "अनडिफाइंड बिहेवियर कंपाइलर को कोई भी कोड जनरेट करने की छूट देता है।"
+    ]
+  },
+  "commonPitfalls": {
+    "en": [
+      "Writing to string literals (char *s = \"hi\"; s[0]='x'; causes SIGSEGV).",
+      "Forgetting to link math library with -lm compiler flag.",
+      "Relying on Undefined Behavior that happens to work on one specific compiler."
+    ],
+    "hi": [
+      "स्ट्रिंग लिटरल में मान बदलने का प्रयास करना (SIGSEGV क्रैश)।",
+      "मैथ लाइब्रेरी को -lm फ्लैग से लिंक करना भूल जाना।",
+      "अनडिफाइंड बिहेवियर पर भरोसा करना जो किसी एक कंपाइलर पर गलती से चल रहा हो।"
+    ]
+  }
+  ,
+  "quiz": getTopicQuestionBank("error", "Errors, Debugging, Segmentation Faults & Undefined Behavior")
+},
+{
+  "id": "file-handling",
+  "order": 13,
+  "title": "File Handling: Streams, File Modes, Buffering & Binary Records",
+  "titleHindi": "फाइल हैंडलिंग: स्ट्रीम्स, फाइल मोड्स और बाइनरी ऑपरेशन्स (File Handling)",
+  "category": "Memory & Files",
+  "summary": "Master persistent disk storage in C: The FILE structure pointer, fopen() file opening modes (r, w, a, r+, w+, a+, b), fclose() stream flushing and descriptor release, text stream I/O (fgetc, fputc, fgets, fputs, fprintf, fscanf), binary block records (fread, fwrite), random access seeking (fseek, ftell, rewind, SEEK_SET, SEEK_CUR, SEEK_END), and stream error handling (feof, ferror, perror).",
+  "summaryHindi": "C भाषा में स्थायी डिस्क स्टोरेज का संपूर्ण अध्ययन: FILE स्ट्रक्चर पॉइंटर, fopen के विभिन्न मोड्स (r, w, a, r+, w+, a+, b), fclose द्वारा स्ट्रीम फ्लशिंग, टेक्स्ट फाइल I/O (fgetc, fgets, fprintf, fscanf), बाइनरी रिकॉर्ड I/O (fread, fwrite), रैंडम एक्सेस सीकिंग (fseek, ftell, rewind), तथा फाइल एरर हैंडलिंग (feof, ferror, perror)।",
+  "readTimeMinutes": 23,
+  "explanationEn": "1. PERSISTENT STORAGE VERSUS VOLATILE MEMORY:\nAll variables, arrays, and dynamic heap memory allocations explored thus far exist exclusively within Random Access Memory (RAM). RAM is Volatile Storage: the exact moment a program terminates or the physical computer loses power, all data residing in RAM evaporates instantly. To preserve data across program executions and power cycles, software must write to Non-Volatile Secondary Storage devices (Hard Disk Drives, Solid State Drives, NVMe flash).\nIn C, interacting with persistent storage files is mediated through the File Stream Abstraction provided by standard header <stdio.h>.\n\n2. THE 'FILE' STRUCTURE POINTER & FOPEN():\nIn C, a disk file is never accessed by raw hardware sectors. Instead, the runtime library maintains an opaque control block represented by the typedef 'FILE' (defined in <stdio.h>). A 'FILE*' pointer stores critical internal metadata:\n- The OS File Descriptor (a numeric handle provided by the operating system kernel).\n- The memory stream read/write buffer address.\n- The current byte Position Indicator within the file.\n- End-of-File (EOF) and Error status bit flags.\n\nOpening a Stream with fopen():\n```c\nFILE *fopen(const char *filename, const char *mode);\n```\nMandatory Defensive Rule: If fopen() fails (e.g., file does not exist, disk is full, or user lacks read/write permissions), it returns NULL. A robust program MUST ALWAYS test for NULL before performing any file operations!\n\n3. EXHAUSTIVE TAXONOMY OF FOPEN MODES:\nFile modes dictate access permissions and file pointer placement:\n1. \"r\" (Read Text):\n   - Opens an existing text file for reading.\n   - File MUST already exist! If the file is missing, fopen() returns NULL.\n2. \"w\" (Write Text):\n   - Creates a new empty text file for writing.\n   - DANGER: If the file already exists, its existing contents are completely TRUNCATED and wiped to 0 bytes!\n3. \"a\" (Append Text):\n   - Opens file for appending data to the very end.\n   - If the file exists, previous contents are preserved; new writes are appended at the end. If missing, a new file is created.\n4. \"r+\" (Read & Write Extended):\n   - Opens an existing file for both reading and writing. File must exist.\n5. \"w+\" (Write & Read Extended):\n   - Creates an empty file for both reading and writing. Overwrites existing file if present.\n6. \"a+\" (Append & Read Extended):\n   - Opens file for reading and appending.\n7. Binary Modes (\"rb\", \"wb\", \"ab\", \"rb+\", \"wb+\", \"ab+\"):\n   - Disables automatic newline translation ('\r\n' on Windows into '\n'). Crucial for images, compiled binaries, and structured data records.\n\n4. CLOSING STREAMS & FLUSHING WITH FCLOSE():\n```c\nint fclose(FILE *stream);\n```\nNever forget to close opened files! fclose() performs three vital operating system tasks:\n1. Flushes any remaining unwritten data sitting in RAM buffers onto physical disk sectors.\n2. Deallocates internal stream buffers from memory.\n3. Releases the operating system file descriptor handle back to the kernel. Operating systems enforce a strict limit on open file handles per process (e.g., 1024); failing to close files causes \"File Descriptor Leak\" crashes.\n\n5. TEXT STREAM FUNCTIONS VS BINARY STREAM FUNCTIONS:\n- Text I/O Functions:\n  - fgetc(fp) / fputc(ch, fp): Read / write a single character.\n  - fgets(buffer, size, fp): Reads a line of text safely up to size-1 bytes or newline.\n  - fputs(str, fp): Writes a string without adding trailing newlines.\n  - fprintf(fp, format, ...): Formatted text output to file stream.\n  - fscanf(fp, format, ...): Formatted text parsing from file stream.\n- Binary Block I/O Functions:\n  For structured data (e.g., writing whole structs), text formatting is slow and wastes space. Binary functions read and write raw bytes directly:\n  ```c\n  size_t fwrite(const void *ptr, size_t size, size_t count, FILE *stream);\n  size_t fread(void *ptr, size_t size, size_t count, FILE *stream);\n  ```\n  Writes or reads 'count' elements of 'size' bytes each in a single hardware DMA disk operation!\n\n6. RANDOM ACCESS FILE SEEKING (FSEEK, FTELL, REWIND):\nFiles are sequential streams by default, but random access allows jumping directly to any byte offset:\n1. fseek(fp, offset, origin):\n   Moves the byte position indicator. 'origin' can be:\n   - SEEK_SET: Beginning of the file.\n   - SEEK_CUR: Current position indicator.\n   - SEEK_END: End of the file.\n2. ftell(fp):\n   Returns the current byte offset from the start of the file (type long). Used to calculate exact file sizes:\n   ```c\n   fseek(fp, 0, SEEK_END);\n   long fileSize = ftell(fp);\n   ```\n3. rewind(fp):\n   Resets position indicator back to byte 0 (equivalent to fseek(fp, 0, SEEK_SET);).\n\n7. STREAM ERROR & EOF DETECTION (FEOF, FERROR, PERROR):\n- feof(fp): Returns non-zero ONLY AFTER an attempt has been made to read past the end of the file. DANGER: Do not use 'while(!feof(fp))' as a loop condition because it reads the last record twice!\n- ferror(fp): Tests if a hardware read/write error occurred on the stream.\n- perror(\"Custom message\"): Prints descriptive human-readable OS error string (such as \"No such file or directory\" or \"Permission denied\") to stderr.\n\n8. STREAM BUFFERING CONTROL, FLUSHING & TEMPORARY FILES:\n- Controlling Stream Buffering (setvbuf):\nStandard I/O performance can be fine-tuned by modifying stream buffer modes:\n```c\nint setvbuf(FILE *stream, char *buffer, int mode, size_t size);\n```\nModes:\n- _IOFBF: Full buffering (data written only when full buffer fills).\n- _IOLBF: Line buffering (flushes on '\n').\n- _IONBF: No buffering (every byte written immediately).\n- Forcing Disk Synchronization:\nCalling fflush(fp) empties the user-space C runtime buffer into the OS kernel buffer. On POSIX systems, calling fsync(fileno(fp)) forces the kernel to physically write all dirty cache pages onto the magnetic platters or solid-state NAND cells of the disk.\n- Secure Temporary Files:\nOperating systems provide tmpfile() to create an anonymous binary file in the system temp directory. It automatically unlinks and destroys itself the instant fclose() is called or the process exits, eliminating the danger of sensitive temporary data remaining exposed on disk.\n- File System Management Functions:\nremove(\"old_log.txt\") deletes a file from secondary storage, while rename(\"temp.dat\", \"final.dat\") performs an atomic filename change.",
+  "explanationHi": "१. वोलेटाइल मेमोरी (RAM) बनाम स्थायी स्टोरेज (Files):\nअब तक हमने C भाषा में जितने भी वेरिएबल्स, ऐरे और डायनेमिक मेमोरी (malloc) का उपयोग किया, वे सभी कंप्यूटर की मुख्य मेमोरी (RAM) में रहते हैं। रैम एक 'वोलेटाइल' (अस्थायी) मेमोरी होती है: जैसे ही प्रोग्राम बंद होता है या कंप्यूटर की बिजली कटती है, रैम का सारा डेटा हमेशा के लिए मिट जाता है।\nयदि हमें डेटा को स्थायी रूप से सुरक्षित रखना हो (जैसे छात्रों का रिकॉर्ड, गेम सेव फाइल्स या लॉग्स), तो हमें डेटा को नॉन-वोलेटाइल सेकेंडरी स्टोरेज (हार्ड डिस्क, SSD) की फाइलों में लिखना पड़ता है।\nC भाषा में फाइलों से संवाद करने के लिए <stdio.h> हेडर फाइल के 'फाइल स्ट्रीम्स' (File Streams) का उपयोग किया जाता है।\n\n२. 'FILE' स्ट्रक्चर पॉइंटर और fopen():\nC भाषा में हम डिस्क की फाइलों को सीधे हार्डवेयर स्तर पर नहीं पढ़ते। इसके बजाय C रनटाइम एक विशेष स्ट्रक्चर 'FILE' का उपयोग करता है। एक 'FILE*' पॉइंटर निम्नलिखित आंतरिक जानकारी को संभालता है:\n- ऑपरेटिंग सिस्टम का फाइल डिस्क्रिप्टर (File Descriptor)।\n- मेमोरी बफर का पता।\n- फाइल के अंदर कर्सर की वर्तमान स्थिति (Position Indicator)।\n- फाइल समाप्ति (EOF) और एरर के बिट फ्लैग्स।\n\nfopen() द्वारा फाइल खोलना:\n```c\nFILE *fopen(const char *filename, const char *mode);\n```\nअनिवार्य सुरक्षा नियम: यदि किसी कारणवश फाइल न खुले (जैसे फाइल मौजूद न हो, डिस्क भरी हो या परमिशन न हो), तो fopen() 'NULL' लौटाता है। फाइल पर कोई भी काम करने से पहले हमेशा NULL की जांच करना अनिवार्य है!\n\n३. फाइल ओपनिंग मोड्स (File Modes) का विस्तृत विवरण:\n१. \"r\" (रीड मोड):\n   - पहले से मौजूद टेक्स्ट फाइल को पढ़ने के लिए खोलता है।\n   - फाइल का पहले से मौजूद होना अनिवार्य है! यदि फाइल नहीं है तो fopen NULL देगा।\n२. \"w\" (राइट मोड):\n   - लिखने के लिए नई फाइल बनाता है।\n   - अत्यंत महत्वपूर्ण चेतावनी: यदि फाइल पहले से मौजूद है, तो उसका पुराना सारा डेटा हमेशा के लिए मिटा दिया जाता है (Truncate)!\n३. \"a\" (अपेंड मोड):\n   - फाइल के अंत में नया डेटा जोड़ने के लिए। पुराना डेटा सुरक्षित रहता है। यदि फाइल न हो तो नई फाइल बन जाती है।\n४. \"r+\" (रीड और राइट): दोनों पढ़ने और लिखने के लिए। फाइल होनी चाहिए।\n५. \"w+\" (राइट और रीड): पढ़ने और लिखने के लिए; पुरानी फाइल को खाली कर देता है।\n६. \"a+\" (अपेंड और रीड): पढ़ने और अंत में जोड़ने के लिए।\n७. बाइनरी मोड्स (\"rb\", \"wb\", \"ab\"):\n   - बिना किसी कैरेक्टर कन्वर्जन के सीधे बाइनरी बाइट्स पढ़ने/लिखने के लिए (जैसे फोटो, ऑडियो या स्ट्रक्चर्स)।\n\n४. fclose() द्वारा स्ट्रीम बंद करना:\n'fclose(fp);'\nफाइल का काम पूरा होने के बाद उसे बंद करना अनिवार्य है। यह तीन प्रमुख कार्य करता है:\n१. रैम बफर में बचे हुए डेटा को डिस्क पर लिखता है (Flushing)।\n२. बफर मेमोरी को खाली करता है।\n३. ऑपरेटिंग सिस्टम के फाइल डिस्क्रिप्टर को मुक्त करता है। यदि फाइलें बंद न की जाएँ, तो ऑपरेटिंग सिस्टम फाइल हैंडल्स खत्म होने पर एरर दे देगा।\n\n५. टेक्स्ट बनाम बाइनरी I/O फंक्शन्स:\n- टेक्स्ट फाइल फंक्शन्स:\n  - fgetc(fp) / fputc(ch, fp): एक-एक कैरेक्टर पढ़ना और लिखना।\n  - fgets(buffer, size, fp): फाइल से पूरी एक पंक्ति सुरक्षित रूप से पढ़ना।\n  - fputs(str, fp): स्ट्रिंग को फाइल में लिखना।\n  - fprintf(fp, format, ...): फॉर्मेटेड टेक्स्ट फाइल में लिखना।\n  - fscanf(fp, format, ...): फॉर्मेटेड टेक्स्ट फाइल से पढ़ना।\n- बाइनरी फाइल फंक्शन्स (fread और fwrite):\n  पूरे के पूरे स्ट्रक्चर को एक ही झटके में डिस्क पर लिखने और पढ़ने के लिए:\n  ```c\n  fwrite(&student1, sizeof(Student), 1, fp);\n  fread(&student1, sizeof(Student), 1, fp);\n  ```\n  यह टेक्स्ट कन्वर्जन की देरी के बिना सुपर-फास्ट गति से सीधे बाइनरी डेटा लिखता और पढ़ता है।\n\n६. रैंडम एक्सेस सीकिंग (fseek, ftell, rewind):\nफाइल में सीधे किसी भी बाइट पर छलांग लगाने की सुविधा:\n१. fseek(fp, offset, origin):\n   कर्सर को किसी विशिष्ट स्थान पर ले जाता है।\n   - SEEK_SET: फाइल की शुरुआत से।\n   - SEEK_CUR: कर्सर की वर्तमान जगह से।\n   - SEEK_END: फाइल के अंत से।\n२. ftell(fp):\n   यह बताता है कि कर्सर इस समय फाइल की शुरुआत से कितने बाइट्स दूर है। इसका उपयोग फाइल का कुल साइज (आकार) नापने के लिए किया जाता है:\n   'fseek(fp, 0, SEEK_END); long size = ftell(fp);'\n३. rewind(fp):\n   कर्सर को वापस फाइल के पहले बाइट (SEEK_SET) पर भेज देता है।\n\n७. एरर हैंडलिंग (feof, ferror, perror):\n- feof(fp): यह तभी सत्य लौटाता है जब फाइल के अंतिम सिरे (EOF) के पार जाने की कोशिश की जा चुकी हो। कभी भी 'while(!feof(fp))' का उपयोग न करें क्योंकि यह अंतिम रिकॉर्ड को दो बार पढ़ लेता है!\n- perror(\"मैसेज\"): सिस्टम में आई एरर का असली कारण स्क्रीन पर प्रिंट करता है।\n\n८. स्ट्रीम बफरिंग नियंत्रण, फ्लशिंग और सुरक्षित टेम्परेरी फाइल्स:\n- बफरिंग को नियंत्रित करना (setvbuf):\nC भाषा में I/O प्रदर्शन को बेहतर करने के लिए बफरिंग मोड को बदला जा सकता है:\n'setvbuf(fp, buffer, _IOFBF, 8192);'\nमोड्स:\n- _IOFBF: फुल बफरिंग (पूरा बफर भरने पर ही डिस्क पर लिखा जाएगा)।\n- _IOLBF: लाइन बफरिंग (न्यूलाइन आते ही फ्लश होगा)।\n- _IONBF: बिना बफर (प्रत्येक बाइट तुरंत डिस्क पर जाएगा)।\n- डिस्क सिंक्रोनाइजेशन और fflush:\n'fflush(fp);' C लाइब्रेरी के बफर को तुरंत खाली करता है। ऑपरेटिंग सिस्टम स्तर पर डेटा को वास्तव में हार्ड डिस्क पर सुरक्षित करने के लिए fsync() का उपयोग किया जाता है।\n- सुरक्षित अस्थायी फाइलें (tmpfile):\n'tmpfile()' सिस्टम के टेम्परेरी फोल्डर में एक ऐसी गुप्त फाइल बनाता है जो प्रोग्राम बंद होते ही या fclose होते ही अपने आप डिस्क से हमेशा के लिए गायब (Delete) हो जाती है।\n- फाइल हटाने और नाम बदलने के फंक्शन्स:\n'remove(\"file.txt\")' डिस्क से फाइल को हमेशा के लिए मिटा देता है, और 'rename(\"old.txt\", \"new.txt\")' फाइल का नाम तुरंत बदल देता है।",
+  "realLifeAnalogy": {
+    "en": "Think of RAM like writing notes on an erasable whiteboard: the moment you turn off the office lights and leave, the janitor wipes the board clean (volatile memory)! Think of file handling like writing notes with indelible ink into a bound leather notebook and locking it in an iron filing cabinet: years later, you can open the notebook ('fopen'), turn directly to Page 50 ('fseek'), and read the exact preserved words!",
+    "hi": "रैम की तुलना व्हाइटबोर्ड पर लिखे मिटने वाले मार्कर से करें: शाम को जैसे ही आप ऑफिस से निकलते हैं, बोर्ड को पोंछकर साफ कर दिया जाता है! फाइल हैंडलिंग की तुलना एक पक्की डायरी में स्थायी स्याही से लिखने और उसे लोहे की अलमारी में बंद करने से करें: 10 साल बाद भी डायरी खोलकर (fopen) सीधे 50वें पन्ने पर जाकर (fseek) आप अपना लिखा हुआ बिल्कुल सुरक्षित पढ़ सकते हैं!"
+  },
+  "codeExamples": [
+    {
+      "title": "Text File Writing and Safe Reading with fgets",
+      "titleHindi": "टेक्स्ट फाइल में लिखना और fgets द्वारा सुरक्षित पढ़ना",
+      "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main() {\n    FILE *fp;\n    \n    // Writing to text file\n    fp = fopen(\"demo.txt\", \"w\");\n    if (fp == NULL) {\n        perror(\"Error opening file for write\");\n        return 1;\n    }\n    \n    fprintf(fp, \"Line 1: Learning C File Handling\n\");\n    fprintf(fp, \"Line 2: Persistent Storage in Action\n\");\n    fclose(fp); // Flush and close\n    printf(\"Data written and file closed successfully.\n\");\n    \n    // Reading back from file safely\n    fp = fopen(\"demo.txt\", \"r\");\n    if (fp == NULL) {\n        perror(\"Error opening file for read\");\n        return 1;\n    }\n    \n    char buffer[100];\n    printf(\"\nReading file contents:\n\");\n    while (fgets(buffer, sizeof(buffer), fp) != NULL) {\n        printf(\"%s\", buffer);\n    }\n    \n    fclose(fp);\n    return 0;\n}",
+      "output": "Data written and file closed successfully.\n\nReading file contents:\nLine 1: Learning C File Handling\nLine 2: Persistent Storage in Action",
+      "explanation": "Demonstrates file creation in 'w' mode, fprintf formatting, safe closing, and line-by-line reading with fgets.",
+      "explanationHindi": "'w' मोड में फाइल बनाना, fprintf से लिखना, fclose से स्ट्रीम बंद करना और fgets द्वारा लाइन-दर-लाइन सुरक्षित पढ़ने का प्रदर्शन।"
+    }
+  ],
+  "practicals": [
+    {
+      "id": "prac-file-1",
+      "title": "Binary Record Storage and File Size Calculation",
+      "titleHindi": "बाइनरी रिकॉर्ड स्टोरेज और फाइल का आकार निकालना",
+      "objective": "Store and retrieve structured binary records using fwrite/fread and calculate size with fseek/ftell.",
+      "objectiveHindi": "fwrite और fread से बाइनरी स्ट्रक्चर सेव करें तथा fseek/ftell से फाइल साइज मापें।",
+      "code": "#include <stdio.h>\n\ntypedef struct {\n    int id;\n    char code[10];\n    double balance;\n} Account;\n\nint main() {\n    Account acc1 = {1001, \"SAVINGS\", 45000.75};\n    FILE *fp = fopen(\"account.bin\", \"wb\");\n    if (!fp) return 1;\n    \n    fwrite(&acc1, sizeof(Account), 1, fp);\n    fclose(fp);\n    \n    // Calculate file size using fseek and ftell\n    fp = fopen(\"account.bin\", \"rb\");\n    if (!fp) return 1;\n    \n    fseek(fp, 0, SEEK_END);\n    long size = ftell(fp);\n    printf(\"Binary file size on disk: %ld bytes (sizeof Account is %zu)\n\", size, sizeof(Account));\n    \n    // Read record back\n    rewind(fp);\n    Account loaded;\n    fread(&loaded, sizeof(Account), 1, fp);\n    printf(\"Loaded Account -> ID: %d | Code: %s | Balance: %.2f\n\", loaded.id, loaded.code, loaded.balance);\n    \n    fclose(fp);\n    return 0;\n}",
+      "expectedOutput": "Binary file size on disk: 32 bytes (sizeof Account is 32)\nLoaded Account -> ID: 1001 | Code: SAVINGS | Balance: 45000.75",
+      "lineByLineExplanation": [
+        {
+          "line": "fwrite(&acc1, sizeof(Account), 1, fp);",
+          "noteEn": "Writes whole struct memory directly to disk in single binary block.",
+          "noteHi": "पूरे स्ट्रक्चर को एक ही ब्लॉक में सीधे बाइनरी रूप में डिस्क पर लिखता है।"
+        },
+        {
+          "line": "fseek(fp, 0, SEEK_END); ftell(fp);",
+          "noteEn": "Seeks to EOF and measures total file byte length accurately.",
+          "noteHi": "फाइल के अंत में जाकर कुल बाइट्स की संख्या मापता है।"
+        }
+      ]
+    }
+  ],
+  "keyPoints": {
+    "en": [
+      "Always check fopen() for NULL return before accessing.",
+      "Mode 'w' truncates existing files to 0 bytes.",
+      "fclose() flushes memory buffers and frees OS file descriptors.",
+      "Use binary modes ('rb', 'wb') for structures and raw bytes."
+    ],
+    "hi": [
+      "फाइल पर काम करने से पहले हमेशा fopen() के NULL होने की जांच करें।",
+      "'w' मोड पहले से मौजूद फाइल के डेटा को पूरी तरह मिटा देता है।",
+      "fclose() बफर को डिस्क पर फ्लश करता है और फाइल हैंडल मुक्त करता है।",
+      "स्ट्रक्चर्स और बाइनरी डेटा के लिए हमेशा 'rb' और 'wb' मोड का उपयोग करें।"
+    ]
+  },
+  "commonPitfalls": {
+    "en": [
+      "Using while(!feof(fp)) which processes the last record twice.",
+      "Forgetting to fclose() causing file descriptor leaks and unwritten buffers.",
+      "Opening in 'w' mode by mistake and accidentally erasing critical data."
+    ],
+    "hi": [
+      "while(!feof(fp)) का उपयोग करना जिससे अंतिम रिकॉर्ड दो बार प्रोसेस हो जाता है।",
+      "fclose() करना भूल जाना जिससे फाइल डिस्क्रिप्टर लीक होते हैं और डेटा अधूरा रह जाता है।",
+      "गलती से 'w' मोड खोलकर जरूरी डेटा को नष्ट कर देना।"
+    ]
+  }
+  ,
+  "quiz": getTopicQuestionBank("file-handling", "File Handling: Streams, File Modes, Buffering & Binary Records")
+}
 ];
 
-export const MILESTONES = [
+export const MILESTONES: Milestone[] = [
   {
     id: 'm1',
-    title: 'C Novice',
-    titleHindi: 'C का आरंभ (Novice)',
-    description: 'Mastered C basics, variables, and operators',
-    descriptionHindi: 'C के बुनियादी नियम, वेरिएबल्स और ऑपरेटर्स सीखे',
+    title: 'C Fundamentals Pioneer',
+    titleHindi: 'C भाषा के बुनियादी सिद्धांत (C Fundamentals)',
+    description: 'Mastered Program Structure, Flowcharts, Data Types, and Logic',
+    descriptionHindi: 'प्रोग्राम संरचना, फ्लोचार्ट, डेटा टाइप्स और 3-डिजिट लॉजिक में महारत',
     icon: '🌱',
-    requiredProgress: 20,
-    badgeName: 'Beginner Badge'
+    requiredProgress: 25,
+    badgeName: 'Foundation Master'
   },
   {
     id: 'm2',
-    title: 'Logic Master',
-    titleHindi: 'लॉजिक मास्टर (Logic Master)',
-    description: 'Conquered conditions, loops, and iterations',
-    descriptionHindi: 'कंडीशन्स और लूप्स में महारत हासिल की',
+    title: 'Logic & Control Flow Expert',
+    titleHindi: 'लॉजिक और कंट्रोल फ्लो विशेषज्ञ',
+    description: 'Conquered Variables, Input/Output, Operators, and Control Statements',
+    descriptionHindi: 'वेरिएबल्स, I/O, ऑपरेटर्स और कंट्रोल स्टेटमेंट्स में विशेषज्ञता',
     icon: '⚡',
-    requiredProgress: 40,
+    requiredProgress: 50,
     badgeName: 'Control Flow Pro'
   },
   {
     id: 'm3',
-    title: 'Function Craftsman',
-    titleHindi: 'फंक्शन कारीगर (Function Craftsman)',
-    description: 'Mastered modular functions and recursion',
-    descriptionHindi: 'फंक्शंस और रिकर्शन को गहराई से समझा',
+    title: 'Data Structures Craftsman',
+    titleHindi: 'डेटा स्ट्रक्चर्स कारीगर',
+    description: 'Mastered 1D/2D Arrays, Matrices, Strings, and Pointers',
+    descriptionHindi: 'ऐरे, मैट्रिक्स, स्ट्रिंग्स और पॉइंटर्स को गहराई से समझा',
     icon: '🧩',
-    requiredProgress: 60,
-    badgeName: 'Modular Coder'
+    requiredProgress: 75,
+    badgeName: 'Memory & Pointer Ninja'
   },
   {
     id: 'm4',
-    title: 'Pointer Ninja',
-    titleHindi: 'पॉइंटर निंजा (Pointer Ninja)',
-    description: 'Tamed memory addresses, pointers, and structures',
-    descriptionHindi: 'पॉइंटर्स, मेमोरी एड्रेस और स्ट्रक्चर्स की समझ',
+    title: 'Systems & Types Architect',
+    titleHindi: 'सिस्टम्स और डेटा टाइप्स आर्किटेक्ट',
+    description: 'Mastered User-Defined Types (Struct, Union, Enum) and Debugging',
+    descriptionHindi: 'स्ट्रक्चर्स, यूनियन्स, इनम्स और एरर डिबगिंग का संपूर्ण अध्ययन',
     icon: '🎯',
-    requiredProgress: 80,
-    badgeName: 'Memory Explorer'
+    requiredProgress: 90,
+    badgeName: 'Systems Architect'
   },
   {
     id: 'm5',
     title: 'C Guru (File Handling Champion)',
-    titleHindi: 'C गुरु (File Handling Master)',
-    description: 'Completed 100% curriculum from Zero to File Handling',
-    descriptionHindi: '0 से लेकर फाइल हैंडलिंग तक पूरा पाठ्यक्रम पूर्ण किया',
+    titleHindi: 'C गुरु (फाइल हैंडलिंग चैंपियन)',
+    description: 'Completed 100% curriculum from Program Structure to File Handling',
+    descriptionHindi: 'प्रोग्राम स्ट्रक्चर से फाइल हैंडलिंग तक सभी 13 टॉपिक्स व टेस्ट्स पूर्ण किए',
     icon: '🏆',
     requiredProgress: 100,
     badgeName: 'Certified C-Guru'
