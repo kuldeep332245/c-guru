@@ -57,8 +57,8 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
           </div>
 
           {/* Header */}
-          <div className="flex items-center justify-center gap-2">
-            <Award className="w-8 h-8 text-blue-600" />
+          <div className="flex items-center justify-center gap-2.5">
+            <img src="/c-guru-logo.png" alt="C-Guru" className="w-8 h-8 rounded-lg object-cover shadow-sm" />
             <span className="text-xs font-bold uppercase tracking-widest text-blue-900">
               C-Guru Academy • Certificate of Achievement
             </span>
