@@ -102,7 +102,7 @@ export const QuizSection: React.FC<QuizSectionProps> = ({
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white shadow-md">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 text-white shadow-md">
                     <HelpCircle className="w-5 h-5" />
                   </div>
                   <h1 className={`text-xl sm:text-2xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -148,7 +148,7 @@ export const QuizSection: React.FC<QuizSectionProps> = ({
                       {quizRecord ? (
                         <span
                           className={`font-bold px-2 py-0.5 rounded text-[11px] ${
-                            isPassed ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-amber-500/10 border border-amber-500/20 text-amber-400'
+                            isPassed ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-blue-500/10 border border-blue-500/20 text-blue-400'
                           }`}
                         >
                           Best: {quizRecord.score}/{quizRecord.total} ({quizRecord.percentage}%)
@@ -286,7 +286,7 @@ export const QuizSection: React.FC<QuizSectionProps> = ({
                 isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200'
               }`}
             >
-              <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center font-bold text-2xl shadow-lg bg-gradient-to-tr from-amber-500 to-orange-500 text-white">
+              <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center font-bold text-2xl shadow-lg bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 text-white">
                 🏆
               </div>
 
