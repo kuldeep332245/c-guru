@@ -126,47 +126,49 @@ export const CompilerPlayground: React.FC<CompilerPlaygroundProps> = ({
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={handleCopyCode}
-            className={`p-2.5 rounded-xl border transition-all hover:scale-105 ${
-              isDark
-                ? 'bg-slate-800 border-slate-700 text-slate-300'
-                : 'bg-slate-100 border-slate-200 text-slate-700'
-            }`}
-            title="Copy Code"
-          >
-            {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-          </button>
+        <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto justify-between sm:justify-start">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCopyCode}
+              className={`p-2.5 rounded-xl border transition-all hover:scale-105 ${
+                isDark
+                  ? 'bg-slate-800 border-slate-700 text-slate-300'
+                  : 'bg-slate-100 border-slate-200 text-slate-700'
+              }`}
+              title="Copy Code"
+            >
+              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+            </button>
 
-          <button
-            onClick={handleReset}
-            className={`p-2.5 rounded-xl border transition-all hover:scale-105 ${
-              isDark
-                ? 'bg-slate-800 border-slate-700 text-slate-300'
-                : 'bg-slate-100 border-slate-200 text-slate-700'
-            }`}
-            title="Reset to Template"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
+            <button
+              onClick={handleReset}
+              className={`p-2.5 rounded-xl border transition-all hover:scale-105 ${
+                isDark
+                  ? 'bg-slate-800 border-slate-700 text-slate-300'
+                  : 'bg-slate-100 border-slate-200 text-slate-700'
+              }`}
+              title="Reset to Template"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          </div>
 
           <button
             onClick={handleRun}
             disabled={isRunning}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-blue-500/25 bg-gradient-to-r from-blue-600 to-cyan-500 text-white transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md bg-blue-600 hover:bg-blue-500 text-white transition-all active:scale-95 disabled:opacity-50"
           >
             <Play className={`w-4 h-4 fill-current ${isRunning ? 'animate-spin' : ''}`} />
-            <span>{isRunning ? (lang === 'hi' ? 'कंपाइल हो रहा है...' : 'Compiling...') : (lang === 'hi' ? 'Run (Ctrl+Enter)' : 'Run (Ctrl+Enter)')}</span>
+            <span>{isRunning ? 'Compiling...' : 'Run Code'}</span>
           </button>
         </div>
       </div>
 
-      {/* Snippet Quick Inserts */}
-      <div className="flex flex-wrap items-center gap-2 text-xs">
-        <span className="font-semibold text-slate-400 flex items-center gap-1">
+      {/* Snippet Quick Inserts (Scrollable on mobile) */}
+      <div className="flex items-center gap-2 text-xs overflow-x-auto pb-1 no-scrollbar sm:flex-wrap">
+        <span className="font-semibold text-slate-400 flex items-center gap-1 shrink-0">
           <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-          {lang === 'hi' ? 'त्वरित स्निपेट्स:' : 'Quick Snippets:'}
+          <span>Snippets:</span>
         </span>
         {[
           { label: '+ printf', snippet: 'printf("Hello C-Guru!\\n");' },
@@ -178,7 +180,7 @@ export const CompilerPlayground: React.FC<CompilerPlaygroundProps> = ({
           <button
             key={i}
             onClick={() => insertSnippet(btn.snippet)}
-            className={`px-3 py-1 rounded-lg border font-mono transition-colors ${
+            className={`px-2.5 py-1 rounded-lg border font-mono text-[11px] whitespace-nowrap transition-colors shrink-0 ${
               isDark
                 ? 'bg-slate-900 border-slate-800 text-slate-300 hover:border-blue-500 hover:text-white'
                 : 'bg-white border-slate-200 text-slate-700 hover:border-blue-400'
@@ -190,16 +192,16 @@ export const CompilerPlayground: React.FC<CompilerPlaygroundProps> = ({
       </div>
 
       {/* Editor & Console Split View */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
         {/* Code Editor */}
-        <div className="lg:col-span-7 rounded-3xl border border-slate-800 bg-[#070A11] overflow-hidden shadow-xl flex flex-col">
+        <div className="lg:col-span-7 rounded-2xl border border-slate-800 bg-[#070A11] overflow-hidden shadow-lg flex flex-col">
           {/* Editor Header */}
-          <div className="px-5 py-3 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
+          <div className="px-4 py-2.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-rose-500/80" />
-              <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-              <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-              <span className="text-xs font-mono font-bold text-cyan-300 ml-2">main.c</span>
+              <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
+              <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+              <span className="text-xs font-mono font-bold text-cyan-300 ml-1.5">main.c</span>
             </div>
             <span className="text-[11px] font-mono text-slate-400">
               GCC 11.2 • {lineCount} lines
@@ -207,10 +209,10 @@ export const CompilerPlayground: React.FC<CompilerPlaygroundProps> = ({
           </div>
 
           {/* Editor Textarea with Line Numbers */}
-          <div className="relative flex-1 min-h-[400px] flex">
+          <div className="relative flex-1 min-h-[280px] sm:min-h-[400px] flex">
             {/* Line numbers gutter */}
-            <div className="py-4 pl-3 pr-2 text-right select-none font-mono text-xs text-slate-600 bg-black/30 border-r border-slate-800/60 w-11">
-              {Array.from({ length: Math.max(lineCount, 16) }, (_, i) => (
+            <div className="py-3 sm:py-4 pl-2.5 pr-2 text-right select-none font-mono text-[11px] sm:text-xs text-slate-600 bg-black/30 border-r border-slate-800/60 w-9 sm:w-11">
+              {Array.from({ length: Math.max(lineCount, 14) }, (_, i) => (
                 <div key={i}>{i + 1}</div>
               ))}
             </div>
@@ -220,20 +222,20 @@ export const CompilerPlayground: React.FC<CompilerPlaygroundProps> = ({
               value={code}
               onChange={(e) => setCode(e.target.value)}
               spellCheck={false}
-              className="flex-1 p-4 font-mono text-xs sm:text-sm bg-transparent text-cyan-100 resize-none focus:outline-none leading-relaxed"
-              style={{ minHeight: '400px' }}
+              className="flex-1 p-3 sm:p-4 font-mono text-xs sm:text-sm bg-transparent text-cyan-100 resize-none focus:outline-none leading-relaxed"
+              style={{ minHeight: '280px' }}
               placeholder="// Write your C program here..."
             />
           </div>
 
           {/* Stdin Input Bar */}
-          <div className="p-3.5 border-t border-slate-800 bg-slate-950/80 flex items-center gap-3">
-            <span className="text-xs font-mono font-semibold text-cyan-400 shrink-0">
-              Standard Input (stdin):
+          <div className="p-3 border-t border-slate-800 bg-slate-950/80 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+            <span className="text-[11px] sm:text-xs font-mono font-semibold text-cyan-400 shrink-0">
+              Stdin:
             </span>
             <input
               type="text"
-              placeholder={lang === 'hi' ? 'scanf के लिए इनपुट यहाँ डालें (जैसे: 25 Kuldeep)...' : 'Input data for scanf (e.g. 25 Kuldeep)...'}
+              placeholder="Input data for scanf (e.g. 25)..."
               value={stdin}
               onChange={(e) => setStdin(e.target.value)}
               className="flex-1 px-3 py-1.5 rounded-xl text-xs font-mono bg-black/60 border border-slate-700 text-cyan-200 focus:outline-none focus:border-blue-500"
