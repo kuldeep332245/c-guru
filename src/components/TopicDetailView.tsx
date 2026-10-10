@@ -18,7 +18,10 @@ import {
   RotateCcw,
   CheckCircle2,
   XCircle,
-  FileText
+  FileText,
+  Lock,
+  Sparkles,
+  Crown
 } from 'lucide-react';
 import { Topic, UserProgress, QuizQuestion } from '../types';
 import { getTopicQuestionBank } from '../data/topicQuestionBanks';
@@ -29,6 +32,8 @@ interface TopicDetailViewProps {
   lang: 'hi' | 'en';
   isDark: boolean;
   userProgress: UserProgress;
+  isSubscribed: boolean;
+  onOpenPayment: () => void;
   onToggleComplete: (topicId: string) => void;
   onToggleBookmark: (topicId: string) => void;
   onOpenInCompiler: (code: string) => void;
@@ -41,6 +46,8 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
   lang,
   isDark,
   userProgress,
+  isSubscribed,
+  onOpenPayment,
   onToggleComplete,
   onToggleBookmark,
   onOpenInCompiler,
@@ -109,83 +116,83 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6 protected-content">
       {/* Top Header / Breadcrumb Bar */}
       <div
-        className={`rounded-3xl p-5 sm:p-6 border shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all ${
+        className={`rounded-2xl sm:rounded-3xl p-4 sm:p-6 border shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 transition-all ${
           isDark
-            ? 'bg-slate-900/90 border-slate-800'
-            : 'bg-white border-slate-200'
+            ? 'bg-[#1D2536] border-[#2C374D]'
+            : 'bg-white border-[#E2E8F0]'
         }`}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 sm:gap-3 w-full md:w-auto">
           <button
             onClick={onBack}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-bold transition-all hover:scale-105 ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border text-xs font-bold transition-all hover:scale-105 shrink-0 ${
               isDark
-                ? 'bg-slate-800/80 border-slate-700 text-slate-200 hover:bg-slate-700'
-                : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+                ? 'bg-[#171E2D] border-[#2C374D] text-slate-200 hover:bg-[#20293D]'
+                : 'bg-slate-100 border-[#E2E8F0] text-slate-700 hover:bg-slate-200'
             }`}
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>{lang === 'hi' ? 'सभी विषय (All Topics)' : 'All Topics'}</span>
+            <span>{lang === 'hi' ? 'सभी विषय' : 'All Topics'}</span>
           </button>
 
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              <span className="text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-0.5 rounded-full bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/20">
                 Module {topic.order}
               </span>
-              <span className="text-xs font-medium text-slate-400">{topic.category}</span>
+              <span className="text-[11px] sm:text-xs font-medium text-slate-400">{topic.category}</span>
             </div>
-            <h1 className={`text-xl sm:text-2xl font-extrabold tracking-tight mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            <h1 className={`text-base sm:text-2xl font-extrabold tracking-tight mt-0.5 sm:mt-1 truncate ${isDark ? 'text-white' : 'text-[#0F172A]'}`}>
               {lang === 'hi' ? topic.titleHindi : topic.title}
             </h1>
           </div>
         </div>
 
         {/* Actions: Bookmark & Mark Complete */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-700/20">
           <button
             onClick={() => onToggleBookmark(topic.id)}
-            className={`p-2.5 rounded-xl border transition-all hover:scale-105 ${
+            className={`p-2 sm:p-2.5 rounded-xl border transition-all hover:scale-105 ${
               isDark
-                ? 'bg-slate-800/80 border-slate-700 text-slate-300'
-                : 'bg-slate-100 border-slate-200 text-slate-600'
+                ? 'bg-[#171E2D] border-[#2C374D] text-slate-300'
+                : 'bg-slate-100 border-[#E2E8F0] text-slate-600'
             }`}
             title="Bookmark"
           >
-            {isBookmarked ? <BookmarkCheck className="w-4 h-4 fill-current text-blue-500" /> : <Bookmark className="w-4 h-4" />}
+            {isBookmarked ? <BookmarkCheck className="w-4 h-4 fill-current text-[#2563EB]" /> : <Bookmark className="w-4 h-4" />}
           </button>
 
           <button
             onClick={() => onToggleComplete(topic.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all shadow-md ${
               isCompleted
-                ? 'bg-emerald-600 text-white'
-                : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105'
+                ? 'bg-[#10B981] hover:bg-emerald-600 text-white shadow-emerald-500/20'
+                : 'bg-[#2563EB] hover:bg-blue-600 text-white hover:scale-105 shadow-blue-500/20'
             }`}
           >
             <CheckCircle className="w-4 h-4" />
-            <span>{isCompleted ? (lang === 'hi' ? 'पूर्ण हुआ (Done ✓)' : 'Completed ✓') : (lang === 'hi' ? 'पूर्ण मार्क करें' : 'Mark as Done')}</span>
+            <span>{isCompleted ? 'Completed ✓' : 'Mark as Done'}</span>
           </button>
         </div>
       </div>
 
-      {/* 3 Main Mode Switcher Tabs */}
+      {/* All Course Content is 100% Free for Everyone */}
       <div
         className={`flex rounded-2xl p-1.5 border shadow-sm ${
-          isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-100 border-slate-200'
+          isDark ? 'bg-[#1D2536] border-[#2C374D]' : 'bg-[#F1F5F9] border-[#E2E8F0]'
         }`}
       >
         <button
           onClick={() => setActiveMode('theory')}
           className={`flex-1 py-3 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
             activeMode === 'theory'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 scale-[1.01]'
+              ? 'bg-[#2563EB] text-white shadow-md shadow-blue-500/20 scale-[1.01]'
               : isDark
-              ? 'text-slate-400 hover:text-slate-200'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'text-slate-300 hover:text-white'
+              : 'text-[#64748B] hover:text-[#0F172A]'
           }`}
         >
           <BookOpen className="w-4 h-4" />
@@ -196,10 +203,10 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
           onClick={() => setActiveMode('practical')}
           className={`flex-1 py-3 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
             activeMode === 'practical'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 scale-[1.01]'
+              ? 'bg-[#2563EB] text-white shadow-md shadow-blue-500/20 scale-[1.01]'
               : isDark
-              ? 'text-slate-400 hover:text-slate-200'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'text-slate-300 hover:text-white'
+              : 'text-[#64748B] hover:text-[#0F172A]'
           }`}
         >
           <Code2 className="w-4 h-4" />
@@ -210,16 +217,16 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
           onClick={() => setActiveMode('quiz')}
           className={`flex-1 py-3 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
             activeMode === 'quiz'
-              ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md shadow-blue-500/20 scale-[1.01]'
+              ? 'bg-[#2563EB] text-white shadow-md shadow-blue-500/20 scale-[1.01]'
               : isDark
-              ? 'text-slate-400 hover:text-slate-200'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'text-slate-300 hover:text-white'
+              : 'text-[#64748B] hover:text-[#0F172A]'
           }`}
         >
           <HelpCircle className="w-4 h-4" />
           <span>{lang === 'hi' ? '3. 40 प्रश्नों का टेस्ट' : '3. 40-Q Test'}</span>
           <span className="hidden md:inline-block px-2 py-0.5 rounded-full text-[10px] bg-black/20 text-white font-bold">
-            20 सरल + 20 कठिन
+            {lang === 'hi' ? '20 सरल + 20 कठिन' : '20 Easy + 20 Hard'}
           </span>
         </button>
       </div>
@@ -229,10 +236,10 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
         <div className="space-y-6">
           {/* Main Structured Reading Card */}
           <div
-            className={`rounded-3xl p-6 sm:p-9 border shadow-lg space-y-6 ${
+            className={`rounded-3xl p-6 sm:p-9 border shadow-sm space-y-6 ${
               isDark
-                ? 'bg-slate-900/90 border-slate-800'
-                : 'bg-white border-slate-200'
+                ? 'bg-[#1D2536] border-[#2C374D]'
+                : 'bg-white border-[#E2E8F0]'
             }`}
           >
             <div className="flex items-center gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
@@ -249,7 +256,7 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
 
             <div
               className={`text-sm sm:text-base leading-relaxed whitespace-pre-line font-sans ${
-                isDark ? 'text-slate-300' : 'text-slate-700'
+                isDark ? 'text-slate-200' : 'text-slate-900 font-medium'
               }`}
             >
               {lang === 'hi' ? topic.explanationHi : topic.explanationEn}
@@ -260,18 +267,20 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
           <div
             className={`rounded-3xl p-6 sm:p-8 border shadow-md flex items-start gap-4 ${
               isDark
-                ? 'bg-blue-950/20 border-blue-900/40 text-blue-200'
-                : 'bg-blue-50/70 border-blue-200 text-blue-900'
+                ? 'bg-blue-950/20 border-blue-900/40 text-blue-100'
+                : 'bg-blue-50/70 border-blue-200 text-slate-900'
             }`}
           >
             <div className="p-3 rounded-2xl bg-blue-500/20 text-blue-400 shrink-0">
               <Lightbulb className="w-6 h-6" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-500 font-bold">
                 {lang === 'hi' ? 'दैनिक जीवन का मजेदार उदाहरण (Fun Real-Life Analogy)' : 'Real-Life Everyday Analogy'}
               </h3>
-              <p className="text-sm sm:text-base font-medium leading-relaxed">
+              <p className={`text-sm sm:text-base font-semibold leading-relaxed ${
+                isDark ? 'text-blue-100' : 'text-slate-900'
+              }`}>
                 {lang === 'hi' ? topic.realLifeAnalogy.hi : topic.realLifeAnalogy.en}
               </p>
             </div>
@@ -290,14 +299,14 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
               <div className="flex items-center gap-2 text-emerald-400">
                 <Award className="w-5 h-5" />
                 <h3 className="font-bold text-sm uppercase tracking-wider">
-                  {lang === 'hi' ? 'महत्वपूर्ण नियम (Golden Rules)' : 'Key Rules & Best Practices'}
+                  {lang === 'hi' ? 'महत्वपूर्ण नियम (Key Principles)' : 'Key Rules & Best Practices'}
                 </h3>
               </div>
               <ul className="space-y-2.5 text-xs sm:text-sm">
                 {(lang === 'hi' ? topic.keyPoints.hi : topic.keyPoints.en).map((pt, i) => (
                   <li key={i} className="flex items-start gap-2.5">
                     <span className="text-emerald-400 font-bold">•</span>
-                    <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>{pt}</span>
+                    <span className={isDark ? 'text-slate-200' : 'text-slate-900 font-medium'}>{pt}</span>
                   </li>
                 ))}
               </ul>
@@ -321,7 +330,7 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                 {(lang === 'hi' ? topic.commonPitfalls.hi : topic.commonPitfalls.en).map((pit, i) => (
                   <li key={i} className="flex items-start gap-2.5">
                     <span className="text-rose-400 font-bold">⚠</span>
-                    <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>{pit}</span>
+                    <span className={isDark ? 'text-slate-200' : 'text-slate-900 font-medium'}>{pit}</span>
                   </li>
                 ))}
               </ul>
@@ -351,7 +360,7 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
               <div className="px-5 py-3.5 bg-slate-900/80 border-b border-slate-800 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-rose-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-amber-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-slate-500/80" />
                   <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
                   <span className="text-xs font-mono font-bold text-cyan-300 ml-2">
                     {lang === 'hi' ? ex.titleHindi : ex.title}
@@ -542,7 +551,9 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
                       : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
                   }`}
                 >
-                  {currentQ?.difficulty === 'easy' ? '🟢 सरल (Easy)' : '🔴 कठिन (Hard)'}
+                  {currentQ?.difficulty === 'easy'
+                    ? lang === 'hi' ? '🟢 सरल (Easy)' : '🟢 Easy'
+                    : lang === 'hi' ? '🔴 कठिन (Hard)' : '🔴 Hard'}
                 </span>
               </div>
 
