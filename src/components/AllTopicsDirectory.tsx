@@ -210,19 +210,19 @@ export const AllTopicsDirectory: React.FC<AllTopicsDirectoryProps> = ({
                     isDark ? 'border-slate-800 bg-slate-950 text-slate-400' : 'border-slate-200 bg-slate-50 text-slate-600'
                   }`}>
                     <FileText className="w-3 h-3 text-cyan-400" />
-                    <span>400+ शब्द</span>
+                    <span>{lang === 'hi' ? '400+ शब्द' : '400+ Words'}</span>
                   </span>
                   <span className={`px-2 py-0.5 rounded-md border flex items-center gap-1 ${
                     isDark ? 'border-slate-800 bg-slate-950 text-slate-400' : 'border-slate-200 bg-slate-50 text-slate-600'
                   }`}>
                     <Code2 className="w-3 h-3 text-emerald-400" />
-                    <span>प्रैक्टिकल कोड</span>
+                    <span>{lang === 'hi' ? 'प्रैक्टिकल कोड' : 'Practical Code'}</span>
                   </span>
                   <span className={`px-2 py-0.5 rounded-md border flex items-center gap-1 ${
                     isDark ? 'border-blue-500/30 bg-blue-500/10 text-blue-400' : 'border-blue-200 bg-blue-50 text-blue-600'
                   }`}>
                     <HelpCircle className="w-3 h-3" />
-                    <span>40 प्रश्न टेस्ट</span>
+                    <span>{lang === 'hi' ? '40 प्रश्न टेस्ट' : '40-Q Test'}</span>
                   </span>
                 </div>
               </div>
