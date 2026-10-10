@@ -111,7 +111,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setSuccessMsg(null);
 
     if (cleanP.length !== 10) {
-      setError('कृपया सही 10-अंकों का मोबाइल नंबर दर्ज करें (Enter valid 10-digit mobile number).');
+      setError(
+        lang === 'hi'
+          ? 'कृपया सही 10-अंकों का मोबाइल नंबर दर्ज करें।'
+          : 'Please enter a valid 10-digit mobile number.'
+      );
       return;
     }
 
@@ -121,8 +125,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       if (!isRegistered) {
         setError(
           lang === 'hi'
-            ? 'Number is not registered (यह मोबाइल नंबर रजिस्टर नहीं है! कृपया पहले नया खाता बनाएं)।'
-            : 'Number is not registered! Please create an account first.'
+            ? 'यह मोबाइल नंबर रजिस्टर नहीं है! कृपया पहले नया खाता बनाएं।'
+            : 'This mobile number is not registered! Please create an account first.'
         );
         return;
       }
@@ -133,17 +137,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       if (isRegistered) {
         setError(
           lang === 'hi'
-            ? 'यह मोबाइल नंबर पहले से रजिस्टर्ड है! कृपया सीधे "लॉगिन करें" टैब से लॉगिन करें।'
+            ? 'यह मोबाइल नंबर पहले से रजिस्टर्ड है! कृपया सीधे लॉगिन करें।'
             : 'This number is already registered! Please switch to Login tab.'
         );
         return;
       }
       if (!name.trim()) {
-        setError('कृपया अपना पूरा नाम दर्ज करें (Please enter full name).');
+        setError(
+          lang === 'hi' ? 'कृपया अपना पूरा नाम दर्ज करें।' : 'Please enter your full name.'
+        );
         return;
       }
       if (!email.trim() || !email.includes('@')) {
-        setError('कृपया सही ईमेल/जीमेल आईडी दर्ज करें (Enter valid email).');
+        setError(
+          lang === 'hi' ? 'कृपया सही ईमेल आईडी दर्ज करें।' : 'Please enter a valid email address.'
+        );
         return;
       }
     }
@@ -166,17 +174,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           setIsSimulated(false);
         }
 
-        setSuccessMsg(res.message || `ओटीपी +91 ${cleanP} पर भेज दिया गया है।`);
+        setSuccessMsg(
+          res.message ||
+            (lang === 'hi'
+              ? `ओटीपी +91 ${cleanP} पर भेज दिया गया है।`
+              : `OTP has been sent to +91 ${cleanP}.`)
+        );
         // Focus first OTP input
         setTimeout(() => {
           otpInputRefs.current[0]?.focus();
         }, 150);
       } else {
-        setError(res.error || res.message || 'OTP भेजने में विफल। पुनः प्रयास करें।');
+        setError(
+          res.error ||
+            res.message ||
+            (lang === 'hi' ? 'OTP भेजने में विफल। पुनः प्रयास करें।' : 'Failed to send OTP. Please try again.')
+        );
       }
     } catch (err: any) {
       setIsSubmitting(false);
-      setError(err.message || 'OTP भेजने में त्रुटि हुई।');
+      setError(
+        err.message || (lang === 'hi' ? 'OTP भेजने में त्रुटि हुई।' : 'Error sending OTP.')
+      );
     }
   };
 
@@ -232,7 +251,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     const fullOtp = otpDigits.join('').trim();
     if (fullOtp.length !== 6) {
-      setError('कृपया 6-अंकों का पूरा ओटीपी दर्ज करें।');
+      setError(
+        lang === 'hi'
+          ? 'कृपया 6-अंकों का पूरा ओटीपी दर्ज करें।'
+          : 'Please enter complete 6-digit OTP.'
+      );
       return;
     }
 
@@ -241,7 +264,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const verifyRes = await verifyOtpApi(cleanP, fullOtp, mode);
       if (!verifyRes.success) {
         setIsSubmitting(false);
-        setError(verifyRes.error || verifyRes.message || 'अमान्य ओटीपी दर्ज किया गया है।');
+        setError(
+          verifyRes.error ||
+            verifyRes.message ||
+            (lang === 'hi' ? 'अमान्य ओटीपी दर्ज किया गया है।' : 'Invalid OTP entered.')
+        );
         return;
       }
 
@@ -263,7 +290,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           setError(
             authRes.error ||
               (lang === 'hi'
-                ? 'Number is not registered (यह मोबाइल नंबर रजिस्टर नहीं है! कृपया पहले नया खाता बनाएं)।'
+                ? 'यह मोबाइल नंबर रजिस्टर नहीं है! कृपया पहले नया खाता बनाएं।'
                 : 'Number is not registered! Please create an account first.')
           );
         }
@@ -292,7 +319,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
     } catch (err: any) {
       setIsSubmitting(false);
-      setError(err.message || 'ओटीपी सत्यापन में त्रुटि हुई।');
+      setError(err.message || (lang === 'hi' ? 'ओटीपी सत्यापन में त्रुटि हुई।' : 'Error verifying OTP.'));
     }
   };
 
@@ -306,11 +333,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     const trimmedPass = loginPassword.trim();
 
     if (!trimmedId) {
-      setError('कृपया रजिस्टर्ड ईमेल या मोबाइल नंबर दर्ज करें।');
+      setError(
+        lang === 'hi'
+          ? 'कृपया रजिस्टर्ड ईमेल या मोबाइल नंबर दर्ज करें।'
+          : 'Please enter registered email or mobile number.'
+      );
       return;
     }
     if (!trimmedPass) {
-      setError('कृपया पासवर्ड दर्ज करें।');
+      setError(
+        lang === 'hi' ? 'कृपया पासवर्ड दर्ज करें।' : 'Please enter your password.'
+      );
       return;
     }
 
@@ -319,12 +352,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const res = loginUserWithCredentials(trimmedId, trimmedPass);
       setIsSubmitting(false);
       if (res.success && res.user) {
-        setSuccessMsg(`लॉगिन सफल! स्वागत है, ${res.user.name}!`);
+        setSuccessMsg(
+          lang === 'hi'
+            ? `लॉगिन सफल! स्वागत है, ${res.user.name}!`
+            : `Login successful! Welcome, ${res.user.name}!`
+        );
         setTimeout(() => {
           onSuccess(res.user!);
         }, 300);
       } else {
-        setError(res.error || 'लॉगिन विफल। कृपया पासवर्ड जांचें।');
+        setError(
+          res.error ||
+            (lang === 'hi' ? 'लॉगिन विफल। कृपया पासवर्ड जांचें।' : 'Login failed. Please verify credentials.')
+        );
       }
     }, 200);
   };
@@ -354,12 +394,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
-                {mode === 'login' ? 'C-Guru लॉगिन (Login)' : 'नया खाता बनाएं (Register)'}
+                {mode === 'login'
+                  ? (lang === 'hi' ? 'C-Guru लॉगिन' : 'Sign In to C-Guru')
+                  : (lang === 'hi' ? 'नया खाता बनाएं' : 'Create an Account')}
               </h2>
               <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                 {mode === 'login'
-                  ? 'सुरक्षित मोबाइल OTP से तुरंत लॉगिन करें'
-                  : 'रजिस्टर करें और C प्रोग्रामिंग की यात्रा शुरू करें'}
+                  ? (lang === 'hi' ? 'सुरक्षित मोबाइल OTP से तुरंत लॉगिन करें' : 'Fast and secure login with mobile OTP')
+                  : (lang === 'hi' ? 'रजिस्टर करें और C प्रोग्रामिंग की यात्रा शुरू करें' : 'Sign up to start your C programming masterclass')}
               </p>
             </div>
           </div>
@@ -384,7 +426,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   : isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              लॉगिन (Login)
+              {lang === 'hi' ? 'लॉगिन' : 'Sign In'}
             </button>
             <button
               type="button"
@@ -399,14 +441,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   : isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              रजिस्टर (Register)
+              {lang === 'hi' ? 'रजिस्टर (नया खाता)' : 'Register (New Account)'}
             </button>
           </div>
 
         {/* Status Alerts */}
         {error && (
           <div className="mb-4 p-3 rounded-xl text-xs flex items-start sm:items-center justify-between gap-2.5 bg-rose-500/15 border-2 border-rose-500/40 text-rose-300 animate-in fade-in">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
               <span className="font-medium">{error}</span>
             </div>
@@ -417,7 +459,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   setMode('register');
                   setError(null);
                 }}
-                className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] shrink-0 transition-colors shadow-xs cursor-pointer"
+                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shrink-0 transition-colors shadow-sm cursor-pointer whitespace-nowrap"
               >
                 {lang === 'hi' ? 'रजिस्टर करें →' : 'Register Now →'}
               </button>
@@ -442,7 +484,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <>
                     <div>
                       <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                        पूरा नाम (Full Name) *
+                        {lang === 'hi' ? 'पूरा नाम *' : 'Full Name *'}
                       </label>
                       <div className="relative">
                         <UserIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -451,7 +493,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                           required
                           value={name}
                           onChange={(e) => setName(e.target.value)}
-                          placeholder="उदा. कुलदीप सिंह (Kuldeep Singh)"
+                          placeholder={lang === 'hi' ? 'उदा. कुलदीप सिंह' : 'e.g. Alex Smith'}
                           className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-blue-500 ${
                             isDark ? 'bg-[#13161D] border-[#2B313F] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                           }`}
@@ -461,7 +503,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
                     <div>
                       <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                        जीमेल / ईमेल (Email Address) *
+                        {lang === 'hi' ? 'जीमेल / ईमेल *' : 'Email Address *'}
                       </label>
                       <div className="relative">
                         <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -470,7 +512,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                           required
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          placeholder="उदा. yourname@gmail.com"
+                          placeholder={lang === 'hi' ? 'उदा. yourname@gmail.com' : 'e.g. yourname@gmail.com'}
                           className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-blue-500 ${
                             isDark ? 'bg-[#13161D] border-[#2B313F] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                           }`}
@@ -482,7 +524,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
                 <div>
                   <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    मोबाइल नंबर (10-Digit Mobile Number) *
+                    {lang === 'hi' ? 'मोबाइल नंबर (10-अंक) *' : 'Mobile Number (10 Digits) *'}
                   </label>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-slate-400 text-xs font-semibold">
@@ -501,31 +543,77 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     />
                   </div>
                   <p className="text-[10px] text-slate-400 mt-1">
-                    * इस नंबर पर 6-अंकों का ओटीपी (One-Time Password) भेजा जाएगा।
+                    {lang === 'hi'
+                      ? '* इस नंबर पर 6-अंकों का ओटीपी भेजा जाएगा।'
+                      : '* A 6-digit OTP will be sent to this number.'}
                   </p>
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting || cleanP.length !== 10}
-                  className="w-full py-3 rounded-xl font-semibold text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-blue-500/20 active:scale-98"
+                  className="w-full py-3 rounded-xl font-semibold text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
                   ) : (
                     <>
-                      <span>{mode === 'login' ? 'ओटीपी प्राप्त करें (Send OTP)' : 'ओटीपी भेजें और रजिस्टर करें'}</span>
+                      <span>
+                        {mode === 'login'
+                          ? (lang === 'hi' ? 'ओटीपी प्राप्त करें' : 'Get OTP & Sign In')
+                          : (lang === 'hi' ? 'ओटीपी भेजें और रजिस्टर करें' : 'Send OTP & Register')}
+                      </span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
                 </button>
+
+                {/* Explicit Switch Option for Mobile Users */}
+                <div className="pt-2 text-center">
+                  {mode === 'login' ? (
+                    <div className="text-xs">
+                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+                        {lang === 'hi' ? 'खाता नहीं है?' : "Don't have an account?"}{' '}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMode('register');
+                          setOtpStep('phone');
+                          setError(null);
+                        }}
+                        className="font-bold text-blue-500 hover:underline cursor-pointer ml-1"
+                      >
+                        {lang === 'hi' ? 'यहाँ रजिस्टर करें (नया खाता) →' : 'Register Now (Create Account) →'}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-xs">
+                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+                        {lang === 'hi' ? 'पहले से खाता है?' : 'Already registered?'}{' '}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMode('login');
+                          setOtpStep('phone');
+                          setError(null);
+                        }}
+                        className="font-bold text-blue-500 hover:underline cursor-pointer ml-1"
+                      >
+                        {lang === 'hi' ? 'सीधे लॉगिन करें →' : 'Sign In Directly →'}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </form>
             ) : (
               /* OTP verification screen */
               <form onSubmit={handleVerifyOtp} className="space-y-5 animate-in fade-in duration-200">
                 <div className="flex items-center justify-between text-xs">
                   <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                    ओटीपी भेजा गया: <strong className={isDark ? 'text-white' : 'text-slate-900'}>+91 {cleanP}</strong>
+                    {lang === 'hi' ? 'ओटीपी भेजा गया:' : 'OTP Sent To:'}{' '}
+                    <strong className={isDark ? 'text-white' : 'text-slate-900'}>+91 {cleanP}</strong>
                   </span>
                   <button
                     type="button"
@@ -533,10 +621,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       setOtpStep('phone');
                       setError(null);
                     }}
-                    className="text-blue-500 hover:underline flex items-center gap-1 font-medium"
+                    className="text-blue-500 hover:underline flex items-center gap-1 font-medium cursor-pointer"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
-                    <span>नंबर बदलें</span>
+                    <span>{lang === 'hi' ? 'नंबर बदलें' : 'Change Number'}</span>
                   </button>
                 </div>
 
@@ -554,15 +642,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         {devOtp}
                       </span>
                     </div>
-                    <p className="text-[11px] opacity-80">
-                      (Backend API ready. Add <code>SMS_API_KEY</code> in .env to deliver live SMS to handsets.)
-                    </p>
                     <button
                       type="button"
                       onClick={handleAutoFillDevOtp}
-                      className="text-[11px] font-bold text-blue-500 hover:underline block pt-0.5"
+                      className="text-[11px] font-bold text-blue-500 hover:underline block pt-0.5 cursor-pointer"
                     >
-                      👉 ओटीपी स्वतः भरें (Auto-Fill {devOtp})
+                      👉 {lang === 'hi' ? `ओटीपी स्वतः भरें (${devOtp})` : `Auto-Fill OTP (${devOtp})`}
                     </button>
                   </div>
                 )}
@@ -572,7 +657,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 text-center ${
                     isDark ? 'text-slate-300' : 'text-slate-700'
                   }`}>
-                    6-अंकों का ओटीपी दर्ज करें
+                    {lang === 'hi' ? '6-अंकों का ओटीपी दर्ज करें' : 'Enter 6-Digit OTP'}
                   </label>
                   <div className="flex justify-center gap-1.5 sm:gap-2.5">
                     {otpDigits.map((digit, index) => (
@@ -602,21 +687,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 {/* Resend & Timer */}
                 <div className="flex items-center justify-between text-xs pt-1">
                   <span className={isDark ? 'text-slate-400' : 'text-slate-500'}>
-                    ओटीपी नहीं मिला?
+                    {lang === 'hi' ? 'ओटीपी नहीं मिला?' : "Didn't receive OTP?"}
                   </span>
                   {countdown > 0 ? (
                     <span className="text-slate-400 font-mono">
-                      पुनः भेजें: 00:{countdown < 10 ? `0${countdown}` : countdown}s
+                      {lang === 'hi' ? 'पुनः भेजें' : 'Resend'}: 00:{countdown < 10 ? `0${countdown}` : countdown}s
                     </span>
                   ) : (
                     <button
                       type="button"
                       onClick={() => handleSendOtp()}
                       disabled={isSubmitting}
-                      className="text-blue-500 hover:underline font-semibold flex items-center gap-1"
+                      className="text-blue-500 hover:underline font-semibold flex items-center gap-1 cursor-pointer"
                     >
                       <RefreshCw className="w-3 h-3" />
-                      <span>पुनः ओटीपी भेजें (Resend OTP)</span>
+                      <span>{lang === 'hi' ? 'पुनः ओटीपी भेजें' : 'Resend OTP'}</span>
                     </button>
                   )}
                 </div>
@@ -624,13 +709,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <button
                   type="submit"
                   disabled={isSubmitting || otpDigits.join('').length !== 6}
-                  className="w-full py-3 rounded-xl font-semibold text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-blue-500/20 active:scale-98"
+                  className="w-full py-3 rounded-xl font-semibold text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
                   ) : (
                     <>
-                      <span>{mode === 'login' ? 'सत्यापित करें और लॉगिन करें' : 'सत्यापित करें और शुरू करें'}</span>
+                      <span>
+                        {mode === 'login'
+                          ? (lang === 'hi' ? 'सत्यापित करें और लॉगिन करें' : 'Verify & Sign In')
+                          : (lang === 'hi' ? 'सत्यापित करें और शुरू करें' : 'Verify & Get Started')}
+                      </span>
                       <CheckCircle2 className="w-4 h-4" />
                     </>
                   )}
@@ -646,12 +735,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   setAuthMethod('password');
                   setError(null);
                 }}
-                className={`text-xs hover:underline inline-flex items-center gap-1.5 ${
+                className={`text-xs hover:underline inline-flex items-center gap-1.5 cursor-pointer ${
                   isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <KeyRound className="w-3.5 h-3.5" />
-                <span>पासवर्ड के माध्यम से लॉगिन करें (Login with Password)</span>
+                <span>
+                  {lang === 'hi'
+                    ? 'पासवर्ड के माध्यम से लॉगिन करें'
+                    : 'Sign in with Password instead'}
+                </span>
               </button>
             </div>
           </div>
@@ -662,7 +755,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <form onSubmit={handlePasswordLogin} className="space-y-4">
             <div>
               <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                रजिस्टर्ड जीमेल / मोबाइल नंबर
+                {lang === 'hi' ? 'रजिस्टर्ड ईमेल / मोबाइल नंबर' : 'Registered Email or Mobile'}
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -671,7 +764,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   required
                   value={loginId}
                   onChange={(e) => setLoginId(e.target.value)}
-                  placeholder="yourname@gmail.com या 9876543210"
+                  placeholder={lang === 'hi' ? 'yourname@gmail.com या 9876543210' : 'yourname@gmail.com or 9876543210'}
                   className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-blue-500 ${
                     isDark ? 'bg-[#13161D] border-[#2B313F] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                   }`}
@@ -681,7 +774,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
             <div>
               <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                पासवर्ड (Password)
+                {lang === 'hi' ? 'पासवर्ड' : 'Password'}
               </label>
               <div className="relative">
                 <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -690,7 +783,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   required
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="अपना पासवर्ड दर्ज करें"
+                  placeholder={lang === 'hi' ? 'अपना पासवर्ड दर्ज करें' : 'Enter your password'}
                   className={`w-full pl-9 pr-10 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-blue-500 ${
                     isDark ? 'bg-[#13161D] border-[#2B313F] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                   }`}
@@ -708,13 +801,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 rounded-xl font-semibold text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 active:scale-98"
+              className="w-full py-3 rounded-xl font-semibold text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
             >
               {isSubmitting ? (
                 <RefreshCw className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  <span>पासवर्ड से लॉगिन करें</span>
+                  <span>{lang === 'hi' ? 'पासवर्ड से लॉगिन करें' : 'Sign In with Password'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -729,12 +822,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   setOtpStep('phone');
                   setError(null);
                 }}
-                className={`text-xs hover:underline inline-flex items-center gap-1.5 ${
+                className={`text-xs hover:underline inline-flex items-center gap-1.5 cursor-pointer ${
                   isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <Smartphone className="w-3.5 h-3.5 text-blue-500" />
-                <span className="text-blue-500 font-medium">वापस मोबाइल OTP से लॉगिन करें (Use Mobile OTP)</span>
+                <span className="text-blue-500 font-medium">
+                  {lang === 'hi' ? 'वापस मोबाइल OTP से लॉगिन करें' : 'Switch back to Mobile OTP'}
+                </span>
               </button>
             </div>
           </form>
