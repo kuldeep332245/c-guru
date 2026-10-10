@@ -530,7 +530,7 @@ export const LabProgramsViewer: React.FC<LabProgramsViewerProps> = ({
                 </div>
 
                 {/* Output */}
-                <div className={`p-4 rounded-2xl border space-y-1.5 ${
+                <div className={`p-4 rounded-2xl border space-y-1.5 max-w-full overflow-hidden ${
                   isDark
                     ? 'border-emerald-900/40 bg-emerald-950/20'
                     : 'border-emerald-300 bg-emerald-50/70'
@@ -538,7 +538,7 @@ export const LabProgramsViewer: React.FC<LabProgramsViewerProps> = ({
                   <span className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? 'text-emerald-400' : 'text-emerald-800'}`}>
                     {isHindi ? 'कंसोल आउटपुट (Output):' : 'Console Output:'}
                   </span>
-                  <pre className={`text-xs font-mono font-bold whitespace-pre-wrap ${isDark ? 'text-emerald-300' : 'text-emerald-950'}`}>
+                  <pre className={`text-xs font-mono font-bold whitespace-pre-wrap break-all break-words overflow-x-auto max-w-full ${isDark ? 'text-emerald-300' : 'text-emerald-950'}`}>
                     {activeQuestion.sampleOutput}
                   </pre>
                 </div>
