@@ -45,12 +45,12 @@ import { initAppSecurity, registerSecurityListener } from './utils/security';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('home');
-  // Read saved language from localStorage, default to Hindi ('hi') or any chosen Indian language
+  // Read saved language from localStorage, default to English ('en')
   const [lang, setLang] = useState<string>(() => {
     const saved = localStorage.getItem('cguru_lang');
-    return saved || 'hi';
+    return saved || 'en';
   });
-  const effectiveLang: 'hi' | 'en' = lang === 'en' ? 'en' : 'hi';
+  const effectiveLang: 'hi' | 'en' = lang === 'hi' ? 'hi' : 'en';
   const navLabels = getNavLabels(lang);
   const [isDark, setIsDark] = useState<boolean>(() => {
     const saved = localStorage.getItem('cguru_dark_theme');
@@ -269,7 +269,6 @@ export default function App() {
   const handleLogout = () => {
     setActiveUser(null);
     setUser(null);
-    setShowUnlockOffer(false);
     setUserProgress(getUserProgress('user_guest'));
   };
 
@@ -381,7 +380,7 @@ export default function App() {
           setAuthMode('login');
           setIsAuthModalOpen(true);
         }}
-        onOpenPayment={() => setIsPaymentModalOpen(true)}
+        onOpenPayment={() => {}}
         onLogout={handleLogout}
         onOpenGitHubExport={() => setIsGitHubModalOpen(true)}
         completedCount={userProgress.completedTopicIds.length}
@@ -400,7 +399,7 @@ export default function App() {
             onGoToTab={(tab) => setActiveTab(tab)}
             onSelectTopic={handleGoToTopic}
             onOpenCompilerWithCode={handleOpenInCompiler}
-            onOpenPayment={() => setIsPaymentModalOpen(true)}
+            onOpenPayment={() => {}}
           />
         )}
 
@@ -412,7 +411,7 @@ export default function App() {
             isDark={isDark}
             userProgress={userProgress}
             isSubscribed={isSubscribed}
-            onOpenPayment={() => setIsPaymentModalOpen(true)}
+            onOpenPayment={() => {}}
             onToggleComplete={handleToggleComplete}
             onToggleBookmark={handleToggleBookmark}
             onOpenInCompiler={handleOpenInCompiler}
@@ -427,7 +426,7 @@ export default function App() {
             isDark={isDark}
             userProgress={userProgress}
             isSubscribed={isSubscribed}
-            onOpenPayment={() => setIsPaymentModalOpen(true)}
+            onOpenPayment={() => {}}
           />
         )}
 
@@ -492,7 +491,7 @@ export default function App() {
             isDark={isDark}
             lang={effectiveLang}
             isSubscribed={isSubscribed}
-            onOpenPayment={() => setIsPaymentModalOpen(true)}
+            onOpenPayment={() => {}}
             onGoToTopic={handleGoToTopic}
             onGoToCompiler={() => setActiveTab('compiler')}
             onGoToBugs={() => setActiveTab('bugs')}
