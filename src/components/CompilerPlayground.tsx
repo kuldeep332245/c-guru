@@ -244,7 +244,7 @@ export const CompilerPlayground: React.FC<CompilerPlaygroundProps> = ({
         </div>
 
         {/* Output Console / Virtual Files */}
-        <div className="lg:col-span-5 rounded-3xl border border-slate-800 bg-[#070A11] overflow-hidden shadow-xl flex flex-col">
+        <div className="lg:col-span-5 rounded-3xl border border-slate-800 bg-[#070A11] overflow-hidden shadow-xl flex flex-col min-w-0 max-w-full">
           {/* Console Header with Tabs */}
           <div className="px-4 py-3 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -292,7 +292,7 @@ export const CompilerPlayground: React.FC<CompilerPlaygroundProps> = ({
           </div>
 
           {/* Console Body */}
-          <div className="p-4 flex-1 min-h-[400px] max-h-[520px] overflow-y-auto font-mono text-xs leading-relaxed">
+          <div className="p-4 flex-1 min-h-[400px] max-h-[520px] overflow-y-auto overflow-x-auto font-mono text-xs leading-relaxed max-w-full">
             {activeConsoleTab === 'output' ? (
               !compileResult ? (
                 <div className="h-full flex flex-col items-center justify-center text-center text-slate-500 py-16 space-y-2">
@@ -302,17 +302,17 @@ export const CompilerPlayground: React.FC<CompilerPlaygroundProps> = ({
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-3 max-w-full">
                   {compileResult.stdout && (
-                    <div className="text-emerald-300 whitespace-pre-wrap font-mono">
+                    <div className="text-emerald-300 whitespace-pre-wrap break-all break-words font-mono max-w-full overflow-x-auto">
                       {compileResult.stdout}
                     </div>
                   )}
 
                   {compileResult.stderr && (
-                    <div className="text-rose-400 bg-rose-950/30 p-3.5 rounded-xl border border-rose-900/40 whitespace-pre-wrap flex items-start gap-2">
+                    <div className="text-rose-400 bg-rose-950/30 p-3.5 rounded-xl border border-rose-900/40 whitespace-pre-wrap break-all break-words flex items-start gap-2 max-w-full">
                       <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                      <div>{compileResult.stderr}</div>
+                      <div className="min-w-0 flex-1">{compileResult.stderr}</div>
                     </div>
                   )}
                 </div>
