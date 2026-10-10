@@ -128,45 +128,48 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2.5">
           {/* Clean Left Brand */}
-          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0 shrink">
             <img
               src="/c-guru-logo.png"
               alt="C-Guru"
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover shadow-sm border border-blue-500/30 shrink-0"
+              className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl object-cover shadow-sm border border-blue-500/30 shrink-0"
             />
-            <span className={`font-bold text-sm sm:text-lg tracking-tight truncate ${
+            <span className={`font-bold text-xs sm:text-base tracking-tight truncate ${
               isDark ? 'text-white' : 'text-slate-900'
             }`}>
-              C-Guru Academy
+              C-Guru<span className="hidden sm:inline"> Academy</span>
             </span>
           </div>
 
           {/* Right Header Action Buttons: Language toggle, Theme, Login, Register */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {setLang && (
               <div className="relative flex items-center">
-                <Globe className="w-3.5 h-3.5 text-blue-500 absolute left-2 pointer-events-none" />
+                <Globe className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-500 absolute left-1.5 sm:left-2 pointer-events-none" />
                 <select
                   value={lang}
                   onChange={(e) => setLang(e.target.value)}
-                  className={`pl-6.5 pr-2 py-1.5 rounded-xl border text-xs font-semibold appearance-none transition-colors cursor-pointer ${
+                  className={`pl-5 sm:pl-6.5 pr-1 sm:pr-2 py-1 sm:py-1.5 rounded-lg sm:rounded-xl border text-[11px] sm:text-xs font-semibold appearance-none transition-colors cursor-pointer max-w-[70px] sm:max-w-none ${
                     isDark
                       ? 'border-[#2B313F] bg-[#181B24] text-slate-200 hover:bg-[#232834]'
                       : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
                   }`}
-                  title="Select Indian Language (भाषा चुनें)"
+                  title="Select Language (भाषा चुनें)"
                 >
-                  <optgroup label="🇮🇳 भारतीय भाषाएं (Indian Languages)">
-                    {ALL_INDIAN_LANGUAGES.filter(l => l.code !== 'en').map((item) => (
+                  <optgroup label="🔥 Popular">
+                    <option value="en" className={isDark ? 'bg-[#181B24] text-white' : 'bg-white text-slate-900'}>
+                      English
+                    </option>
+                    <option value="hi" className={isDark ? 'bg-[#181B24] text-white' : 'bg-white text-slate-900'}>
+                      हिन्दी (Hindi)
+                    </option>
+                  </optgroup>
+                  <optgroup label="🇮🇳 Indian Languages">
+                    {ALL_INDIAN_LANGUAGES.filter(l => l.code !== 'en' && l.code !== 'hi').map((item) => (
                       <option key={item.code} value={item.code} className={isDark ? 'bg-[#181B24] text-white' : 'bg-white text-slate-900'}>
-                        🇮🇳 {item.native} ({item.name})
+                        {item.native} ({item.name})
                       </option>
                     ))}
-                  </optgroup>
-                  <optgroup label="🌐 Global">
-                    <option value="en" className={isDark ? 'bg-[#181B24] text-white' : 'bg-white text-slate-900'}>
-                      🌐 English (Global)
-                    </option>
                   </optgroup>
                 </select>
               </div>
@@ -175,28 +178,28 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({
             {setIsDark && (
               <button
                 onClick={() => setIsDark(!isDark)}
-                className={`p-1.5 rounded-xl border transition-all ${
+                className={`p-1 sm:p-1.5 rounded-lg sm:rounded-xl border transition-all ${
                   isDark
                     ? 'border-[#2B313F] bg-[#181B24] text-amber-400 hover:bg-[#232834]'
                     : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
                 }`}
                 title="Toggle Theme"
               >
-                {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-blue-500" />}
+                {isDark ? <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-500" />}
               </button>
             )}
 
             <button
               onClick={() => onOpenAuth('login')}
-              className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-sm transition-all active:scale-95"
+              className="px-2 py-1 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-xs transition-all active:scale-95 whitespace-nowrap cursor-pointer"
             >
-              {lang === 'hi' ? 'लॉगिन करें' : 'Sign In'}
+              {lang === 'hi' ? 'लॉगिन' : 'Sign In'}
             </button>
             <button
               onClick={() => onOpenAuth('register')}
-              className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold border border-blue-500/30 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-all active:scale-95"
+              className="px-2 py-1 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold border border-blue-500/40 bg-blue-500/15 text-blue-500 hover:bg-blue-500/25 transition-all active:scale-95 whitespace-nowrap cursor-pointer shadow-xs"
             >
-              {lang === 'hi' ? 'रजिस्टर करें' : 'Register'}
+              {lang === 'hi' ? 'रजिस्टर' : 'Register'}
             </button>
           </div>
         </div>
