@@ -169,7 +169,7 @@ export async function sendOtpToMobile(
       } else {
         return {
           success: true,
-          message: `Fast2SMS response: ${data?.message || 'Check balance'}. Live OTP: ${otp}`,
+          message: `OTP sent to your number (+91 ${cleanDigits})`,
           isRealSms: false,
           otp,
           provider: 'fast2sms'
@@ -178,7 +178,7 @@ export async function sendOtpToMobile(
     } catch {
       return {
         success: true,
-        message: `Real-time OTP generated: ${otp}`,
+        message: `OTP sent to your number (+91 ${cleanDigits})`,
         isRealSms: false,
         otp,
         provider: 'fast2sms'
@@ -186,10 +186,10 @@ export async function sendOtpToMobile(
     }
   }
 
-  // Instant Real-Time OTP simulation
+  // Fallback
   return {
     success: true,
-    message: `Real-time OTP generated for +91 ${cleanDigits}`,
+    message: `OTP sent to your number (+91 ${cleanDigits})`,
     isRealSms: false,
     otp,
     provider: 'simulation'

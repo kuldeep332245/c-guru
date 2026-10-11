@@ -80,6 +80,8 @@ async function sendSmsViaGateway(
     clientApiKey ||
     process.env.SMS_API_KEY ||
     process.env.TWO_FACTOR_API_KEY ||
+    process.env.VITE_SMS_API_KEY ||
+    process.env.VITE_2FACTOR_API_KEY ||
     process.env.FAST2SMS_API_KEY ||
     ''
   ).trim();
@@ -292,7 +294,6 @@ app.post('/api/auth/send-otp', async (req, res) => {
       success: true,
       message: `OTP sent to your number (+91 ${cleaned})`,
       expiresIn: 600,
-      devOtp: isSimulated ? otp : undefined,
       isSimulated,
       mode,
       verificationToken

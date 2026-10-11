@@ -101,7 +101,6 @@ export async function sendOtpApi(
     return {
       success: true,
       message: feedbackMsg,
-      devOtp: isReal ? undefined : generatedOtp,
       isSimulated: !isReal,
       expiresIn: 600
     };

@@ -64,7 +64,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   // OTP State
   const [otpStep, setOtpStep] = useState<'phone' | 'verify'>('phone');
   const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
-  const [devOtp, setDevOtp] = useState<string | null>(null);
   const [isSimulated, setIsSimulated] = useState<boolean>(false);
   const [countdown, setCountdown] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -80,7 +79,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setAuthMethod('otp');
       setOtpStep('phone');
       setOtpDigits(['', '', '', '', '', '']);
-      setDevOtp(null);
       setError(null);
       setSuccessMsg(null);
       setCountdown(0);
@@ -167,13 +165,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         setCountdown(60); // 60 seconds resend countdown
         setOtpDigits(['', '', '', '', '', '']);
 
-        if (res.devOtp) {
-          setDevOtp(res.devOtp);
-          setIsSimulated(Boolean(res.isSimulated));
-        } else {
-          setDevOtp(null);
-          setIsSimulated(false);
-        }
+        setIsSimulated(Boolean(res.isSimulated));
 
         const cleanNotice = (res.message && !res.message.includes('असली') && !res.message.toLowerCase().includes('asli'))
           ? res.message
@@ -230,19 +222,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
       otpInputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  // Auto fill dev OTP helper
-  const handleAutoFillDevOtp = () => {
-    if (devOtp) {
-      const digits = devOtp.split('');
-      const nextDigits = ['', '', '', '', '', ''];
-      for (let i = 0; i < digits.length; i++) {
-        nextDigits[i] = digits[i];
-      }
-      setOtpDigits(nextDigits);
-      otpInputRefs.current[Math.min(digits.length - 1, 5)]?.focus();
     }
   };
 
@@ -662,30 +641,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     <span>{lang === 'hi' ? 'नंबर बदलें' : 'Change Number'}</span>
                   </button>
                 </div>
-
-                {/* Dev/Simulated Mode Banner */}
-                {devOtp && (
-                  <div className={`p-3 rounded-xl border text-xs space-y-1.5 ${
-                    isDark ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-900'
-                  }`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 font-semibold">
-                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                        <span>{lang === 'hi' ? 'लाइव टेस्ट ओटीपी कोड' : 'Live Test OTP Generated'}</span>
-                      </div>
-                      <span className="font-mono font-bold text-sm bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/40">
-                        {devOtp}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleAutoFillDevOtp}
-                      className="text-[11px] font-bold text-blue-500 hover:underline block pt-0.5 cursor-pointer"
-                    >
-                      👉 {lang === 'hi' ? `ओटीपी स्वतः भरें (${devOtp})` : `Auto-Fill OTP (${devOtp})`}
-                    </button>
-                  </div>
-                )}
 
                 {/* Individual OTP Boxes */}
                 <div>
