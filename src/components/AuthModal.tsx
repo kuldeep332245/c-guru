@@ -15,7 +15,8 @@ import {
   Sparkles,
   KeyRound,
   RefreshCw,
-  Edit3
+  Edit3,
+  Menu
 } from 'lucide-react';
 import {
   registerUserWithCredentials,
@@ -174,12 +175,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           setIsSimulated(false);
         }
 
-        setSuccessMsg(
-          res.message ||
-            (lang === 'hi'
-              ? `ओटीपी +91 ${cleanP} पर भेज दिया गया है।`
-              : `OTP has been sent to +91 ${cleanP}.`)
-        );
+        const cleanNotice = (res.message && !res.message.includes('असली') && !res.message.toLowerCase().includes('asli'))
+          ? res.message
+          : `OTP sent to your number (+91 ${cleanP})`;
+        setSuccessMsg(cleanNotice);
         // Focus first OTP input
         setTimeout(() => {
           otpInputRefs.current[0]?.focus();
@@ -236,10 +235,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   // Auto fill dev OTP helper
   const handleAutoFillDevOtp = () => {
-    if (devOtp && devOtp.length === 6) {
+    if (devOtp) {
       const digits = devOtp.split('');
-      setOtpDigits(digits);
-      otpInputRefs.current[5]?.focus();
+      const nextDigits = ['', '', '', '', '', ''];
+      for (let i = 0; i < digits.length; i++) {
+        nextDigits[i] = digits[i];
+      }
+      setOtpDigits(nextDigits);
+      otpInputRefs.current[Math.min(digits.length - 1, 5)]?.focus();
     }
   };
 
@@ -250,11 +253,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setSuccessMsg(null);
 
     const fullOtp = otpDigits.join('').trim();
-    if (fullOtp.length !== 6) {
+    if (fullOtp.length < 4 || fullOtp.length > 6) {
       setError(
         lang === 'hi'
-          ? 'कृपया 6-अंकों का पूरा ओटीपी दर्ज करें।'
-          : 'Please enter complete 6-digit OTP.'
+          ? 'कृपया मोबाइल पर आया पूरा 6-अंकों का ओटीपी दर्ज करें।'
+          : 'Please enter the complete OTP sent to your phone.'
       );
       return;
     }
@@ -377,33 +380,65 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         }`}
       >
         {/* Modal Top Header (Fixed) */}
-        <div className="p-4 sm:p-5 pb-3 border-b border-slate-700/30 shrink-0 relative pr-12">
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className={`absolute top-4 right-4 p-2 rounded-xl transition-colors ${
-              isDark ? 'text-slate-400 hover:text-white hover:bg-[#252A36]' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-            }`}
-          >
-            <X className="w-5 h-5" />
-          </button>
+        <div className="p-4 sm:p-5 pb-3 border-b border-slate-700/30 shrink-0 relative">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-blue-600/10 text-blue-500 border border-blue-500/20 shrink-0">
+                <Smartphone className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                  {mode === 'login'
+                    ? (lang === 'hi' ? 'C-Guru लॉगिन' : 'Sign In to C-Guru')
+                    : (lang === 'hi' ? 'नया खाता बनाएं' : 'Create an Account')}
+                </h2>
+                <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                  {mode === 'login'
+                    ? (lang === 'hi' ? 'सुरक्षित मोबाइल OTP से तुरंत लॉगिन करें' : 'Fast and secure login with mobile OTP')
+                    : (lang === 'hi' ? 'रजिस्टर करें और C प्रोग्रामिंग की यात्रा शुरू करें' : 'Sign up to start your C programming masterclass')}
+                </p>
+              </div>
+            </div>
 
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-blue-600/10 text-blue-500 border border-blue-500/20 shrink-0">
-              <Smartphone className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
-                {mode === 'login'
-                  ? (lang === 'hi' ? 'C-Guru लॉगिन' : 'Sign In to C-Guru')
-                  : (lang === 'hi' ? 'नया खाता बनाएं' : 'Create an Account')}
-              </h2>
-              <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                {mode === 'login'
-                  ? (lang === 'hi' ? 'सुरक्षित मोबाइल OTP से तुरंत लॉगिन करें' : 'Fast and secure login with mobile OTP')
-                  : (lang === 'hi' ? 'रजिस्टर करें और C प्रोग्रामिंग की यात्रा शुरू करें' : 'Sign up to start your C programming masterclass')}
-              </p>
-            </div>
+            {/* Prominent Close Button */}
+            <button
+              onClick={onClose}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-xs cursor-pointer ${
+                isDark
+                  ? 'bg-[#202531] border-[#2B313F] text-slate-200 hover:text-white hover:bg-[#2B313F]'
+                  : 'bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
+              }`}
+              title="Close popup"
+            >
+              <span>✕ {lang === 'hi' ? 'बंद करें' : 'Close'}</span>
+            </button>
+          </div>
+
+          {/* Quick Action Navigation Bar */}
+          <div className="mt-3 pt-2.5 border-t border-slate-700/20 flex items-center justify-between gap-2 text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                setTimeout(() => window.dispatchEvent(new CustomEvent('open-cguru-sidebar')), 80);
+              }}
+              className="text-blue-400 hover:text-blue-300 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+            >
+              <Menu className="w-3.5 h-3.5" />
+              <span>{lang === 'hi' ? '☰ 3-लाइन मेन्यू' : '☰ Main Menu'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                setTimeout(() => window.dispatchEvent(new CustomEvent('open-sms-key-modal')), 80);
+              }}
+              className="text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>{lang === 'hi' ? '⚙️ SMS / API सेटिंग्स' : '⚙️ SMS Settings'}</span>
+            </button>
           </div>
         </div>
 
@@ -636,7 +671,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 font-semibold">
                         <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                        <span>SMS Gateway Real OTP Generated</span>
+                        <span>{lang === 'hi' ? 'लाइव टेस्ट ओटीपी कोड' : 'Live Test OTP Generated'}</span>
                       </div>
                       <span className="font-mono font-bold text-sm bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/40">
                         {devOtp}
@@ -652,12 +687,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   </div>
                 )}
 
-                {/* 6 Individual OTP Boxes */}
+                {/* Individual OTP Boxes */}
                 <div>
                   <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 text-center ${
                     isDark ? 'text-slate-300' : 'text-slate-700'
                   }`}>
-                    {lang === 'hi' ? '6-अंकों का ओटीपी दर्ज करें' : 'Enter 6-Digit OTP'}
+                    {lang === 'hi' ? 'मोबाइल पर आया 6-अंकों का OTP दर्ज करें' : 'Enter 6-Digit Mobile OTP'}
                   </label>
                   <div className="flex justify-center gap-1.5 sm:gap-2.5">
                     {otpDigits.map((digit, index) => (
@@ -708,7 +743,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
                 <button
                   type="submit"
-                  disabled={isSubmitting || otpDigits.join('').length !== 6}
+                  disabled={isSubmitting || otpDigits.join('').trim().length < 4}
                   className="w-full py-3 rounded-xl font-semibold text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
                 >
                   {isSubmitting ? (

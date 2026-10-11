@@ -22,10 +22,14 @@ import {
   Sparkles,
   Lock,
   FolderArchive,
-  FlaskConical
+  FlaskConical,
+  Key,
+  Smartphone,
+  Check
 } from 'lucide-react';
 import { User as UserType } from '../types';
 import { ALL_INDIAN_LANGUAGES, getNavLabels, getLanguageName } from '../utils/languages';
+import { getSavedSmsApiKey, saveSmsApiKey, detectSmsProvider, sendOtpToMobile } from '../utils/smsService';
 
 export type TabType =
   | 'home'
@@ -76,6 +80,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showSmsKeyModal, setShowSmsKeyModal] = useState(false);
+  const [modalSmsKey, setModalSmsKey] = useState(() => getSavedSmsApiKey());
+  const [smsTestPhone, setSmsTestPhone] = useState('9876543210');
+  const [isTestingSms, setIsTestingSms] = useState(false);
+  const [smsFeedbackMsg, setSmsFeedbackMsg] = useState<string | null>(null);
   const [selectedLanguageCode, setSelectedLanguageCode] = useState(lang);
   const percent = Math.round((completedCount / totalTopics) * 100);
   const isAdmin = Boolean(user?.isAdmin || user?.role === 'admin');
@@ -84,6 +93,21 @@ export const Navbar: React.FC<NavbarProps> = ({
   React.useEffect(() => {
     setSelectedLanguageCode(lang);
   }, [lang]);
+
+  // Global listeners so modal or other views can open sidebar / SMS settings directly
+  React.useEffect(() => {
+    const handleOpenSidebar = () => setIsSidebarOpen(true);
+    const handleOpenSmsModal = () => {
+      setModalSmsKey(getSavedSmsApiKey());
+      setShowSmsKeyModal(true);
+    };
+    window.addEventListener('open-cguru-sidebar', handleOpenSidebar);
+    window.addEventListener('open-sms-key-modal', handleOpenSmsModal);
+    return () => {
+      window.removeEventListener('open-cguru-sidebar', handleOpenSidebar);
+      window.removeEventListener('open-sms-key-modal', handleOpenSmsModal);
+    };
+  }, []);
 
   const navLabels = getNavLabels(lang);
   const isIndian = lang !== 'en';
@@ -508,7 +532,36 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </span>
                 </button>
 
-                {/* 4. THEME OPTION */}
+                {/* 4. SMS OTP API KEY (2Factor.in / Fast2SMS) */}
+                <button
+                  onClick={() => {
+                    setIsSidebarOpen(false);
+                    setModalSmsKey(getSavedSmsApiKey());
+                    setSmsFeedbackMsg(null);
+                    setShowSmsKeyModal(true);
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+                    isDark
+                      ? 'bg-[#191D26] border-[#2B313F] text-slate-200 hover:bg-[#222733]'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 shadow-xs'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Key className="w-4 h-4 text-cyan-400" />
+                    <span>
+                      {isIndian ? 'SMS व OTP गेटवे सेटिंग्स' : 'SMS Gateway Settings'}
+                    </span>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                    modalSmsKey
+                      ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                      : 'border-cyan-500/20 bg-cyan-500/10 text-cyan-400'
+                  }`}>
+                    {modalSmsKey ? (isIndian ? 'सक्रिय' : 'Active') : (isIndian ? 'सेट करें' : 'Setup')}
+                  </span>
+                </button>
+
+                {/* 5. THEME OPTION */}
                 <button
                   onClick={() => setIsDark(!isDark)}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
@@ -718,6 +771,193 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* DEDICATED MOBILE SMS API KEY MODAL (Paste 2Factor.in / Fast2SMS API Key) */}
+      {showSmsKeyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowSmsKeyModal(false)}
+          />
+
+          <div
+            className={`relative w-full max-w-md rounded-2xl p-5 sm:p-6 border shadow-2xl z-10 space-y-4 animate-in zoom-in-95 duration-200 ${
+              isDark ? 'bg-[#181B24] border-[#2B313F] text-white' : 'bg-white border-slate-200 text-slate-900'
+            }`}
+          >
+            {/* Modal Header */}
+            <div className={`flex items-center justify-between pb-3 border-b ${
+              isDark ? 'border-[#2B313F]' : 'border-slate-200'
+            }`}>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                  <Key className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className={`font-bold text-base sm:text-lg tracking-tight ${
+                    isDark ? 'text-white' : 'text-slate-900'
+                  }`}>
+                    {lang === 'hi' ? 'SMS व OTP गेटवे सेटिंग्स' : 'SMS Gateway Settings'}
+                  </h3>
+                  <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                    {lang === 'hi' ? 'मोबाइल फोन पर SMS OTP भेजने के लिए' : 'Send OTP SMS to phones in India'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowSmsKeyModal(false)}
+                className={`p-2 rounded-xl transition-colors ${
+                  isDark ? 'text-slate-400 hover:text-white hover:bg-[#252A36]' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Provider status badge */}
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold border ${
+                modalSmsKey
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                  : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+              }`}>
+                {modalSmsKey
+                  ? '⚡ 2Factor SMS Gateway सक्रिय'
+                  : '⚠️ कृपया 2Factor API Key दर्ज करें'}
+              </span>
+              <span className="text-[11px] px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-semibold">
+                🔒 100% सुरक्षित वास्तविक OTP
+              </span>
+            </div>
+
+            {/* API Key Input */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-400">
+                  {lang === 'hi' ? 'अपनी 2Factor.in API Key यहाँ पेस्ट करें:' : 'Paste 2Factor.in API Key here:'}
+                </label>
+                {modalSmsKey && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModalSmsKey('');
+                      saveSmsApiKey('');
+                      setSmsFeedbackMsg('API Key हटा दी गई');
+                    }}
+                    className="text-[11px] text-rose-400 hover:underline"
+                  >
+                    {lang === 'hi' ? 'हटाएं' : 'Clear'}
+                  </button>
+                )}
+              </div>
+
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="उदा. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                  value={modalSmsKey}
+                  onChange={(e) => {
+                    const val = e.target.value.trim();
+                    setModalSmsKey(val);
+                    saveSmsApiKey(val);
+                    setSmsFeedbackMsg('✅ API Key अपने आप सेव हो गई है!');
+                  }}
+                  className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-mono focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                    isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-slate-50 border-slate-300 text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <p className="text-[11px] text-slate-400">
+                {lang === 'hi'
+                  ? '💡 पेस्ट करते ही यह ब्राउज़र में सेव हो जाती है और रजिस्ट्रेशन/लॉगिन में इस्तेमाल होगी।'
+                  : 'Auto-saved on paste. Used for mobile OTP registration and logins.'}
+              </p>
+            </div>
+
+            {/* Test SMS Block */}
+            <div className={`p-3 rounded-xl border space-y-2 ${
+              isDark ? 'bg-[#13161D] border-[#2B313F]' : 'bg-slate-50 border-slate-200'
+            }`}>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+                  <Smartphone className="w-3.5 h-3.5" />
+                  {lang === 'hi' ? 'तुरंत SMS टेस्ट करें (+91):' : 'Test SMS on Phone (+91):'}
+                </span>
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="tel"
+                  maxLength={10}
+                  placeholder="10 अंकों का मोबाइल नंबर"
+                  value={smsTestPhone}
+                  onChange={(e) => setSmsTestPhone(e.target.value.replace(/\D/g, ''))}
+                  className={`w-full px-3 py-2 rounded-xl border text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                    isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-white border-slate-300 text-slate-900'
+                  }`}
+                />
+                <button
+                  type="button"
+                  disabled={isTestingSms || smsTestPhone.length < 10}
+                  onClick={async () => {
+                    setIsTestingSms(true);
+                    setSmsFeedbackMsg(null);
+                    const code = Math.floor(1000 + Math.random() * 9000).toString();
+                    try {
+                      const res = await sendOtpToMobile(smsTestPhone, code, modalSmsKey);
+                      setSmsFeedbackMsg(res.message);
+                    } catch {
+                      setSmsFeedbackMsg('SMS भेजने में त्रुटि हुई। कृपया API Key जांचें।');
+                    } finally {
+                      setIsTestingSms(false);
+                    }
+                  }}
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white shrink-0 flex items-center gap-1 transition-all active:scale-95 disabled:opacity-50"
+                >
+                  {isTestingSms ? 'भेज रहा है...' : (lang === 'hi' ? '📩 SMS भेजें' : 'Test SMS')}
+                </button>
+              </div>
+            </div>
+
+            {/* Feedback Message */}
+            {smsFeedbackMsg && (
+              <div className={`p-2.5 rounded-xl text-xs font-semibold ${
+                smsFeedbackMsg.includes('✅') || smsFeedbackMsg.includes('safalta') || smsFeedbackMsg.includes('Real Telecom') || smsFeedbackMsg.includes('sent') || smsFeedbackMsg.includes('सफलतापूर्वक')
+                  ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                  : 'bg-rose-500/10 border border-rose-500/20 text-rose-300'
+              }`}>
+                {smsFeedbackMsg}
+              </div>
+            )}
+
+            {/* Guidance on Text SMS delivery */}
+            <div className={`p-2.5 rounded-xl text-[11px] space-y-1.5 ${
+              isDark ? 'bg-blue-500/10 border border-blue-500/20 text-blue-300' : 'bg-blue-50 border border-blue-200 text-blue-800'
+            }`}>
+              <div className="font-bold flex items-center gap-1 text-cyan-400">
+                <span>📱 टेक्स्ट SMS (SMS Message) कैसे प्राप्त करें?</span>
+              </div>
+              <p className="leading-relaxed">
+                2Factor.in पर आपके खाते में <strong>Transactional SMS बैलेंस</strong> होना चाहिए। यदि आपके पास DLT Template स्वीकृत है तो SMS सीधे इनबॉक्स में आता है।
+              </p>
+              <p className="text-[10px] opacity-80">
+                * सुरक्षा के लिए किसी भी फ़र्ज़ी या 9999 कोड से लॉगिन बंद कर दिया गया है। केवल आपके मोबाइल पर भेजा गया सही OTP ही मान्य होगा।
+              </p>
+            </div>
+
+            {/* Save / Done button */}
+            <button
+              onClick={() => setShowSmsKeyModal(false)}
+              className="w-full py-2.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
+            >
+              <Check className="w-4 h-4" />
+              <span>{lang === 'hi' ? 'हो गया (Save & Close)' : 'Done (Save & Close)'}</span>
+            </button>
           </div>
         </div>
       )}

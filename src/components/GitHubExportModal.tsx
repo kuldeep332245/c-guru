@@ -37,9 +37,27 @@ export const GitHubExportModal: React.FC<GitHubExportModalProps> = ({
   const [showTokenHelp, setShowTokenHelp] = useState<boolean>(false);
 
   // Mobile direct GitHub upload state
-  const [ghUsername, setGhUsername] = useState<string>('kuldeep0203singh');
-  const [ghRepo, setGhRepo] = useState<string>('c-guru');
-  const [ghToken, setGhToken] = useState<string>('');
+  const [ghUsername, setGhUsername] = useState<string>(() => {
+    try {
+      return localStorage.getItem('cguru_gh_username') || 'kuldeep332245';
+    } catch {
+      return 'kuldeep332245';
+    }
+  });
+  const [ghRepo, setGhRepo] = useState<string>(() => {
+    try {
+      return localStorage.getItem('cguru_gh_repo') || 'c-guru';
+    } catch {
+      return 'c-guru';
+    }
+  });
+  const [ghToken, setGhToken] = useState<string>(() => {
+    try {
+      return localStorage.getItem('cguru_gh_token') || '';
+    } catch {
+      return '';
+    }
+  });
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [uploadStatusText, setUploadStatusText] = useState<string>('');
@@ -75,7 +93,7 @@ git push -u origin main`;
     document.body.removeChild(link);
   };
 
-  // Direct Mobile Push via GitHub API
+  // Direct Mobile Push via GitHub API (Backend Proxy with Client-Side Fallback)
   const handleStartMobileUpload = async () => {
     const username = ghUsername.trim();
     const repo = ghRepo.trim();
@@ -98,38 +116,118 @@ git push -u origin main`;
       return;
     }
 
+    try {
+      localStorage.setItem('cguru_gh_username', username);
+      localStorage.setItem('cguru_gh_repo', repo);
+      localStorage.setItem('cguru_gh_token', token);
+    } catch {}
+
     setIsUploading(true);
     setUploadError(null);
     setUploadSuccessUrl(null);
-    setUploadProgress(5);
-    setUploadStatusText(lang === 'hi' ? 'प्रोजेक्ट की फाइलें तैयार की जा रही हैं...' : 'Preparing project files...');
+    setUploadProgress(10);
+    setUploadStatusText(lang === 'hi' ? 'GitHub से संपर्क किया जा रहा है...' : 'Connecting to GitHub...');
 
+    // Method 1: Try Direct Server Push Endpoint (Zero mobile rate limiting, ultra-fast)
     try {
-      // 1. Fetch the zip from server
-      const zipRes = await fetch('/c-guru-source-code.zip');
-      if (!zipRes.ok) throw new Error('Source code archive not found');
-      const blob = await zipRes.blob();
-      
-      setUploadProgress(15);
-      setUploadStatusText(lang === 'hi' ? 'फाइलों को प्रोसेस किया जा रहा है...' : 'Processing file contents...');
-      const zip = await JSZip.loadAsync(blob);
+      setUploadProgress(25);
+      setUploadStatusText(lang === 'hi' ? 'GitHub पर कोड सीधे पुश किया जा रहा है...' : 'Pushing code directly to GitHub...');
 
+      const serverRes = await fetch('/api/github/push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, repo, token })
+      });
+
+      if (serverRes.ok) {
+        const serverData = await serverRes.json();
+        if (serverData.success) {
+          setUploadProgress(100);
+          setUploadStatusText(lang === 'hi' ? 'सफलतापूर्वक पूरा हुआ! 🎉' : 'Upload completed successfully! 🎉');
+          setUploadSuccessUrl(serverData.repoUrl || `https://github.com/${username}/${repo}`);
+          setIsUploading(false);
+          return;
+        } else {
+          throw new Error(serverData.error || 'Server push failed');
+        }
+      } else {
+        const errData = await serverRes.json().catch(() => ({}));
+        if (serverRes.status === 401 || serverRes.status === 403) {
+          throw new Error(errData.error || errData.message || 'टोकन परमिशन त्रुटि');
+        }
+      }
+    } catch (serverErr: any) {
+      // If token error, report immediately
+      if (
+        serverErr.message?.includes('Token') ||
+        serverErr.message?.includes('परमिशन') ||
+        serverErr.message?.includes('Bad credentials')
+      ) {
+        setUploadError(serverErr.message);
+        setIsUploading(false);
+        return;
+      }
+      console.warn('Backend push proxy unavailable, running client fallback:', serverErr.message);
+    }
+
+    // Method 2: Resilient Client-Side Git Tree Push
+    try {
       const headers: Record<string, string> = {
         Authorization: `Bearer ${token}`,
         Accept: 'application/vnd.github.v3+json',
         'Content-Type': 'application/json'
       };
 
-      // 2. Check or create repo
-      setUploadProgress(25);
-      setUploadStatusText(lang === 'hi' ? 'GitHub रिपॉजिटरी चेक की जा रही है...' : 'Checking GitHub repository...');
-      
-      let repoCheck = await fetch(`https://api.github.com/repos/${username}/${repo}`, { headers });
-      
-      if (repoCheck.status === 404) {
-        setUploadProgress(30);
-        setUploadStatusText(lang === 'hi' ? `नई रिपॉजिटरी '${repo}' बनाई जा रही है...` : `Creating repository '${repo}'...`);
-        
+      // 1. Preflight test user token
+      setUploadProgress(35);
+      setUploadStatusText(lang === 'hi' ? 'GitHub टोकन वेरिफाई हो रहा है...' : 'Verifying GitHub token...');
+      const userRes = await fetch('https://api.github.com/user', { headers });
+      if (!userRes.ok) {
+        if (userRes.status === 401) {
+          throw new Error(
+            lang === 'hi'
+              ? 'GitHub Token अमान्य (Bad credentials) है! कृपया ऊपर दिए गए "🔗 1-Click में Token बनाएं" लिंक से नया टोकन बनाकर पेस्ट करें।'
+              : 'Invalid GitHub token. Please create a new token using the link above.'
+          );
+        }
+        const uErr = await userRes.json().catch(() => ({}));
+        throw new Error(uErr.message || 'GitHub Authentication failed');
+      }
+
+      // Check classic scopes
+      const scopesHeader = userRes.headers.get('x-oauth-scopes') || '';
+      if (token.startsWith('ghp_') && scopesHeader && !scopesHeader.includes('repo')) {
+        throw new Error(
+          lang === 'hi'
+            ? 'आपके टोकन में "repo" परमिशन टिक नहीं है! कृपया ऊपर दिए गए "🔗 1-Click में Token बनाएं" लिंक से "repo" पर टिक करके नया टोकन बनाएं।'
+            : 'Token is missing "repo" permissions.'
+        );
+      }
+
+      // 2. Fetch clean source zip
+      setUploadProgress(45);
+      setUploadStatusText(lang === 'hi' ? 'प्रोजेक्ट की फाइलें प्रोसेस की जा रही हैं...' : 'Processing project files...');
+      const zipRes = await fetch('/c-guru-source-code.zip');
+      if (!zipRes.ok) throw new Error('Source archive not found');
+      const blob = await zipRes.blob();
+      const zip = await JSZip.loadAsync(blob);
+
+      // Collect non-directory, non-python files
+      const fileList: { path: string; file: JSZip.JSZipObject }[] = [];
+      zip.forEach((path, file) => {
+        if (!file.dir && !path.endsWith('.py') && !path.endsWith('.pyc') && !path.endsWith('.zip')) {
+          fileList.push({ path, file });
+        }
+      });
+
+      if (fileList.length === 0) throw new Error('अपलोड करने के लिए कोई फाइल नहीं मिली!');
+
+      // 3. Check or create repo
+      setUploadProgress(55);
+      setUploadStatusText(lang === 'hi' ? 'रिपॉजिटरी चेक की जा रही है...' : 'Checking repository...');
+      let defaultBranch = 'main';
+      const repoRes = await fetch(`https://api.github.com/repos/${username}/${repo}`, { headers });
+      if (repoRes.status === 404) {
         const createRes = await fetch('https://api.github.com/user/repos', {
           method: 'POST',
           headers,
@@ -140,103 +238,158 @@ git push -u origin main`;
             auto_init: true
           })
         });
-
         if (!createRes.ok) {
-          const errData = await createRes.json().catch(() => ({}));
+          const cErr = await createRes.json().catch(() => ({}));
+          throw new Error(cErr.message || 'रिपॉजिटरी नहीं बन सकी। टोकन परमिशन चेक करें।');
+        }
+        await new Promise((r) => setTimeout(r, 1500));
+      } else if (repoRes.ok) {
+        const repoData = await repoRes.json();
+        defaultBranch = repoData.default_branch || 'main';
+        if (repoData.permissions && repoData.permissions.push === false) {
           throw new Error(
-            errData.message || (lang === 'hi' ? 'रिपॉजिटरी नहीं बन सकी। कृपया अपना टोकन और स्कोप (repo) चेक करें।' : 'Failed to create repository. Check token permissions.')
+            lang === 'hi'
+              ? `टोकन के पास "${username}/${repo}" में कोड लिखने (Push) की अनुमति नहीं है। Fine-grained टोकन में "Contents: Read and write" परमिशन दें।`
+              : `Token lacks push access for ${username}/${repo}.`
           );
         }
-
-        // Wait 1.5s for GitHub to initialize branch
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-      } else if (!repoCheck.ok) {
-        const errData = await repoCheck.json().catch(() => ({}));
-        throw new Error(
-          errData.message === 'Bad credentials'
-            ? (lang === 'hi' ? 'गलत टोकन (Bad credentials)! कृपया नया टोकन बनाकर सही पेस्ट करें।' : 'Invalid token! Please provide a valid GitHub token.')
-            : (errData.message || 'GitHub से कनेक्ट नहीं हो सका।')
-        );
       }
 
-      // 3. Collect non-directory files
-      const fileList: { path: string; file: JSZip.JSZipObject }[] = [];
-      zip.forEach((path, file) => {
-        if (!file.dir) {
-          fileList.push({ path, file });
+      // 4. Build Tree Items: Text files with direct content, only images as blobs
+      setUploadProgress(65);
+      setUploadStatusText(lang === 'hi' ? 'गिट ऑब्जेक्ट्स तैयार किए जा रहे हैं...' : 'Preparing Git objects...');
+      const treeItems: any[] = [];
+
+      for (let i = 0; i < fileList.length; i++) {
+        const item = fileList[i];
+        const isImage = /\.(png|jpg|jpeg|gif|ico|webp)$/i.test(item.path);
+
+        if (isImage) {
+          const b64 = await item.file.async('base64');
+          const blobRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/blobs`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ content: b64, encoding: 'base64' })
+          });
+          if (blobRes.ok) {
+            const bData = await blobRes.json();
+            treeItems.push({
+              path: item.path,
+              mode: '100644',
+              type: 'blob',
+              sha: bData.sha
+            });
+          }
+        } else {
+          const textContent = await item.file.async('string');
+          treeItems.push({
+            path: item.path,
+            mode: '100644',
+            type: 'blob',
+            content: textContent
+          });
         }
+
+        const pct = Math.round(65 + (i / fileList.length) * 20);
+        setUploadProgress(pct);
+      }
+
+      // 5. Get current latest commit & tree
+      setUploadProgress(88);
+      setUploadStatusText(lang === 'hi' ? 'कमिट लिंक किया जा रहा है...' : 'Linking commit...');
+      let parentCommitSha: string | null = null;
+      let baseTreeSha: string | null = null;
+      try {
+        const refRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/refs/heads/${defaultBranch}`, { headers });
+        if (refRes.ok) {
+          const refData = await refRes.json();
+          parentCommitSha = refData.object?.sha || null;
+          if (parentCommitSha) {
+            const cRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/commits/${parentCommitSha}`, { headers });
+            if (cRes.ok) {
+              const cData = await cRes.json();
+              baseTreeSha = cData.tree?.sha || null;
+            }
+          }
+        }
+      } catch {}
+
+      // 6. Create Git Tree
+      setUploadProgress(92);
+      setUploadStatusText(lang === 'hi' ? 'गिट ट्री बनाई जा रही है...' : 'Creating Git tree...');
+      const treePayload: any = { tree: treeItems };
+      if (baseTreeSha) {
+        treePayload.base_tree = baseTreeSha;
+      }
+
+      let treeRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/trees`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(treePayload)
       });
 
-      const totalFiles = fileList.length;
-      if (totalFiles === 0) throw new Error('कोई फाइल नहीं मिली!');
-
-      // Determine default branch
-      let defaultBranch = 'main';
-      try {
-        const brRes = await fetch(`https://api.github.com/repos/${username}/${repo}/branches/main`, { headers });
-        if (!brRes.ok) {
-          const brMaster = await fetch(`https://api.github.com/repos/${username}/${repo}/branches/master`, { headers });
-          if (brMaster.ok) defaultBranch = 'master';
-        }
-      } catch {
-        defaultBranch = 'main';
+      if (!treeRes.ok && baseTreeSha) {
+        // Fallback without base_tree
+        treeRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/trees`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ tree: treeItems })
+        });
       }
 
-      // 4. Upload files with progress
-      let count = 0;
-      for (const item of fileList) {
-        const base64Content = await item.file.async('base64');
+      if (!treeRes.ok) {
+        const treeErr = await treeRes.json().catch(() => ({}));
+        throw new Error(treeErr.message || 'गिट ट्री बनाने में विफलता (Failed to create Git tree)');
+      }
 
-        // Check if file exists to get sha
-        let fileSha: string | undefined;
-        try {
-          const getRes = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${item.path}?ref=${defaultBranch}`, { headers });
-          if (getRes.ok) {
-            const data = await getRes.json();
-            fileSha = data.sha;
-          }
-        } catch {
-          // New file
-        }
+      const treeData = await treeRes.json();
 
-        const putBody: {
-          message: string;
-          content: string;
-          branch: string;
-          sha?: string;
-        } = {
-          message: `Add ${item.path}`,
-          content: base64Content,
-          branch: defaultBranch
-        };
-        if (fileSha) putBody.sha = fileSha;
+      // 7. Create Single Atomic Commit
+      setUploadProgress(96);
+      setUploadStatusText(lang === 'hi' ? 'कमिट फाइनल किया जा रहा है...' : 'Finalizing commit...');
+      const commitRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/commits`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          message: 'Update C-Guru: Latest bilingual updates, OTP fix & clean build',
+          tree: treeData.sha,
+          parents: parentCommitSha ? [parentCommitSha] : []
+        })
+      });
 
-        const putRes = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${item.path}`, {
-          method: 'PUT',
+      if (!commitRes.ok) {
+        const commitErr = await commitRes.json().catch(() => ({}));
+        throw new Error(commitErr.message || 'Failed to create Git commit');
+      }
+
+      const commitData = await commitRes.json();
+
+      // 8. Update branch pointer
+      const patchRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/refs/heads/${defaultBranch}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({
+          sha: commitData.sha,
+          force: true
+        })
+      });
+
+      if (!patchRes.ok) {
+        await fetch(`https://api.github.com/repos/${username}/${repo}/git/refs`, {
+          method: 'POST',
           headers,
-          body: JSON.stringify(putBody)
+          body: JSON.stringify({
+            ref: `refs/heads/${defaultBranch}`,
+            sha: commitData.sha
+          })
         });
-
-        if (!putRes.ok) {
-          const errRes = await putRes.json().catch(() => ({}));
-          console.warn(`Error uploading ${item.path}:`, errRes);
-        }
-
-        count++;
-        const pct = Math.round(35 + (count / totalFiles) * 60);
-        setUploadProgress(pct);
-        setUploadStatusText(
-          lang === 'hi'
-            ? `फ़ाइल अपलोड हो रही है (${count}/${totalFiles}): ${item.path}`
-            : `Uploading (${count}/${totalFiles}): ${item.path}`
-        );
       }
 
       setUploadProgress(100);
       setUploadStatusText(lang === 'hi' ? 'सफलतापूर्वक पूरा हुआ! 🎉' : 'Upload completed successfully! 🎉');
       setUploadSuccessUrl(`https://github.com/${username}/${repo}`);
     } catch (err: any) {
-      console.error(err);
+      console.error('Mobile upload error:', err);
       setUploadError(err.message || 'अपलोड में कोई त्रुटि आई। कृपया पुनः प्रयास करें।');
     } finally {
       setIsUploading(false);
@@ -383,7 +536,7 @@ git push -u origin main`;
                       type="text"
                       value={ghUsername}
                       onChange={(e) => setGhUsername(e.target.value)}
-                      placeholder="e.g. kuldeep0203singh"
+                      placeholder="e.g. kuldeep332245"
                       disabled={isUploading}
                       className={`w-full px-3 py-2 text-xs rounded-xl border font-mono outline-none transition-all ${
                         isDark ? 'bg-slate-950 border-slate-800 focus:border-blue-500 text-white' : 'bg-slate-50 border-slate-300 focus:border-blue-600 text-slate-900'
@@ -454,7 +607,7 @@ git push -u origin main`;
                             ऊपर दिए नीले <strong>"🔗 1-Click में Token बनाएं"</strong> पर क्लिक करें। (अगर लॉगिन नहीं हैं तो GitHub लॉगिन करें)।
                           </li>
                           <li>
-                            पेज खुलेगा जिसमें <code>repo</code> पहले से सेलेक्ट होगा। सीधे पेज के सबसे नीचे जाएं और हरा बटन <strong>"Generate token"</strong> दबाएं।
+                            पेज खुलेगा जिसमें <code>repo</code> बॉक्स पहले से सेलेक्ट होगा (यदि Fine-grained टोकन बना रहे हैं तो <strong>Contents: Read and write</strong> चुनें)। पेज के नीचे जाकर हरा बटन <strong>"Generate token"</strong> दबाएं।
                           </li>
                           <li>
                             स्क्रीन पर जो <code>ghp_...</code> कोड दिखेगा, उसके बगल के कॉपी बटन पर टैप करके यहाँ पेस्ट कर दें!

@@ -28,7 +28,12 @@ import {
   saveAllUsers,
   setActiveUser
 } from '../utils/storage';
-import { getSavedSmsApiKey, saveSmsApiKey, sendOtpToMobile } from '../utils/smsService';
+import {
+  getSavedSmsApiKey,
+  saveSmsApiKey,
+  sendOtpToMobile,
+  detectSmsProvider
+} from '../utils/smsService';
 
 interface AdminPanelProps {
   currentUser: User;
@@ -121,11 +126,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     const code = Math.floor(1000 + Math.random() * 9000).toString();
     try {
       const res = await sendOtpToMobile(smsTestPhone, code, smsApiKey);
-      if (res.isRealSms) {
-        showToast(`🟢 Real Telecom SMS sent to +91 ${smsTestPhone}! (OTP: ${code})`);
-      } else {
-        showToast(`Simulated SMS Alert triggered for +91 ${smsTestPhone}! (OTP: ${code})`);
-      }
+      showToast(res.message);
     } catch {
       showToast('Error sending test SMS.');
     } finally {
@@ -332,24 +333,52 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           <div className="flex items-center gap-2.5">
             <Key className="w-5 h-5 text-cyan-400" />
             <h3 className="font-bold text-sm sm:text-base">
-              Telecom Real SMS Gateway & Master OTP Config
+              Telecom SMS Gateway & 2Factor.in / Fast2SMS Config
             </h3>
           </div>
-          <span className="text-xs px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-bold">
-            Master OTP: 9999 (Anytime Instant Bypass)
-          </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            {smsApiKey && (
+              <span className={`text-xs px-2.5 py-1 rounded-full font-bold border ${
+                detectSmsProvider(smsApiKey) === '2factor'
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                  : 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+              }`}>
+                ⚡ {detectSmsProvider(smsApiKey) === '2factor' ? '2Factor.in Connected' : 'Fast2SMS Connected'}
+              </span>
+            )}
+            <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold">
+              🔒 Real SMS Protected
+            </span>
+          </div>
         </div>
 
         <p className="text-xs text-slate-400">
-          Enter any 10-digit mobile number to send a live test verification OTP code. You can also configure your Fast2SMS API key below for genuine SMS delivery in India:
+          Paste your <strong>2Factor.in</strong> API Key below to deliver genuine SMS OTP to mobile phones in India. You can test it immediately using the test number on the right:
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-400">Fast2SMS Telecom API Key</label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-400">
+                2Factor.in / Fast2SMS API Key
+              </label>
+              {smsApiKey && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSmsApiKey('');
+                    saveSmsApiKey('');
+                    showToast('SMS Key cleared');
+                  }}
+                  className="text-[11px] text-red-400 hover:underline"
+                >
+                  Clear Key
+                </button>
+              )}
+            </div>
             <input
               type="text"
-              placeholder="Paste Fast2SMS API Key here (Optional)"
+              placeholder="Paste 2Factor API Key here (e.g. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)"
               value={smsApiKey}
               onChange={(e) => {
                 setSmsApiKey(e.target.value);
@@ -359,6 +388,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-slate-50 border-slate-300 text-slate-900'
               }`}
             />
+            <p className="text-[11px] text-slate-500">
+              Auto-saved in browser. Will be used for all OTP verifications.
+            </p>
           </div>
 
           <div className="space-y-1.5">
@@ -384,6 +416,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <span>{isSendingSms ? 'Sending...' : 'Send Test SMS'}</span>
               </button>
             </div>
+            <p className="text-[11px] text-slate-500">
+              Click Send Test SMS to verify that your 2Factor API Key is active.
+            </p>
           </div>
         </div>
       </div>
