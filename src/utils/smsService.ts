@@ -55,8 +55,10 @@ export function detectSmsProvider(key: string): '2factor' | 'fast2sms' | 'unknow
 export async function sendOtpToMobile(
   phone: string,
   otp: string,
-  apiKey?: string
+  apiKey?: string,
+  lang: string = 'en'
 ): Promise<SmsSendResult> {
+  const isHi = lang === 'hi';
   const activeKey = (apiKey || getSavedSmsApiKey()).trim();
   const cleanDigits = phone.replace(/\D/g, '').slice(-10);
 
@@ -65,13 +67,13 @@ export async function sendOtpToMobile(
     const res = await fetch('/api/sms/send-test', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: cleanDigits, apiKey: activeKey, otp })
+      body: JSON.stringify({ phone: cleanDigits, apiKey: activeKey, otp, lang })
     });
     if (res.ok) {
       const data = await res.json();
       return {
         success: data.success,
-        message: data.message || `OTP sent to your number (+91 ${cleanDigits})`,
+        message: data.message || (isHi ? `ओटीपी आपके नंबर (+91 ${cleanDigits}) पर भेजा गया है` : `OTP sent to your number (+91 ${cleanDigits})`),
         isRealSms: Boolean(data.isRealSms),
         otp: data.otp || otp,
         provider: data.provider || 'unknown'
@@ -88,39 +90,75 @@ export async function sendOtpToMobile(
     // 2.1 If 2Factor.in API Key
     if (provider === '2factor') {
       try {
+        // First try standard OTP endpoint
         const url = `https://2factor.in/API/V1/${encodeURIComponent(
           activeKey
         )}/SMS/${encodeURIComponent(cleanDigits)}/${encodeURIComponent(otp)}`;
 
-        const response = await fetch(url, {
+        let response = await fetch(url, {
           method: 'GET',
           headers: {
             'cache-control': 'no-cache'
           }
-        });
+        }).catch(() => null);
 
-        const rawText = await response.text();
+        let rawText = '';
         let data: any = null;
-        try {
-          data = JSON.parse(rawText);
-        } catch {
-          // If non-JSON
+
+        if (response) {
+          rawText = await response.text();
+          try {
+            data = JSON.parse(rawText);
+          } catch {}
+        }
+
+        // If direct fetch was blocked by CORS or failed, or returned template error, try AUTOGEN route
+        const isOk = Boolean(data && (data.Status === 'Success' || String(data.Status).toLowerCase() === 'success'));
+
+        if (!isOk) {
+          // Attempt 2Factor AUTOGEN route (doesn't require custom template approval)
+          try {
+            const autoUrl = `https://2factor.in/API/V1/${encodeURIComponent(
+              activeKey
+            )}/SMS/${encodeURIComponent(cleanDigits)}/AUTOGEN`;
+            const autoRes = await fetch(autoUrl, { method: 'GET', headers: { 'cache-control': 'no-cache' } });
+            const autoText = await autoRes.text();
+            let autoData: any = null;
+            try {
+              autoData = JSON.parse(autoText);
+            } catch {}
+            if (autoData && (autoData.Status === 'Success' || String(autoData.Status).toLowerCase() === 'success')) {
+              data = autoData;
+              rawText = autoText;
+            } else if (!data) {
+              data = autoData;
+              rawText = autoText;
+            }
+          } catch {}
         }
 
         if (data && (data.Status === 'Success' || String(data.Status).toLowerCase() === 'success')) {
           return {
             success: true,
-            message: `OTP sent to your number (+91 ${cleanDigits})`,
+            message: isHi ? `ओटीपी आपके नंबर (+91 ${cleanDigits}) पर भेजा गया है` : `OTP sent to your number (+91 ${cleanDigits})`,
             isRealSms: true,
             otp,
             provider: '2factor'
           };
         } else {
-          let errDetail = data?.Details || rawText || 'त्रुटि';
-          if (errDetail.toLowerCase().includes('insufficient') || errDetail.toLowerCase().includes('balance')) {
-            errDetail = '2Factor.in में SMS बैलेंस (Credits) समाप्त है। कृपया 2factor.in पर SMS बैलेंस रिचार्ज करें।';
+          let errDetail = data?.Details || rawText || 'Error';
+          if (!rawText && !data) {
+            errDetail = isHi
+              ? 'ब्राउज़र CORS या नेटवर्क ब्लॉक (कृपया SMS Settings में सही Key जांचें)'
+              : 'Network error or CORS block (Please check your 2Factor API Key in SMS Settings)';
+          } else if (errDetail.toLowerCase().includes('insufficient') || errDetail.toLowerCase().includes('balance')) {
+            errDetail = isHi
+              ? '2Factor.in में SMS बैलेंस (Credits) समाप्त है। कृपया 2factor.in पर SMS बैलेंस रिचार्ज करें।'
+              : '2Factor.in SMS balance is exhausted. Please recharge SMS credits on 2factor.in.';
           } else if (errDetail.toLowerCase().includes('invalid') || errDetail.toLowerCase().includes('missing api')) {
-            errDetail = 'अमान्य 2Factor API Key। कृपया 2Factor.in Account Summary से सही Key कॉपी करें।';
+            errDetail = isHi
+              ? 'अमान्य 2Factor API Key। कृपया 2Factor.in Account Summary से सही Key कॉपी करें।'
+              : 'Invalid 2Factor API Key. Please copy the valid Key from 2Factor.in Account Summary.';
           }
           return {
             success: false,
@@ -133,7 +171,9 @@ export async function sendOtpToMobile(
       } catch (err: any) {
         return {
           success: false,
-          message: `2Factor नेटवर्क त्रुटि। कृपया पुनः प्रयास करें।`,
+          message: isHi
+            ? `2Factor नेटवर्क त्रुटि: ${err.message || 'कनेक्शन समस्या'}`
+            : `2Factor Network Error: ${err.message || 'Connection issue'}`,
           isRealSms: false,
           otp,
           provider: '2factor'

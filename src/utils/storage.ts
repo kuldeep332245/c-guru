@@ -223,7 +223,7 @@ export function loginUserWithPhoneOtp(
   try {
     const cleanP = cleanPhone(phone);
     if (cleanP.length < 10) {
-      return { success: false, error: 'कृपया 10-अंकों का मोबाइल नंबर दर्ज करें।' };
+      return { success: false, error: 'Please enter a valid 10-digit mobile number.' };
     }
 
     const users = getAllUsers();
@@ -246,7 +246,7 @@ export function loginUserWithPhoneOtp(
       error: 'Number is not registered'
     };
   } catch (err: any) {
-    return { success: false, error: err.message || 'लॉगिन में समस्या आई।' };
+    return { success: false, error: err.message || 'Login failed.' };
   }
 }
 
@@ -257,7 +257,7 @@ export function registerUserWithPhoneOtp(
   try {
     const cleanP = cleanPhone(phone);
     if (cleanP.length < 10) {
-      return { success: false, error: 'कृपया 10-अंकों का मोबाइल नंबर दर्ज करें।' };
+      return { success: false, error: 'Please enter a valid 10-digit mobile number.' };
     }
 
     const users = getAllUsers();
@@ -265,7 +265,7 @@ export function registerUserWithPhoneOtp(
     if (existing) {
       return {
         success: false,
-        error: 'यह मोबाइल नंबर पहले से रजिस्टर्ड है! कृपया सीधे "लॉगिन करें" टैब से लॉगिन करें।',
+        error: 'This mobile number is already registered! Please switch to Login tab.',
         user: existing
       };
     }
@@ -306,7 +306,7 @@ export function registerUserWithPhoneOtp(
 
     return { success: true, user: newUser };
   } catch (err: any) {
-    return { success: false, error: err.message || 'रजिस्ट्रेशन में त्रुटि' };
+    return { success: false, error: err.message || 'Registration failed.' };
   }
 }
 
@@ -317,7 +317,7 @@ export function loginOrRegisterWithPhoneOtp(
   try {
     const cleanP = cleanPhone(phone);
     if (cleanP.length < 10) {
-      return { success: false, error: 'कृपया 10-अंकों का मोबाइल नंबर दर्ज करें।' };
+      return { success: false, error: 'Please enter a valid 10-digit mobile number.' };
     }
 
     const users = getAllUsers();
@@ -376,7 +376,7 @@ export function loginOrRegisterWithPhoneOtp(
 
     return { success: true, user: newUser };
   } catch (err: any) {
-    return { success: false, error: err.message || 'लॉगिन/रजिस्ट्रेशन में त्रुटि' };
+    return { success: false, error: err.message || 'Authentication error.' };
   }
 }
 

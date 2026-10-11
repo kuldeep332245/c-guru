@@ -25,14 +25,18 @@ const clientOtpFallback = new Map<string, { otp: string; token?: string; expires
 
 export async function sendOtpApi(
   phone: string,
-  mode: 'login' | 'register' = 'login'
+  mode: 'login' | 'register' = 'login',
+  lang: string = 'en'
 ): Promise<SendOtpResponse> {
+  const isHi = lang === 'hi';
   const cleanP = phone.replace(/\D/g, '').slice(-10);
   if (cleanP.length !== 10) {
     return {
       success: false,
-      message: 'कृपया सही 10-अंकों का मोबाइल नंबर दर्ज करें।',
-      error: 'Invalid 10-digit mobile number'
+      message: isHi
+        ? 'कृपया सही 10-अंकों का मोबाइल नंबर दर्ज करें।'
+        : 'Please enter a valid 10-digit mobile number.',
+      error: isHi ? 'अमान्य मोबाइल नंबर' : 'Invalid 10-digit mobile number'
     };
   }
 
@@ -42,7 +46,7 @@ export async function sendOtpApi(
     const res = await fetch('/api/auth/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: cleanP, mode, apiKey: savedKey })
+      body: JSON.stringify({ phone: cleanP, mode, apiKey: savedKey, lang })
     });
 
     if (res.ok) {
@@ -89,12 +93,16 @@ export async function sendOtpApi(
 
     // Real SMS Dispatch via 2Factor / Fast2SMS if API key is present!
     let isReal = false;
-    let feedbackMsg = `OTP sent to your number (+91 ${cleanP})`;
+    let feedbackMsg = isHi
+      ? `आपके नंबर (+91 ${cleanP}) पर ओटीपी भेजा गया है`
+      : `OTP sent to your number (+91 ${cleanP})`;
     try {
       const smsRes = await sendOtpToMobile(cleanP, generatedOtp, savedKey);
       if (smsRes.isRealSms) {
         isReal = true;
-        feedbackMsg = smsRes.message || `OTP sent to your number (+91 ${cleanP})`;
+        feedbackMsg = smsRes.message || (isHi ? `आपके नंबर (+91 ${cleanP}) पर ओटीपी भेजा गया है` : `OTP sent to your number (+91 ${cleanP})`);
+      } else if (smsRes.message && !smsRes.message.startsWith('OTP sent')) {
+        feedbackMsg = smsRes.message;
       }
     } catch {}
 
@@ -110,8 +118,10 @@ export async function sendOtpApi(
 export async function verifyOtpApi(
   phone: string,
   otp: string,
-  mode: 'login' | 'register' = 'login'
+  mode: 'login' | 'register' = 'login',
+  lang: string = 'en'
 ): Promise<VerifyOtpResponse> {
+  const isHi = lang === 'hi';
   const cleanP = phone.replace(/\D/g, '').slice(-10);
   const trimmedOtp = (otp || '').trim();
 
@@ -132,13 +142,17 @@ export async function verifyOtpApi(
         phone: cleanP,
         otp: trimmedOtp,
         mode,
+        lang,
         verificationToken: storedRecord?.token
       })
     });
 
     if (res.ok) {
       const data = await res.json();
-      return data;
+      return {
+        ...data,
+        message: isHi ? 'ओटीपी सत्यापन सफल!' : 'OTP verified successfully!'
+      };
     } else {
       const errData = await res.json().catch(() => null);
 
@@ -146,14 +160,20 @@ export async function verifyOtpApi(
       if (storedRecord && storedRecord.otp && storedRecord.otp === trimmedOtp && Date.now() <= storedRecord.expiresAt) {
         return {
           success: true,
-          message: 'ओटीपी सत्यापन सफल!'
+          message: isHi ? 'ओटीपी सत्यापन सफल!' : 'OTP verified successfully!'
         };
+      }
+
+      // Check if server error contains Hindi while lang is English
+      let displayError = errData?.error;
+      if (!isHi && displayError && /[\u0900-\u097F]/.test(displayError)) {
+        displayError = 'Invalid or incorrect OTP. Please enter the valid OTP sent to your phone.';
       }
 
       return {
         success: false,
-        message: errData?.error || 'अमान्य ओटीपी दर्ज किया गया है। कृपया सही ओटीपी दर्ज करें।',
-        error: errData?.error
+        message: displayError || (isHi ? 'अमान्य ओटीपी दर्ज किया गया है। कृपया सही ओटीपी दर्ज करें।' : 'Invalid OTP entered. Please enter the correct OTP.'),
+        error: displayError || (isHi ? 'अमान्य ओटीपी' : 'Invalid OTP')
       };
     }
   } catch (err: any) {
@@ -166,14 +186,16 @@ export async function verifyOtpApi(
       } catch {}
       return {
         success: true,
-        message: 'ओटीपी सत्यापन सफल!'
+        message: isHi ? 'ओटीपी सत्यापन सफल!' : 'OTP verified successfully!'
       };
     }
 
     return {
       success: false,
-      message: 'गलत या अमान्य ओटीपी। कृपया अपने मोबाइल पर आया सही ओटीपी दर्ज करें।',
-      error: 'Invalid OTP'
+      message: isHi
+        ? 'गलत या अमान्य ओटीपी। कृपया अपने मोबाइल पर आया सही ओटीपी दर्ज करें।'
+        : 'Invalid or incorrect OTP. Please enter the valid OTP sent to your phone.',
+      error: isHi ? 'गलत ओटीपी' : 'Invalid OTP'
     };
   }
 }

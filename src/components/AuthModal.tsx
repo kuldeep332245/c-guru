@@ -16,7 +16,10 @@ import {
   KeyRound,
   RefreshCw,
   Edit3,
-  Menu
+  Menu,
+  Check,
+  Key,
+  ChevronLeft
 } from 'lucide-react';
 import {
   registerUserWithCredentials,
@@ -28,6 +31,7 @@ import {
   ADMIN_USER
 } from '../utils/storage';
 import { sendOtpApi, verifyOtpApi } from '../utils/authApi';
+import { getSavedSmsApiKey, saveSmsApiKey, sendOtpToMobile } from '../utils/smsService';
 import { User } from '../types';
 
 interface AuthModalProps {
@@ -70,7 +74,69 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  // Dedicated Inline SMS Settings Modal State (No home-page redirects!)
+  const [showSmsSettings, setShowSmsSettings] = useState(false);
+  const [smsKeyInput, setSmsKeyInput] = useState(() => getSavedSmsApiKey());
+  const [testPhoneInput, setTestPhoneInput] = useState('');
+  const [smsFeedback, setSmsFeedback] = useState<string | null>(null);
+  const [isSendingTestSms, setIsSendingTestSms] = useState(false);
+
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Strict Language Error Localizer (Guarantees English when lang is not 'hi')
+  const localizeErrorMessage = (err: string | null | undefined): string => {
+    if (!err) return '';
+    const isHi = lang === 'hi';
+    const lower = err.toLowerCase();
+
+    if (!isHi) {
+      if (
+        lower.includes('अमान्य') ||
+        lower.includes('गलत') ||
+        lower.includes('invalid') ||
+        lower.includes('wrong') ||
+        lower.includes('ओटीपी') ||
+        lower.includes('otp')
+      ) {
+        if (lower.includes('प्रयास') || lower.includes('attempt')) {
+          return 'Too many invalid attempts. Please request a new OTP.';
+        }
+        if (lower.includes('समाप्त') || lower.includes('expired')) {
+          return 'OTP has expired. Please request a new OTP.';
+        }
+        return 'Invalid or incorrect OTP entered. Please enter the valid OTP sent to your phone.';
+      }
+      if (lower.includes('रजिस्टर नहीं') || lower.includes('not register')) {
+        return 'This mobile number is not registered! Please create an account first.';
+      }
+      if (lower.includes('पहले से') || lower.includes('already register')) {
+        return 'This mobile number is already registered! Please switch to Login tab.';
+      }
+      if (lower.includes('10-अंक') || lower.includes('10 digit') || lower.includes('10-digit')) {
+        return 'Please enter a valid 10-digit mobile number.';
+      }
+      if (lower.includes('नाम') || lower.includes('name')) {
+        return 'Please enter your full name.';
+      }
+      if (lower.includes('ईमेल') || lower.includes('email')) {
+        return 'Please enter a valid email address.';
+      }
+      // If error contains Devanagari Hindi characters, fallback cleanly to English
+      if (/[\u0900-\u097F]/.test(err)) {
+        return 'Invalid or incorrect OTP entered. Please enter the valid OTP sent to your phone.';
+      }
+      return err;
+    }
+
+    // When language is Hindi
+    if (lower.includes('invalid') && lower.includes('otp')) {
+      return 'अमान्य या गलत ओटीपी दर्ज किया गया है। कृपया अपने मोबाइल पर आया सही ओटीपी दर्ज करें।';
+    }
+    if (lower.includes('expired')) {
+      return 'ओटीपी की समय सीमा समाप्त हो गई है। कृपया पुनः ओटीपी मंगाएं।';
+    }
+    return err;
+  };
 
   // Reset and sync mode whenever initialMode or isOpen changes
   useEffect(() => {
@@ -82,6 +148,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setError(null);
       setSuccessMsg(null);
       setCountdown(0);
+      setShowSmsSettings(false);
     }
   }, [isOpen, initialMode]);
 
@@ -157,7 +224,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      const res = await sendOtpApi(cleanP, mode);
+      const res = await sendOtpApi(cleanP, mode, lang);
       setIsSubmitting(false);
 
       if (res.success) {
@@ -169,7 +236,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         const cleanNotice = (res.message && !res.message.includes('असली') && !res.message.toLowerCase().includes('asli'))
           ? res.message
-          : `OTP sent to your number (+91 ${cleanP})`;
+          : (lang === 'hi' ? `आपके नंबर (+91 ${cleanP}) पर ओटीपी भेजा गया है` : `OTP sent to your number (+91 ${cleanP})`);
         setSuccessMsg(cleanNotice);
         // Focus first OTP input
         setTimeout(() => {
@@ -177,15 +244,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         }, 150);
       } else {
         setError(
-          res.error ||
-            res.message ||
-            (lang === 'hi' ? 'OTP भेजने में विफल। पुनः प्रयास करें।' : 'Failed to send OTP. Please try again.')
+          localizeErrorMessage(
+            res.error ||
+              res.message ||
+              (lang === 'hi' ? 'OTP भेजने में विफल। पुनः प्रयास करें।' : 'Failed to send OTP. Please try again.')
+          )
         );
       }
     } catch (err: any) {
       setIsSubmitting(false);
       setError(
-        err.message || (lang === 'hi' ? 'OTP भेजने में त्रुटि हुई।' : 'Error sending OTP.')
+        localizeErrorMessage(
+          err.message || (lang === 'hi' ? 'OTP भेजने में त्रुटि हुई।' : 'Error sending OTP.')
+        )
       );
     }
   };
@@ -243,13 +314,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      const verifyRes = await verifyOtpApi(cleanP, fullOtp, mode);
+      const verifyRes = await verifyOtpApi(cleanP, fullOtp, mode, lang);
       if (!verifyRes.success) {
         setIsSubmitting(false);
         setError(
-          verifyRes.error ||
-            verifyRes.message ||
-            (lang === 'hi' ? 'अमान्य ओटीपी दर्ज किया गया है।' : 'Invalid OTP entered.')
+          localizeErrorMessage(
+            verifyRes.error ||
+              verifyRes.message ||
+              (lang === 'hi' ? 'अमान्य ओटीपी दर्ज किया गया है।' : 'Invalid OTP entered.')
+          )
         );
         return;
       }
@@ -270,10 +343,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           }, 400);
         } else {
           setError(
-            authRes.error ||
-              (lang === 'hi'
-                ? 'यह मोबाइल नंबर रजिस्टर नहीं है! कृपया पहले नया खाता बनाएं।'
-                : 'Number is not registered! Please create an account first.')
+            localizeErrorMessage(
+              authRes.error ||
+                (lang === 'hi'
+                  ? 'यह मोबाइल नंबर रजिस्टर नहीं है! कृपया पहले नया खाता बनाएं।'
+                  : 'Number is not registered! Please create an account first.')
+            )
           );
         }
       } else {
@@ -296,12 +371,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             onSuccess(authRes.user!);
           }, 400);
         } else {
-          setError(authRes.error || (lang === 'hi' ? 'रजिस्ट्रेशन विफल रहा।' : 'Registration failed.'));
+          setError(
+            localizeErrorMessage(
+              authRes.error || (lang === 'hi' ? 'रजिस्ट्रेशन विफल रहा।' : 'Registration failed.')
+            )
+          );
         }
       }
     } catch (err: any) {
       setIsSubmitting(false);
-      setError(err.message || (lang === 'hi' ? 'ओटीपी सत्यापन में त्रुटि हुई।' : 'Error verifying OTP.'));
+      setError(
+        localizeErrorMessage(
+          err.message || (lang === 'hi' ? 'ओटीपी सत्यापन में त्रुटि हुई।' : 'Error verifying OTP.')
+        )
+      );
     }
   };
 
@@ -410,8 +493,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="button"
               onClick={() => {
-                onClose();
-                setTimeout(() => window.dispatchEvent(new CustomEvent('open-sms-key-modal')), 80);
+                setSmsKeyInput(getSavedSmsApiKey());
+                setTestPhoneInput(cleanP || '');
+                setSmsFeedback(null);
+                setShowSmsSettings(true);
               }}
               className="text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
             >
@@ -696,6 +781,40 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   )}
                 </div>
 
+                {/* Helpful SMS Gateway notice if key is missing or not active */}
+                {isSimulated && (
+                  <div className={`p-3 rounded-xl border text-xs flex items-start gap-2.5 ${
+                    isDark ? 'bg-amber-950/30 border-amber-500/30 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-900'
+                  }`}>
+                    <span className="text-base leading-none">⚠️</span>
+                    <div className="space-y-1">
+                      <p className="font-bold">
+                        {lang === 'hi' ? 'मोबाइल पर SMS प्राप्त नहीं हुआ?' : 'Did not receive SMS on mobile?'}
+                      </p>
+                      <p className="text-[11px] leading-relaxed opacity-90">
+                        {lang === 'hi'
+                          ? 'असली SMS भेजने के लिए 2Factor API Key की आवश्यकता होती है। यहाँ '
+                          : 'Real SMS requires a 2Factor API Key. Click '}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSmsKeyInput(getSavedSmsApiKey());
+                            setTestPhoneInput(cleanP || '');
+                            setSmsFeedback(null);
+                            setShowSmsSettings(true);
+                          }}
+                          className="font-bold underline text-blue-500 dark:text-cyan-400 hover:opacity-80 cursor-pointer"
+                        >
+                          {lang === 'hi' ? '⚙️ SMS Settings' : '⚙️ SMS Settings'}
+                        </button>
+                        {lang === 'hi'
+                          ? ' पर क्लिक करके अपनी 2Factor Key जोड़ें।'
+                          : ' to add your 2Factor API key.'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <button
                   type="submit"
                   disabled={isSubmitting || otpDigits.join('').trim().length < 4}
@@ -825,6 +944,186 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </form>
         )}
         </div>
+
+        {/* DEDICATED INLINE SMS GATEWAY SETTINGS (Zero page redirection, full control) */}
+        {showSmsSettings && (
+          <div className={`absolute inset-0 z-30 flex flex-col p-5 sm:p-6 overflow-y-auto animate-in fade-in duration-200 ${
+            isDark ? 'bg-[#181B24] text-white' : 'bg-white text-slate-900'
+          }`}>
+            <div className={`flex items-center justify-between pb-3 border-b ${
+              isDark ? 'border-slate-800' : 'border-slate-200'
+            }`}>
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setShowSmsSettings(false)}
+                  className={`p-1.5 rounded-xl border transition-colors ${
+                    isDark ? 'border-slate-800 text-slate-300 hover:bg-slate-800' : 'border-slate-200 text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                    <Key className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm sm:text-base tracking-tight">
+                      {lang === 'hi' ? 'SMS व OTP गेटवे सेटिंग्स' : 'SMS Gateway Settings'}
+                    </h3>
+                    <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                      {lang === 'hi' ? '2Factor.in से असली SMS प्राप्त करने के लिए' : 'Configure 2Factor.in for real mobile SMS OTP'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowSmsSettings(false)}
+                className={`p-1.5 rounded-xl transition-colors ${
+                  isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 pt-4 flex-1">
+              {/* Status Badge */}
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold border ${
+                  smsKeyInput
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                    : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                }`}>
+                  {smsKeyInput
+                    ? (lang === 'hi' ? '⚡ 2Factor SMS Gateway सक्रिय' : '⚡ 2Factor SMS Gateway Active')
+                    : (lang === 'hi' ? '⚠️ कृपया 2Factor API Key दर्ज करें' : '⚠️ Please Enter 2Factor API Key')}
+                </span>
+                <span className="text-[11px] px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-semibold">
+                  {lang === 'hi' ? '🔒 100% सुरक्षित वास्तविक SMS' : '🔒 100% Secure Real SMS'}
+                </span>
+              </div>
+
+              {/* API Key Input */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-400">
+                    {lang === 'hi' ? 'अपनी 2Factor.in API Key यहाँ पेस्ट करें:' : 'Paste 2Factor.in API Key here:'}
+                  </label>
+                  {smsKeyInput && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSmsKeyInput('');
+                        saveSmsApiKey('');
+                        setSmsFeedback(lang === 'hi' ? 'API Key हटा दी गई' : 'API Key removed');
+                      }}
+                      className="text-[11px] text-rose-400 hover:underline"
+                    >
+                      {lang === 'hi' ? 'हटाएं' : 'Clear'}
+                    </button>
+                  )}
+                </div>
+
+                <input
+                  type="text"
+                  placeholder={lang === 'hi' ? 'उदा. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' : 'e.g. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'}
+                  value={smsKeyInput}
+                  onChange={(e) => {
+                    const val = e.target.value.trim();
+                    setSmsKeyInput(val);
+                    saveSmsApiKey(val);
+                    setSmsFeedback(lang === 'hi' ? '✅ API Key अपने आप सेव हो गई है!' : '✅ API Key saved successfully!');
+                  }}
+                  className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-mono focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                    isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-slate-50 border-slate-300 text-slate-900'
+                  }`}
+                />
+                <p className="text-[11px] text-slate-400">
+                  {lang === 'hi'
+                    ? '💡 पेस्ट करते ही यह तुरंत सेव हो जाती है और रजिस्ट्रेशन/लॉगिन में असली OTP भेजेगी।'
+                    : '💡 Auto-saved instantly. Will be used to deliver real SMS OTPs.'}
+                </p>
+              </div>
+
+              {/* Test SMS Block */}
+              <div className={`p-3 rounded-xl border space-y-2 ${
+                isDark ? 'bg-[#13161D] border-[#2B313F]' : 'bg-slate-50 border-slate-200'
+              }`}>
+                <span className="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+                  <Smartphone className="w-3.5 h-3.5" />
+                  {lang === 'hi' ? 'तुरंत SMS टेस्ट करें (+91):' : 'Test SMS Delivery on Mobile (+91):'}
+                </span>
+                <div className="flex gap-2">
+                  <input
+                    type="tel"
+                    maxLength={10}
+                    placeholder={lang === 'hi' ? '10 अंकों का मोबाइल नंबर' : '10-digit mobile number'}
+                    value={testPhoneInput}
+                    onChange={(e) => setTestPhoneInput(e.target.value.replace(/\D/g, ''))}
+                    className={`w-full px-3 py-2 rounded-xl border text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                      isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-white border-slate-300 text-slate-900'
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    disabled={isSendingTestSms || testPhoneInput.length < 10}
+                    onClick={async () => {
+                      setIsSendingTestSms(true);
+                      setSmsFeedback(null);
+                      const code = Math.floor(1000 + Math.random() * 9000).toString();
+                      try {
+                        const res = await sendOtpToMobile(testPhoneInput, code, smsKeyInput, lang);
+                        setSmsFeedback(res.message);
+                      } catch {
+                        setSmsFeedback(lang === 'hi' ? 'SMS भेजने में त्रुटि हुई। कृपया API Key जांचें।' : 'Error sending SMS. Please verify API Key.');
+                      } finally {
+                        setIsSendingTestSms(false);
+                      }
+                    }}
+                    className="px-3.5 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white shrink-0 flex items-center gap-1 transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    {isSendingTestSms ? (lang === 'hi' ? 'भेज रहा है...' : 'Sending...') : (lang === 'hi' ? '📩 SMS भेजें' : 'Send Test SMS')}
+                  </button>
+                </div>
+              </div>
+
+              {/* Feedback Alert */}
+              {smsFeedback && (
+                <div className={`p-2.5 rounded-xl text-xs font-semibold ${
+                  smsFeedback.includes('✅') || smsFeedback.includes('sent') || smsFeedback.includes('भेजा') || smsFeedback.includes('safalta')
+                    ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                    : 'bg-rose-500/10 border border-rose-500/20 text-rose-300'
+                }`}>
+                  {smsFeedback}
+                </div>
+              )}
+
+              {/* Save & Return Button */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSmsSettings(false);
+                    if (otpStep === 'verify' && smsKeyInput) {
+                      handleSendOtp();
+                    }
+                  }}
+                  className="w-full py-3 rounded-xl font-bold text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center gap-2 shadow-md transition-all active:scale-98 cursor-pointer"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>
+                    {otpStep === 'verify'
+                      ? (lang === 'hi' ? 'सेव करें और अब असली OTP भेजें →' : 'Save & Send Real OTP Now →')
+                      : (lang === 'hi' ? 'सेव करें और वापस जारी रखें' : 'Save & Continue')}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

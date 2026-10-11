@@ -307,9 +307,13 @@ app.post('/api/auth/send-otp', async (req, res) => {
 // 2. Verify OTP (Login & Register)
 app.post('/api/auth/verify-otp', (req, res) => {
   try {
-    const { phone, otp, verificationToken } = req.body;
+    const { phone, otp, verificationToken, lang } = req.body;
+    const isHi = lang === 'hi';
     if (!phone || !otp) {
-      return res.status(400).json({ success: false, error: 'मोबाइल नंबर और ओटीपी दोनों आवश्यक हैं।' });
+      return res.status(400).json({
+        success: false,
+        error: isHi ? 'मोबाइल नंबर और ओटीपी दोनों आवश्यक हैं।' : 'Both mobile number and OTP are required.'
+      });
     }
 
     const cleaned = cleanPhone(phone);
@@ -327,30 +331,41 @@ app.post('/api/auth/verify-otp', (req, res) => {
       otpStore.delete(cleaned);
       return res.json({
         success: true,
-        message: 'ओटीपी सत्यापन सफल! (OTP verified successfully)',
+        message: isHi ? 'ओटीपी सत्यापन सफल!' : 'OTP verified successfully!',
         phone: cleaned
       });
     }
 
     if (record && Date.now() > record.expiresAt) {
-      return res.status(400).json({ success: false, error: 'ओटीपी की समय सीमा समाप्त हो गई है। कृपया पुनः ओटीपी मंगाएं।' });
+      return res.status(400).json({
+        success: false,
+        error: isHi ? 'ओटीपी की समय सीमा समाप्त हो गई है। कृपया पुनः ओटीपी मंगाएं।' : 'OTP has expired. Please request a new OTP.'
+      });
     }
 
     if (record) {
       record.attempts += 1;
       if (record.attempts >= 8) {
         otpStore.delete(cleaned);
-        return res.status(400).json({ success: false, error: 'अत्यधिक गलत प्रयासों के कारण ओटीपी निरस्त कर दिया गया है। नया ओटीपी मंगाएं।' });
+        return res.status(400).json({
+          success: false,
+          error: isHi ? 'अत्यधिक गलत प्रयासों के कारण ओटीपी निरस्त कर दिया गया है। नया ओटीपी मंगाएं।' : 'Too many incorrect attempts. Please request a new OTP.'
+        });
       }
     }
 
     return res.status(400).json({
       success: false,
-      error: 'अमान्य या गलत ओटीपी दर्ज किया गया है। कृपया अपने मोबाइल पर आया सही ओटीपी दर्ज करें।'
+      error: isHi
+        ? 'अमान्य या गलत ओटीपी दर्ज किया गया है। कृपया अपने मोबाइल पर आया सही ओटीपी दर्ज करें।'
+        : 'Invalid or incorrect OTP entered. Please enter the valid OTP sent to your phone.'
     });
   } catch (err: any) {
     console.error('Verify OTP Error:', err);
-    res.status(500).json({ success: false, error: err.message || 'ओटीपी सत्यापन विफल।' });
+    res.status(500).json({
+      success: false,
+      error: err.message || (req.body?.lang === 'hi' ? 'ओटीपी सत्यापन विफल।' : 'OTP verification failed.')
+    });
   }
 });
 

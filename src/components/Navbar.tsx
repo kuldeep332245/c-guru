@@ -777,7 +777,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* DEDICATED MOBILE SMS API KEY MODAL (Paste 2Factor.in / Fast2SMS API Key) */}
       {showSmsKeyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div
             className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
             onClick={() => setShowSmsKeyModal(false)}
@@ -803,7 +803,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     {lang === 'hi' ? 'SMS व OTP गेटवे सेटिंग्स' : 'SMS Gateway Settings'}
                   </h3>
                   <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                    {lang === 'hi' ? 'मोबाइल फोन पर SMS OTP भेजने के लिए' : 'Send OTP SMS to phones in India'}
+                    {lang === 'hi' ? 'मोबाइल फोन पर SMS OTP भेजने के लिए' : 'Send Real SMS OTP to mobile phones'}
                   </p>
                 </div>
               </div>
@@ -826,11 +826,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
               }`}>
                 {modalSmsKey
-                  ? '⚡ 2Factor SMS Gateway सक्रिय'
-                  : '⚠️ कृपया 2Factor API Key दर्ज करें'}
+                  ? (lang === 'hi' ? '⚡ 2Factor SMS Gateway सक्रिय' : '⚡ 2Factor SMS Gateway Active')
+                  : (lang === 'hi' ? '⚠️ कृपया 2Factor API Key दर्ज करें' : '⚠️ Please Enter 2Factor API Key')}
               </span>
               <span className="text-[11px] px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-semibold">
-                🔒 100% सुरक्षित वास्तविक OTP
+                {lang === 'hi' ? '🔒 100% सुरक्षित वास्तविक OTP' : '🔒 100% Secure Real SMS OTP'}
               </span>
             </div>
 
@@ -846,7 +846,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onClick={() => {
                       setModalSmsKey('');
                       saveSmsApiKey('');
-                      setSmsFeedbackMsg('API Key हटा दी गई');
+                      setSmsFeedbackMsg(lang === 'hi' ? 'API Key हटा दी गई' : 'API Key removed');
                     }}
                     className="text-[11px] text-rose-400 hover:underline"
                   >
@@ -858,13 +858,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="उदा. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                  placeholder={lang === 'hi' ? 'उदा. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' : 'e.g. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'}
                   value={modalSmsKey}
                   onChange={(e) => {
                     const val = e.target.value.trim();
                     setModalSmsKey(val);
                     saveSmsApiKey(val);
-                    setSmsFeedbackMsg('✅ API Key अपने आप सेव हो गई है!');
+                    setSmsFeedbackMsg(lang === 'hi' ? '✅ API Key अपने आप सेव हो गई है!' : '✅ API Key saved successfully!');
                   }}
                   className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-mono focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
                     isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-slate-50 border-slate-300 text-slate-900'
@@ -875,7 +875,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <p className="text-[11px] text-slate-400">
                 {lang === 'hi'
                   ? '💡 पेस्ट करते ही यह ब्राउज़र में सेव हो जाती है और रजिस्ट्रेशन/लॉगिन में इस्तेमाल होगी।'
-                  : 'Auto-saved on paste. Used for mobile OTP registration and logins.'}
+                  : '💡 Saved instantly. Will be used for real mobile SMS verification and login.'}
               </p>
             </div>
 
@@ -886,7 +886,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
                   <Smartphone className="w-3.5 h-3.5" />
-                  {lang === 'hi' ? 'तुरंत SMS टेस्ट करें (+91):' : 'Test SMS on Phone (+91):'}
+                  {lang === 'hi' ? 'तुरंत SMS टेस्ट करें (+91):' : 'Test SMS on Mobile Phone (+91):'}
                 </span>
               </div>
 
@@ -894,7 +894,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <input
                   type="tel"
                   maxLength={10}
-                  placeholder="10 अंकों का मोबाइल नंबर"
+                  placeholder={lang === 'hi' ? '10 अंकों का मोबाइल नंबर' : '10-digit mobile number'}
                   value={smsTestPhone}
                   onChange={(e) => setSmsTestPhone(e.target.value.replace(/\D/g, ''))}
                   className={`w-full px-3 py-2 rounded-xl border text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
@@ -909,17 +909,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                     setSmsFeedbackMsg(null);
                     const code = Math.floor(1000 + Math.random() * 9000).toString();
                     try {
-                      const res = await sendOtpToMobile(smsTestPhone, code, modalSmsKey);
+                      const res = await sendOtpToMobile(smsTestPhone, code, modalSmsKey, lang);
                       setSmsFeedbackMsg(res.message);
                     } catch {
-                      setSmsFeedbackMsg('SMS भेजने में त्रुटि हुई। कृपया API Key जांचें।');
+                      setSmsFeedbackMsg(lang === 'hi' ? 'SMS भेजने में त्रुटि हुई। कृपया API Key जांचें।' : 'Error sending SMS. Please verify your API Key.');
                     } finally {
                       setIsTestingSms(false);
                     }
                   }}
                   className="px-3.5 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white shrink-0 flex items-center gap-1 transition-all active:scale-95 disabled:opacity-50"
                 >
-                  {isTestingSms ? 'भेज रहा है...' : (lang === 'hi' ? '📩 SMS भेजें' : 'Test SMS')}
+                  {isTestingSms ? (lang === 'hi' ? 'भेज रहा है...' : 'Sending...') : (lang === 'hi' ? '📩 SMS भेजें' : 'Send Test SMS')}
                 </button>
               </div>
             </div>
@@ -940,13 +940,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               isDark ? 'bg-blue-500/10 border border-blue-500/20 text-blue-300' : 'bg-blue-50 border border-blue-200 text-blue-800'
             }`}>
               <div className="font-bold flex items-center gap-1 text-cyan-400">
-                <span>📱 टेक्स्ट SMS (SMS Message) कैसे प्राप्त करें?</span>
+                <span>{lang === 'hi' ? '📱 टेक्स्ट SMS कैसे प्राप्त करें?' : '📱 How to receive SMS OTP?'}</span>
               </div>
               <p className="leading-relaxed">
-                2Factor.in पर आपके खाते में <strong>Transactional SMS बैलेंस</strong> होना चाहिए। यदि आपके पास DLT Template स्वीकृत है तो SMS सीधे इनबॉक्स में आता है।
+                {lang === 'hi'
+                  ? '2Factor.in पर आपके खाते में Transactional SMS बैलेंस होना चाहिए। यदि आपके पास DLT Template स्वीकृत है तो SMS सीधे इनबॉक्स में आता है।'
+                  : 'Your 2Factor.in account must have active SMS balance/credits. Real SMS will be delivered directly to the phone inbox.'}
               </p>
               <p className="text-[10px] opacity-80">
-                * सुरक्षा के लिए किसी भी फ़र्ज़ी या 9999 कोड से लॉगिन बंद कर दिया गया है। केवल आपके मोबाइल पर भेजा गया सही OTP ही मान्य होगा।
+                {lang === 'hi'
+                  ? '* सुरक्षा के लिए केवल आपके मोबाइल पर भेजा गया सही OTP ही मान्य होगा।'
+                  : '* For security, only the genuine SMS OTP sent to your phone is valid for registration & login.'}
               </p>
             </div>
 
