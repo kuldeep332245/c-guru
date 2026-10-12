@@ -89,232 +89,264 @@ export const Navbar: React.FC<NavbarProps> = ({
   const percent = Math.round((completedCount / totalTopics) * 100);
   const isAdmin = Boolean(user?.isAdmin || user?.role === 'admin');
 
-  // Keep selectedLanguageCode in sync with lang
   React.useEffect(() => {
     setSelectedLanguageCode(lang);
   }, [lang]);
 
-  // Global listeners so modal or other views can open sidebar / SMS settings directly
   React.useEffect(() => {
     const handleOpenSidebar = () => setIsSidebarOpen(true);
     const handleOpenSmsModal = () => {
       setModalSmsKey(getSavedSmsApiKey());
+      setSmsFeedbackMsg(null);
       setShowSmsKeyModal(true);
     };
-    window.addEventListener('open-cguru-sidebar', handleOpenSidebar);
+
+    window.addEventListener('open-navbar-sidebar', handleOpenSidebar);
     window.addEventListener('open-sms-key-modal', handleOpenSmsModal);
+
     return () => {
-      window.removeEventListener('open-cguru-sidebar', handleOpenSidebar);
+      window.removeEventListener('open-navbar-sidebar', handleOpenSidebar);
       window.removeEventListener('open-sms-key-modal', handleOpenSmsModal);
     };
   }, []);
-
-  const navLabels = getNavLabels(lang);
-  const isIndian = lang !== 'en';
-
-  // Top navigation items with Home as first item
-  const topNavItems = [
-    { id: 'home' as TabType, label: navLabels.home, icon: Home },
-    { id: 'topics' as TabType, label: navLabels.topics, icon: BookMarked },
-    { id: 'tutorials' as TabType, label: navLabels.tutorials, icon: BookOpen },
-    { id: 'compiler' as TabType, label: navLabels.compiler, icon: Terminal },
-    { id: 'quiz' as TabType, label: navLabels.quiz, icon: HelpCircle }
-  ];
-
-  // Full 3-Line Drawer navigation items (Fully translated for Hindi & English)
-  const allNavItems = [
-    {
-      category: lang === 'hi' ? 'मुख्य हब (Main Hub)' : 'Main Hub',
-      items: [
-        {
-          id: 'home' as TabType,
-          label: lang === 'hi' ? 'होम (मुख्य पृष्ठ)' : 'Home',
-          desc: lang === 'hi' ? 'डैशबोर्ड और व्यक्तिगत अध्ययन' : 'Personalized dashboard & start',
-          icon: Home
-        }
-      ]
-    },
-    {
-      category: lang === 'hi' ? 'मुख्य पाठ्यक्रम (Curriculum)' : 'Core Curriculum',
-      items: [
-        {
-          id: 'topics' as TabType,
-          label: lang === 'hi' ? 'सभी 20 टॉपिक्स' : 'All Topics',
-          desc: lang === 'hi' ? 'पूरा पाठ्यक्रम और सीखने का रोडमैप' : 'Curriculum & roadmap',
-          icon: BookMarked
-        },
-        {
-          id: 'tutorials' as TabType,
-          label: lang === 'hi' ? 'ट्यूटोरियल्स' : 'Tutorials',
-          desc: lang === 'hi' ? 'अध्याय-दर-अध्याय गहन अध्ययन' : 'Chapter by chapter study',
-          icon: BookOpen
-        },
-        {
-          id: 'compiler' as TabType,
-          label: lang === 'hi' ? 'ऑनलाइन C कम्पाइलर' : 'Online C Compiler',
-          desc: lang === 'hi' ? 'ब्राउज़र में रन करें लाइव कोड व आउटपुट' : 'Code runner with real output',
-          icon: Terminal
-        },
-        {
-          id: 'quiz' as TabType,
-          label: lang === 'hi' ? 'क्विज़ और टेस्ट' : 'Quizzes & Tests',
-          desc: lang === 'hi' ? 'अध्यायवार 500+ MCQs और टेस्ट' : 'Topic-wise MCQs & tests',
-          icon: HelpCircle
-        }
-      ]
-    },
-    {
-      category: lang === 'hi' ? 'अभ्यास और प्रैक्टिकल' : 'Practice & Lab',
-      items: [
-        {
-          id: 'lab' as TabType,
-          label: lang === 'en' ? 'Lab Questions (Practicals)' : 'लैब प्रश्न (प्रैक्टिकल)',
-          desc: lang === 'en' ? 'University lab questions & viva Q&A' : 'यूनिवर्सिटी लैब प्रोग्राम्स और वाइवा',
-          icon: FlaskConical
-        },
-        {
-          id: 'programs' as TabType,
-          label: lang === 'hi' ? 'प्रोग्राम्स लैब' : 'Programs Lab',
-          desc: lang === 'hi' ? '100+ तैयार C प्रोग्राम्स और हल' : '100+ ready C solutions',
-          icon: Code
-        },
-        {
-          id: 'syntax' as TabType,
-          label: lang === 'hi' ? 'सिंटैक्स चीटशीट' : 'Syntax Cheatsheet',
-          desc: lang === 'hi' ? 'मेमोरी और कीवर्ड संदर्भ गाइड' : 'Memory & keyword references',
-          icon: BookMarked
-        },
-        {
-          id: 'bugs' as TabType,
-          label: lang === 'hi' ? 'बग हंटर' : 'Bug Hunter',
-          desc: lang === 'hi' ? 'त्रुटियां ढूंढें और सुलझाएं' : 'Find & fix tricky bugs',
-          icon: Bug
-        }
-      ]
-    },
-    ...(isAdmin
-      ? [
-          {
-            category: lang === 'hi' ? 'सिस्टम एडमिन' : 'System Admin',
-            items: [
-              {
-                id: 'admin' as TabType,
-                label: lang === 'hi' ? 'एडमिन कंट्रोल सेंटर' : 'Admin Control Center',
-                desc: lang === 'hi' ? 'विद्यार्थी और प्लेटफ़ॉर्म सेटिंग्स' : 'Student & platform controls',
-                icon: ShieldCheck
-              }
-            ]
-          }
-        ]
-      : [])
-  ];
 
   const handleSelectTab = (tab: TabType) => {
     setActiveTab(tab);
     setIsSidebarOpen(false);
   };
 
+  const handleLanguageChange = (code: string) => {
+    setSelectedLanguageCode(code);
+    setLang(code);
+    try {
+      localStorage.setItem('cguru_lang', code);
+    } catch (e) {}
+  };
+
+  const handleSaveSmsKey = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    saveSmsApiKey(modalSmsKey);
+    const detected = detectSmsProvider(modalSmsKey);
+    setSmsFeedbackMsg(`API Key सुरक्षित हो गई! (Gateway: ${detected.toUpperCase()})`);
+    setTimeout(() => {
+      setSmsFeedbackMsg(null);
+      setShowSmsKeyModal(false);
+    }, 1500);
+  };
+
+  const handleSendTestSms = async () => {
+    const cleanNumber = smsTestPhone.replace(/\D/g, '').slice(-10);
+    if (cleanNumber.length !== 10) {
+      setSmsFeedbackMsg('कृपया सही 10-अंकों का मोबाइल नंबर दर्ज करें!');
+      return;
+    }
+    setIsTestingSms(true);
+    setSmsFeedbackMsg(null);
+    try {
+      saveSmsApiKey(modalSmsKey);
+      const res = await sendOtpToMobile(cleanNumber, '123456', modalSmsKey);
+      setIsTestingSms(false);
+      if (res.success) {
+        setSmsFeedbackMsg(`SMS सफलतापूर्वक भेजा गया! (Provider: ${res.provider})`);
+      } else {
+        setSmsFeedbackMsg(`त्रुटि: ${res.error || 'SMS नहीं भेजा जा सका'}`);
+      }
+    } catch (err: any) {
+      setIsTestingSms(false);
+      setSmsFeedbackMsg(`त्रुटि: ${err.message || 'SMS भेजने में विफलता'}`);
+    }
+  };
+
+  const navLabels = getNavLabels(lang);
+
+  const primaryTabs: { id: TabType; label: string; icon: React.FC<{ className?: string }> }[] = [
+    { id: 'home', label: navLabels.home, icon: Home },
+    { id: 'tutorials', label: navLabels.tutorials, icon: BookOpen },
+    { id: 'topics', label: navLabels.topics, icon: BookMarked },
+    { id: 'lab', label: navLabels.lab, icon: FlaskConical },
+    { id: 'flowcharts', label: navLabels.flowcharts, icon: GitBranch },
+    { id: 'compiler', label: navLabels.compiler, icon: Terminal },
+    { id: 'dashboard', label: navLabels.dashboard, icon: LayoutDashboard }
+  ];
+
+  const allNavItems: {
+    category: string;
+    items: {
+      id: TabType;
+      label: string;
+      desc: string;
+      icon: React.FC<{ className?: string }>;
+    }[];
+  }[] = [
+    {
+      category: lang === 'hi' ? 'सीखें और पढ़ें (Learn)' : 'Core Learning',
+      items: [
+        {
+          id: 'home',
+          label: navLabels.home,
+          desc: lang === 'hi' ? 'मुख्य पृष्ठ और अवलोकन' : 'Home overview & progress',
+          icon: Home
+        },
+        {
+          id: 'tutorials',
+          label: navLabels.tutorials,
+          desc: lang === 'hi' ? 'अध्यायवार व्याख्या और नोट्स' : 'Step-by-step master lessons',
+          icon: BookOpen
+        },
+        {
+          id: 'topics',
+          label: navLabels.topics,
+          desc: lang === 'hi' ? 'सम्पूर्ण पाठ्यक्रम (40+ अध्याय)' : 'All 40+ topic curriculum',
+          icon: BookMarked
+        },
+        {
+          id: 'syntax',
+          label: navLabels.syntax,
+          desc: lang === 'hi' ? 'त्वरित सिंटैक्स चीट-शीट' : 'C Syntax rules & reference cheat-sheet',
+          icon: Code
+        }
+      ]
+    },
+    {
+      category: lang === 'hi' ? 'प्रैक्टिस और कोडिंग (Practice)' : 'Coding & Practice',
+      items: [
+        {
+          id: 'compiler',
+          label: navLabels.compiler,
+          desc: lang === 'hi' ? 'लाइव C कोड लिखें और रन करें' : 'Interactive online compiler playground',
+          icon: Terminal
+        },
+        {
+          id: 'lab',
+          label: navLabels.lab,
+          desc: lang === 'hi' ? 'प्रयोगशाला कोड और आउटपुट' : 'Real lab programs with line notes',
+          icon: FlaskConical
+        },
+        {
+          id: 'flowcharts',
+          label: navLabels.flowcharts,
+          desc: lang === 'hi' ? 'विजुअल लॉजिक फ्लोचार्ट' : 'Visual step-by-step algorithm flowcharts',
+          icon: GitBranch
+        },
+        {
+          id: 'bugs',
+          label: navLabels.bugs,
+          desc: lang === 'hi' ? 'एरर खोजें और हल करें' : 'Debug code snippets & fix errors',
+          icon: Bug
+        },
+        {
+          id: 'quiz',
+          label: navLabels.quiz,
+          desc: lang === 'hi' ? 'MCQ क्विज और परीक्षा' : 'Chapter-wise test MCQs & instant score',
+          icon: HelpCircle
+        }
+      ]
+    },
+    {
+      category: lang === 'hi' ? 'विद्यार्थी और डैशबोर्ड' : 'Student & Performance',
+      items: [
+        {
+          id: 'dashboard',
+          label: navLabels.dashboard,
+          desc: lang === 'hi' ? 'प्रगति, टेस्ट स्कोर और सर्टिफिकेट' : 'Your learning stats & certificate',
+          icon: LayoutDashboard
+        }
+      ]
+    }
+  ];
+
+  const isIndian = selectedLanguageCode !== 'en';
+
   return (
     <>
       <header
-        className="sticky top-0 z-40 w-full backdrop-blur-md border-b transition-colors"
-        style={{
-          backgroundColor: isDark ? 'rgba(20, 23, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)',
-          borderColor: isDark ? '#2B313F' : '#E2E8F0'
-        }}
+        className={`sticky top-0 z-40 w-full border-b backdrop-blur-md transition-colors ${
+          isDark
+            ? 'bg-[#12141A]/95 border-[#232733] text-white'
+            : 'bg-white/95 border-slate-200 text-slate-900 shadow-xs'
+        }`}
       >
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-3">
-          {/* Left: ONLY ONE 3-Line Hamburger Menu & Logo (Right one deleted as requested) */}
-          <div className="flex items-center gap-2.5 shrink-0">
-            {/* Single 3 Horizontal Lines (Hamburger Menu) */}
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className={`p-2 rounded-xl border transition-all hover:scale-105 active:scale-95 flex items-center justify-center ${
+              className={`p-2 rounded-xl transition-all cursor-pointer ${
                 isDark
-                  ? 'bg-[#1B1E27] border-[#2B313F] text-white hover:bg-[#232834]'
-                  : 'bg-slate-100 border-slate-200 text-slate-800 hover:bg-slate-200'
+                  ? 'hover:bg-[#1E222D] text-slate-300 hover:text-white'
+                  : 'hover:bg-slate-100 text-slate-700 hover:text-slate-900'
               }`}
+              title={lang === 'hi' ? 'सभी फीचर्स खोलें' : 'All Features Menu'}
               aria-label="Open Navigation Menu"
-              title="Open Menu & Profile"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
 
-            {/* Brand Logo & Name */}
-            <div
-              className="flex items-center gap-2.5 cursor-pointer"
+            <button
               onClick={() => setActiveTab('home')}
+              className="flex items-center gap-2.5 sm:gap-3 group text-left cursor-pointer"
             >
               <img
                 src="/c-guru-logo.png"
                 alt="C-Guru Logo"
-                className="w-9 h-9 rounded-xl object-cover shadow-sm border border-blue-500/30 transition-transform hover:scale-105"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform border border-blue-500/20"
               />
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className={`font-extrabold text-base sm:text-lg tracking-tight ${
-                    isDark ? 'text-white' : 'text-slate-900'
-                  }`}>
+              <div className="leading-tight">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-extrabold text-base sm:text-lg tracking-tight bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">
                     C-Guru
                   </span>
-                  <span className="hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-md border border-blue-500/30 bg-blue-500/10 text-blue-500">
-                    ACADEMY
+                  <span className="hidden sm:inline-block text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                    Masterclass
                   </span>
                 </div>
+                <p className={`text-[10px] hidden xs:block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  {lang === 'hi' ? 'C प्रोग्रामिंग सरल हिंदी में' : 'Complete C Programming'}
+                </p>
               </div>
-            </div>
+            </button>
           </div>
 
-          {/* Center: Desktop Tabs (Home, All Topics, Tutorials, Compiler, Quizzes) */}
-          <nav className="hidden md:flex items-center gap-1.5 py-1">
-            {topNavItems.map((item) => {
-              const Icon = item.icon;
-              const active = activeTab === item.id;
-
+          <nav className="hidden lg:flex items-center gap-1">
+            {primaryTabs.map((tab) => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.id;
               return (
                 <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 ${
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                     active
-                      ? 'bg-blue-600 text-white shadow-sm'
+                      ? 'bg-blue-600 text-white shadow-xs'
                       : isDark
-                      ? 'text-slate-300 hover:text-white hover:bg-[#1E222C]'
-                      : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+                      ? 'text-slate-300 hover:text-white hover:bg-[#1E222D]'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
+                  <span>{tab.label}</span>
                 </button>
               );
             })}
           </nav>
 
-          {/* Right Controls: CLEAN & MINIMAL */}
-          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-            {/* Quick Language Dropdown on Header */}
-            <div className="relative hidden md:flex items-center">
-              <Globe className="w-3.5 h-3.5 text-blue-400 absolute left-2 pointer-events-none" />
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
+            <div className="relative">
               <select
                 value={selectedLanguageCode}
-                onChange={(e) => {
-                  const newL = e.target.value;
-                  setSelectedLanguageCode(newL);
-                  setLang(newL);
-                }}
-                className={`pl-6.5 pr-2.5 py-1.5 rounded-xl border text-xs font-bold transition-colors cursor-pointer appearance-none ${
+                onChange={(e) => handleLanguageChange(e.target.value)}
+                className={`appearance-none text-xs font-semibold pl-7 pr-6 py-1.5 rounded-xl border cursor-pointer transition-all ${
                   isDark
-                    ? 'bg-[#191D26] border-[#2B313F] text-slate-200 hover:border-blue-500/50'
-                    : 'bg-slate-50 border-slate-200 text-slate-800 hover:border-blue-400'
+                    ? 'bg-[#181B24] border-[#2B313F] text-slate-200 hover:border-blue-500/50'
+                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-blue-400'
                 }`}
-                title="Select Language"
+                title="Select Language / भाषा चुनें"
               >
-                <optgroup label="🔥 Most Popular (मुख्य भाषाएं)">
+                <optgroup label="⭐ Popular (प्रमुख भाषाएं)">
                   {ALL_INDIAN_LANGUAGES.filter((l) => l.popular).map((item) => (
                     <option
                       key={item.code}
                       value={item.code}
-                      className={isDark ? 'bg-[#14171E] text-white' : 'bg-white text-slate-900'}
+                      className={isDark ? 'bg-[#181B24] text-white' : 'bg-white text-slate-900'}
                     >
                       {item.code === 'en' ? 'English' : `${item.native} (${item.name})`}
                     </option>
@@ -325,54 +357,76 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <option
                       key={item.code}
                       value={item.code}
-                      className={isDark ? 'bg-[#14171E] text-white' : 'bg-white text-slate-900'}
+                      className={isDark ? 'bg-[#181B24] text-white' : 'bg-white text-slate-900'}
                     >
                       {item.native} ({item.name})
                     </option>
                   ))}
                 </optgroup>
               </select>
+              <Globe className="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-blue-500 pointer-events-none" />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[9px] text-slate-400">
+                ▼
+              </div>
             </div>
 
-            {/* 100% Free All Access Badge (No lock, free for everyone) */}
-            <span
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 shadow-xs"
-              title="100% Free Complete C Course"
+            <button
+              onClick={() => setIsDark(!isDark)}
+              className={`p-2 rounded-xl transition-all cursor-pointer ${
+                isDark
+                  ? 'bg-[#181B24] border border-[#2B313F] text-slate-300 hover:text-white'
+                  : 'bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
+              }`}
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{lang === 'hi' ? '100% मुफ़्त कोर्स' : '100% Free Course'}</span>
-            </span>
+              {isDark ? <Moon className="w-4 h-4 text-blue-400" /> : <Sun className="w-4 h-4 text-amber-500" />}
+            </button>
 
-            {!user && (
+            {user ? (
+              <button
+                onClick={() => setShowProfileModal(true)}
+                className={`flex items-center gap-2 pl-2 pr-2 sm:pr-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
+                  isDark
+                    ? 'bg-[#181B24] border-[#2B313F] text-slate-200 hover:border-blue-500/50'
+                    : 'bg-white border-slate-200 text-slate-800 hover:border-blue-400 shadow-xs'
+                }`}
+                title="Open Profile"
+              >
+                <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-xs font-semibold hidden md:inline truncate max-w-[90px]">
+                  {user.name}
+                </span>
+              </button>
+            ) : (
               <button
                 onClick={onOpenAuth}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-xs transition-all hover:scale-105 active:scale-95"
+                className="px-3.5 sm:px-4 py-1.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
               >
-                {navLabels.signIn}
+                <User className="w-3.5 h-3.5" />
+                <span>{lang === 'hi' ? 'लॉगिन' : 'Sign In'}</span>
               </button>
             )}
           </div>
         </div>
       </header>
 
-      {/* 3-LINE HAMBURGER SIDEBAR DRAWER (Contains Profile, Logout, Language, Theme, and Navigation) */}
+      {/* 3-LINE DRAWER */}
       {isSidebarOpen && (
         <div className="fixed inset-0 z-50 flex">
-          {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
             onClick={() => setIsSidebarOpen(false)}
           />
 
-          {/* Drawer Panel */}
           <div
-            className={`relative w-84 max-w-[88vw] h-full shadow-2xl z-10 flex flex-col justify-between border-r animate-in slide-in-from-left duration-200 ${
-              isDark ? 'bg-[#14171E] border-[#2B313F] text-white' : 'bg-white border-slate-200 text-slate-900'
+            className={`relative w-full max-w-xs sm:max-w-sm h-full flex flex-col shadow-2xl z-10 transition-all ${
+              isDark ? 'bg-[#12141A] text-white border-r border-[#232733]' : 'bg-white text-slate-900 border-r border-slate-200'
             }`}
           >
-            {/* Drawer Header */}
-            <div className={`p-4 sm:p-5 border-b flex items-center justify-between ${
-              isDark ? 'border-[#2B313F] bg-[#191D26]' : 'border-slate-200 bg-slate-50'
+            <div className={`p-4 border-b flex items-center justify-between ${
+              isDark ? 'border-[#232733]' : 'border-slate-200'
             }`}>
               <div className="flex items-center gap-3">
                 <img
@@ -394,7 +448,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
               <button
                 onClick={() => setIsSidebarOpen(false)}
-                className={`p-2 rounded-xl text-slate-400 hover:text-white transition-colors ${
+                className={`p-2 rounded-xl text-slate-400 hover:text-white transition-colors cursor-pointer ${
                   isDark ? 'hover:bg-[#252A36]' : 'hover:bg-slate-200 text-slate-600'
                 }`}
               >
@@ -402,9 +456,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
 
-            {/* Scrollable Drawer Content */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-5">
-              {/* 1. ALL APPLICATION FEATURES */}
+            {/* Scrollable Drawer Content (pb-8 so button doesn't stick to bottom footer) */}
+            <div className="flex-1 overflow-y-auto p-4 pb-8 space-y-5">
               {allNavItems.map((group, gIdx) => (
                 <div key={gIdx} className="space-y-1.5">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1">
@@ -418,7 +471,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <button
                           key={item.id}
                           onClick={() => handleSelectTab(item.id)}
-                          className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left transition-all ${
+                          className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left transition-all cursor-pointer ${
                             active
                               ? 'bg-blue-600 text-white font-semibold shadow-sm'
                               : isDark
@@ -453,37 +506,26 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
               ))}
 
-              {/* DIVIDER BETWEEN FEATURES AND SETTINGS */}
-              <div className="pt-2 border-t border-[#2B313F] space-y-3">
-                {/* 2. DEDICATED LANGUAGE SELECTOR */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between px-1">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      {isIndian ? 'वेबसाइट की भाषा (Language)' : 'Website Language'}
-                    </span>
-                    <span className="text-[10px] text-blue-400 font-semibold truncate max-w-[130px]">
-                      {selectedLanguageCode === 'en' ? 'English (Global)' : getLanguageName(selectedLanguageCode)}
-                    </span>
-                  </div>
+              <div className="pt-2 border-t border-slate-700/30 space-y-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1">
+                  {lang === 'hi' ? 'सेटिंग्स और विकल्प' : 'Settings & Preferences'}
+                </span>
 
-                  <div className={`p-2.5 rounded-xl border flex items-center gap-2 ${
-                    isDark ? 'bg-[#191D26] border-[#2B313F]' : 'bg-slate-50 border-slate-200'
-                  }`}>
-                    <Globe className="w-4 h-4 text-blue-400 shrink-0" />
+                <div className={`p-3 rounded-xl border space-y-2 ${
+                  isDark ? 'bg-[#191D26] border-[#2B313F]' : 'bg-slate-50 border-slate-200'
+                }`}>
+                  <label className="block text-xs font-semibold text-slate-400">
+                    🇮🇳 {lang === 'hi' ? 'अपनी भाषा चुनें (Language)' : 'Select Language'}
+                  </label>
+                  <div className="relative">
                     <select
                       value={selectedLanguageCode}
-                      onChange={(e) => {
-                        const newL = e.target.value;
-                        setSelectedLanguageCode(newL);
-                        setLang(newL);
-                      }}
-                      className={`w-full py-1.5 px-2.5 rounded-lg border text-xs font-semibold appearance-none transition-colors cursor-pointer ${
-                        isDark
-                          ? 'bg-[#14171E] border-[#2B313F] text-white focus:border-blue-500'
-                          : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500'
+                      onChange={(e) => handleLanguageChange(e.target.value)}
+                      className={`w-full text-xs font-semibold pl-3 pr-8 py-2 rounded-lg border appearance-none cursor-pointer ${
+                        isDark ? 'bg-[#14171E] border-[#2B313F] text-white' : 'bg-white border-slate-300 text-slate-900'
                       }`}
                     >
-                      <optgroup label="🔥 Most Popular (मुख्य भाषाएं)">
+                      <optgroup label="⭐ Popular (प्रमुख भाषाएं)">
                         {ALL_INDIAN_LANGUAGES.filter((l) => l.popular).map((item) => (
                           <option
                             key={item.code}
@@ -509,62 +551,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
                 </div>
 
-                {/* 3. GITHUB CODE EXPORT / REPLACE BUTTON */}
-                <button
-                  onClick={() => {
-                    setIsSidebarOpen(false);
-                    if (onOpenGitHubExport) onOpenGitHubExport();
-                  }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
-                    isDark
-                      ? 'bg-[#191D26] border-[#2B313F] text-slate-200 hover:bg-[#222733]'
-                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 shadow-xs'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <FolderArchive className="w-4 h-4 text-emerald-400" />
-                    <span>
-                      {isIndian ? 'GitHub पर कोड रिप्लेस / अपडेट करें' : 'Update Code on GitHub'}
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-emerald-400 font-bold px-2 py-0.5 rounded-md border border-emerald-500/20 bg-emerald-500/10">
-                    {isIndian ? 'मोबाइल से' : 'Mobile'}
-                  </span>
-                </button>
-
-                {/* 4. SMS OTP API KEY (2Factor.in / Fast2SMS) */}
-                <button
-                  onClick={() => {
-                    setIsSidebarOpen(false);
-                    setModalSmsKey(getSavedSmsApiKey());
-                    setSmsFeedbackMsg(null);
-                    setShowSmsKeyModal(true);
-                  }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
-                    isDark
-                      ? 'bg-[#191D26] border-[#2B313F] text-slate-200 hover:bg-[#222733]'
-                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 shadow-xs'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Key className="w-4 h-4 text-cyan-400" />
-                    <span>
-                      {isIndian ? 'SMS व OTP गेटवे सेटिंग्स' : 'SMS Gateway Settings'}
-                    </span>
-                  </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
-                    modalSmsKey
-                      ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
-                      : 'border-cyan-500/20 bg-cyan-500/10 text-cyan-400'
-                  }`}>
-                    {modalSmsKey ? (isIndian ? 'सक्रिय' : 'Active') : (isIndian ? 'सेट करें' : 'Setup')}
-                  </span>
-                </button>
-
-                {/* 5. THEME OPTION */}
                 <button
                   onClick={() => setIsDark(!isDark)}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border cursor-pointer ${
                     isDark
                       ? 'bg-[#191D26] border-[#2B313F] text-slate-200 hover:bg-[#222733]'
                       : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 shadow-xs'
@@ -583,7 +572,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </span>
                 </button>
 
-                {/* 4. PROFILE BUTTON AT THE VERY BOTTOM */}
                 <button
                   onClick={() => {
                     setIsSidebarOpen(false);
@@ -593,7 +581,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       onOpenAuth();
                     }
                   }}
-                  className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition-all border ${
+                  className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition-all border cursor-pointer ${
                     isDark
                       ? 'bg-[#191D26] border-[#2B313F] text-white hover:bg-[#222733] hover:border-blue-500/50 shadow-sm'
                       : 'bg-white border-slate-200 text-slate-900 hover:bg-slate-50 hover:border-blue-400 shadow-xs'
@@ -622,7 +610,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             </div>
 
-            {/* Drawer Footer */}
             <div className={`p-3.5 border-t text-center text-[11px] text-slate-400 ${
               isDark ? 'border-[#2B313F] bg-[#191D26]' : 'border-slate-200 bg-slate-50'
             }`}>
@@ -636,7 +623,6 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       )}
 
-      {/* DEDICATED PROFILE MODAL (Opens when clicking 'Profile' at the bottom of 3-line menu) */}
       {showProfileModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -649,7 +635,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               isDark ? 'bg-[#181B24] border-[#2B313F] text-white' : 'bg-white border-slate-200 text-slate-900'
             }`}
           >
-            {/* Header */}
             <div className={`flex items-center justify-between pb-3 border-b ${
               isDark ? 'border-[#2B313F]' : 'border-slate-200'
             }`}>
@@ -671,7 +656,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
               <button
                 onClick={() => setShowProfileModal(false)}
-                className={`p-2 rounded-xl transition-colors ${
+                className={`p-2 rounded-xl transition-colors cursor-pointer ${
                   isDark ? 'text-slate-400 hover:text-white hover:bg-[#252A36]' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
@@ -679,7 +664,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
 
-            {/* Profile Info Card */}
             {user ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
@@ -690,56 +674,51 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <h4 className={`text-lg font-bold truncate ${
                       isDark ? 'text-white' : 'text-slate-900'
                     }`}>{user.name}</h4>
-                    <p className={`text-xs truncate font-mono ${
-                      isDark ? 'text-slate-300' : 'text-slate-600'
-                    }`}>{user.email || user.phone}</p>
-                    <div className="flex items-center gap-2 pt-1">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-500 border border-blue-500/20">
-                        {user.role === 'admin' ? (lang === 'hi' ? 'एडमिन' : 'Admin') : (lang === 'hi' ? 'विद्यार्थी' : 'Student')}
+                    <p className="text-xs text-slate-400 truncate font-mono">
+                      {user.email || user.phone || 'Student'}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        {lang === 'hi' ? 'सक्रिय विद्यार्थी' : 'Active Student'}
                       </span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                        {lang === 'hi' ? '100% मुफ़्त सम्पूर्ण एक्सेस' : '100% Free Full Access'}
-                      </span>
+                      {isAdmin && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                          Admin
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* Details Breakdown */}
-                <div className={`p-4 rounded-xl border space-y-2.5 text-xs ${
-                  isDark ? 'bg-[#13161D] border-[#2B313F] text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-800'
+                <div className={`p-3.5 rounded-xl border space-y-2 ${
+                  isDark ? 'bg-[#14171E] border-[#2B313F]' : 'bg-slate-50 border-slate-200'
                 }`}>
-                  <div className="flex justify-between items-center">
-                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                      {lang === 'hi' ? 'नामांकित कोर्स:' : 'Course Enrolled:'}
-                    </span>
-                    <span className="font-semibold text-blue-600 truncate max-w-[200px]">{user.course || 'Complete C Masterclass'}</span>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-400">{lang === 'hi' ? 'कोर्स प्रगति' : 'Course Progress'}</span>
+                    <span className="font-bold font-mono text-blue-400">{percent}%</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                      {lang === 'hi' ? 'पूर्ण किए गए अध्याय:' : 'Modules Completed:'}
-                    </span>
-                    <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{completedCount} / {totalTopics} ({percent}%)</span>
-                  </div>
-                  {/* Progress bar */}
-                  <div className="w-full h-2 rounded-full bg-[#2B313F] overflow-hidden">
+                  <div className="w-full h-2 rounded-full bg-slate-700/30 overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-blue-600 transition-all duration-300"
-                      style={{ width: `${Math.max(5, percent)}%` }}
+                      className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all"
+                      style={{ width: `${percent}%` }}
                     />
+                  </div>
+                  <div className="flex justify-between text-[11px] text-slate-400 pt-1">
+                    <span>{completedCount} {lang === 'hi' ? 'अध्याय पूर्ण' : 'topics completed'}</span>
+                    <span>{totalTopics} {lang === 'hi' ? 'कुल अध्याय' : 'total topics'}</span>
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="space-y-2 pt-1">
+                <div className="pt-2 flex flex-col gap-2">
                   <button
                     onClick={() => {
                       setShowProfileModal(false);
                       setActiveTab('dashboard');
                     }}
-                    className="w-full py-2.5 rounded-xl font-semibold text-xs bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
+                    className="w-full py-2.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <LayoutDashboard className="w-4 h-4" />
-                    <span>{lang === 'hi' ? 'पूरा डैशबोर्ड और प्रमाणपत्र देखें' : 'View Full Dashboard & Certificate'}</span>
+                    <span>{lang === 'hi' ? 'पूर्ण डैशबोर्ड खोलें' : 'Open Full Dashboard'}</span>
                   </button>
 
                   <button
@@ -747,260 +726,46 @@ export const Navbar: React.FC<NavbarProps> = ({
                       setShowProfileModal(false);
                       onLogout();
                     }}
-                    className="w-full py-2.5 rounded-xl font-semibold text-xs border border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white flex items-center justify-center gap-2 transition-all shadow-xs"
+                    className={`w-full py-2 rounded-xl font-bold text-xs border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      isDark
+                        ? 'border-rose-500/30 text-rose-400 hover:bg-rose-500/10'
+                        : 'border-rose-200 text-rose-600 hover:bg-rose-50'
+                    }`}
                   >
-                    <LogOut className="w-4 h-4" />
-                    <span>{lang === 'hi' ? 'अकाउंट से लॉगआउट करें' : 'Logout from Account'}</span>
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>{lang === 'hi' ? 'खाते से लॉग आउट करें' : 'Sign Out'}</span>
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="text-center py-4 space-y-3">
-                <p className="text-xs text-slate-400">
-                  {lang === 'hi' ? 'आप अभी अतिथि के रूप में देख रहे हैं।' : 'You are currently browsing as a guest.'}
-                </p>
+              <div className="text-center py-6 space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-blue-600/10 text-blue-500 flex items-center justify-center mx-auto">
+                  <User className="w-7 h-7" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-base">
+                    {lang === 'hi' ? 'आप अभी लॉगिन नहीं हैं' : 'You are not signed in'}
+                  </h4>
+                  <p className="text-xs text-slate-400 mt-1">
+                    {lang === 'hi'
+                      ? 'अपनी पढ़ाई की प्रगति और सर्टिफिकेट सेव करने के लिए लॉगिन करें।'
+                      : 'Sign in to save your learning progress and certificate.'}
+                  </p>
+                </div>
                 <button
                   onClick={() => {
                     setShowProfileModal(false);
                     onOpenAuth();
                   }}
-                  className="w-full py-2.5 rounded-xl font-semibold text-xs bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center gap-2 shadow-sm"
+                  className="w-full py-3 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md cursor-pointer"
                 >
-                  <User className="w-4 h-4" />
-                  <span>{lang === 'hi' ? 'लॉगिन / नया खाता बनाएं' : 'Sign In / Register'}</span>
+                  {lang === 'hi' ? 'लॉगिन / नया खाता बनाएं' : 'Sign In / Register'}
                 </button>
               </div>
             )}
           </div>
         </div>
       )}
-
-      {/* DEDICATED MOBILE SMS API KEY MODAL (Paste 2Factor.in / Fast2SMS API Key) */}
-      {showSmsKeyModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
-            onClick={() => setShowSmsKeyModal(false)}
-          />
-
-          <div
-            className={`relative w-full max-w-md rounded-2xl p-5 sm:p-6 border shadow-2xl z-10 space-y-4 animate-in zoom-in-95 duration-200 ${
-              isDark ? 'bg-[#181B24] border-[#2B313F] text-white' : 'bg-white border-slate-200 text-slate-900'
-            }`}
-          >
-            {/* Modal Header */}
-            <div className={`flex items-center justify-between pb-3 border-b ${
-              isDark ? 'border-[#2B313F]' : 'border-slate-200'
-            }`}>
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                  <Key className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className={`font-bold text-base sm:text-lg tracking-tight ${
-                    isDark ? 'text-white' : 'text-slate-900'
-                  }`}>
-                    {lang === 'hi' ? 'SMS व OTP गेटवे सेटिंग्स' : 'SMS Gateway Settings'}
-                  </h3>
-                  <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                    {lang === 'hi' ? 'मोबाइल फोन पर SMS OTP भेजने के लिए' : 'Send Real SMS OTP to mobile phones'}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setShowSmsKeyModal(false)}
-                className={`p-2 rounded-xl transition-colors ${
-                  isDark ? 'text-slate-400 hover:text-white hover:bg-[#252A36]' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Provider status badge */}
-            <div className="flex items-center justify-between gap-2 flex-wrap">
-              <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold border ${
-                modalSmsKey
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                  : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-              }`}>
-                {modalSmsKey
-                  ? (lang === 'hi' ? '⚡ 2Factor SMS Gateway सक्रिय' : '⚡ 2Factor SMS Gateway Active')
-                  : (lang === 'hi' ? '⚠️ कृपया 2Factor API Key दर्ज करें' : '⚠️ Please Enter 2Factor API Key')}
-              </span>
-              <span className="text-[11px] px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-semibold">
-                {lang === 'hi' ? '🔒 100% सुरक्षित वास्तविक OTP' : '🔒 100% Secure Real SMS OTP'}
-              </span>
-            </div>
-
-            {/* API Key Input */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-slate-400">
-                  {lang === 'hi' ? 'अपनी 2Factor.in API Key यहाँ पेस्ट करें:' : 'Paste 2Factor.in API Key here:'}
-                </label>
-                {modalSmsKey && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setModalSmsKey('');
-                      saveSmsApiKey('');
-                      setSmsFeedbackMsg(lang === 'hi' ? 'API Key हटा दी गई' : 'API Key removed');
-                    }}
-                    className="text-[11px] text-rose-400 hover:underline"
-                  >
-                    {lang === 'hi' ? 'हटाएं' : 'Clear'}
-                  </button>
-                )}
-              </div>
-
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder={lang === 'hi' ? 'उदा. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' : 'e.g. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'}
-                  value={modalSmsKey}
-                  onChange={(e) => {
-                    const val = e.target.value.trim();
-                    setModalSmsKey(val);
-                    saveSmsApiKey(val);
-                    setSmsFeedbackMsg(lang === 'hi' ? '✅ API Key अपने आप सेव हो गई है!' : '✅ API Key saved successfully!');
-                  }}
-                  className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-mono focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
-                    isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-slate-50 border-slate-300 text-slate-900'
-                  }`}
-                />
-              </div>
-
-              <p className="text-[11px] text-slate-400">
-                {lang === 'hi'
-                  ? '💡 पेस्ट करते ही यह ब्राउज़र में सेव हो जाती है और रजिस्ट्रेशन/लॉगिन में इस्तेमाल होगी।'
-                  : '💡 Saved instantly. Will be used for real mobile SMS verification and login.'}
-              </p>
-            </div>
-
-            {/* Test SMS Block */}
-            <div className={`p-3 rounded-xl border space-y-2 ${
-              isDark ? 'bg-[#13161D] border-[#2B313F]' : 'bg-slate-50 border-slate-200'
-            }`}>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
-                  <Smartphone className="w-3.5 h-3.5" />
-                  {lang === 'hi' ? 'तुरंत SMS टेस्ट करें (+91):' : 'Test SMS on Mobile Phone (+91):'}
-                </span>
-              </div>
-
-              <div className="flex gap-2">
-                <input
-                  type="tel"
-                  maxLength={10}
-                  placeholder={lang === 'hi' ? '10 अंकों का मोबाइल नंबर' : '10-digit mobile number'}
-                  value={smsTestPhone}
-                  onChange={(e) => setSmsTestPhone(e.target.value.replace(/\D/g, ''))}
-                  className={`w-full px-3 py-2 rounded-xl border text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
-                    isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-white border-slate-300 text-slate-900'
-                  }`}
-                />
-                <button
-                  type="button"
-                  disabled={isTestingSms || smsTestPhone.length < 10}
-                  onClick={async () => {
-                    setIsTestingSms(true);
-                    setSmsFeedbackMsg(null);
-                    const code = Math.floor(1000 + Math.random() * 9000).toString();
-                    try {
-                      const res = await sendOtpToMobile(smsTestPhone, code, modalSmsKey, lang);
-                      setSmsFeedbackMsg(res.message);
-                    } catch {
-                      setSmsFeedbackMsg(lang === 'hi' ? 'SMS भेजने में त्रुटि हुई। कृपया API Key जांचें।' : 'Error sending SMS. Please verify your API Key.');
-                    } finally {
-                      setIsTestingSms(false);
-                    }
-                  }}
-                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white shrink-0 flex items-center gap-1 transition-all active:scale-95 disabled:opacity-50"
-                >
-                  {isTestingSms ? (lang === 'hi' ? 'भेज रहा है...' : 'Sending...') : (lang === 'hi' ? '📩 SMS भेजें' : 'Send Test SMS')}
-                </button>
-              </div>
-            </div>
-
-            {/* Feedback Message */}
-            {smsFeedbackMsg && (
-              <div className={`p-2.5 rounded-xl text-xs font-semibold ${
-                smsFeedbackMsg.includes('✅') || smsFeedbackMsg.includes('safalta') || smsFeedbackMsg.includes('Real Telecom') || smsFeedbackMsg.includes('sent') || smsFeedbackMsg.includes('सफलतापूर्वक')
-                  ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                  : 'bg-rose-500/10 border border-rose-500/20 text-rose-300'
-              }`}>
-                {smsFeedbackMsg}
-              </div>
-            )}
-
-            {/* Guidance on Text SMS delivery */}
-            <div className={`p-2.5 rounded-xl text-[11px] space-y-1.5 ${
-              isDark ? 'bg-blue-500/10 border border-blue-500/20 text-blue-300' : 'bg-blue-50 border border-blue-200 text-blue-800'
-            }`}>
-              <div className="font-bold flex items-center gap-1 text-cyan-400">
-                <span>{lang === 'hi' ? '📱 टेक्स्ट SMS कैसे प्राप्त करें?' : '📱 How to receive SMS OTP?'}</span>
-              </div>
-              <p className="leading-relaxed">
-                {lang === 'hi'
-                  ? '2Factor.in पर आपके खाते में Transactional SMS बैलेंस होना चाहिए। यदि आपके पास DLT Template स्वीकृत है तो SMS सीधे इनबॉक्स में आता है।'
-                  : 'Your 2Factor.in account must have active SMS balance/credits. Real SMS will be delivered directly to the phone inbox.'}
-              </p>
-              <p className="text-[10px] opacity-80">
-                {lang === 'hi'
-                  ? '* सुरक्षा के लिए केवल आपके मोबाइल पर भेजा गया सही OTP ही मान्य होगा।'
-                  : '* For security, only the genuine SMS OTP sent to your phone is valid for registration & login.'}
-              </p>
-            </div>
-
-            {/* Save / Done button */}
-            <button
-              onClick={() => setShowSmsKeyModal(false)}
-              className="w-full py-2.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
-            >
-              <Check className="w-4 h-4" />
-              <span>{lang === 'hi' ? 'हो गया (Save & Close)' : 'Done (Save & Close)'}</span>
-            </button>
-          </div>
-        </div>
-      )}
-      {/* MOBILE BOTTOM NAVIGATION BAR (Sleek modern bottom tab bar for smartphone view) */}
-      <nav
-        className={`md:hidden fixed bottom-0 left-0 right-0 z-40 border-t backdrop-blur-md transition-colors ${
-          isDark
-            ? 'bg-[#14171E]/95 border-[#2B313F] text-slate-300'
-            : 'bg-white/95 border-slate-200 text-slate-700 shadow-lg'
-        }`}
-        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
-      >
-        <div className="grid grid-cols-5 h-14 items-center">
-          {topNavItems.map((item) => {
-            const Icon = item.icon;
-            const active = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`flex flex-col items-center justify-center h-full w-full py-1 transition-colors ${
-                  active
-                    ? 'text-blue-600 font-bold'
-                    : isDark
-                    ? 'text-slate-400 hover:text-white'
-                    : 'text-slate-500 hover:text-slate-900'
-                }`}
-              >
-                <div className={`p-1 rounded-lg transition-transform ${active ? 'scale-110 bg-blue-500/10' : ''}`}>
-                  <Icon className="w-4 h-4" />
-                </div>
-                <span className="text-[10px] mt-0.5 tracking-tight truncate max-w-[58px]">
-                  {item.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
     </>
   );
 };
