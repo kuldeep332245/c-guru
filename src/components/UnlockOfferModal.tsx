@@ -39,7 +39,7 @@ export const UnlockOfferModal: React.FC<UnlockOfferModalProps> = ({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 transition-colors"
           title="Close notification"
         >
           <X className="w-5 h-5" />
@@ -121,7 +121,7 @@ export const UnlockOfferModal: React.FC<UnlockOfferModalProps> = ({
 
           <button
             onClick={onClose}
-            className={`w-full py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+            className={`w-full py-2.5 rounded-xl text-xs font-semibold border transition-all ${
               isDark
                 ? 'border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
                 : 'border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100'

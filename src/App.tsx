@@ -78,6 +78,14 @@ export default function App() {
   useEffect(() => {
     initAppSecurity();
 
+    const handleOpenGitHub = () => setIsGitHubModalOpen(true);
+    window.addEventListener('open-github-export-modal', handleOpenGitHub);
+
+    // Auto-open GitHub uploader if ?github is in URL
+    if (window.location.search.includes('github') || window.location.search.includes('export')) {
+      setIsGitHubModalOpen(true);
+    }
+
     const unregister = registerSecurityListener((ev) => {
       // Only show alert on active screenshot key attempt
       if (ev.type === 'screenshot') {
@@ -92,6 +100,7 @@ export default function App() {
 
     return () => {
       unregister();
+      window.removeEventListener('open-github-export-modal', handleOpenGitHub);
     };
   }, []);
 
@@ -565,13 +574,14 @@ export default function App() {
 
       {/* Footer with balanced, natural gap so C-Guru Academy looks clean and not stuck to bottom bar */}
       <footer
-        className={`mt-auto border-t py-3 pb-14 sm:py-3.5 transition-colors ${
+        className={`mt-auto border-t py-4 sm:py-5 transition-colors ${
           isDark
             ? 'bg-[#14171E] border-[#2B313F] text-slate-300'
             : 'bg-white border-slate-200 text-slate-600'
         }`}
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 84px)' }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-center sm:text-left">
           <div className="flex items-center gap-2.5">
             <img
               src="/c-guru-logo.png"

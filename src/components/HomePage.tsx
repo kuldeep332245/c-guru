@@ -149,9 +149,9 @@ int main() {
                 </span>
               </div>
 
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-semibold">
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-400 font-semibold">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span>{lang === 'hi' ? '100% मुफ़्त सम्पूर्ण एक्सेस' : '100% Free Full Access'}</span>
+                <span>{lang === 'hi' ? 'सम्पूर्ण C मास्टरक्लास' : 'Complete C Masterclass'}</span>
               </div>
             </div>
           </div>

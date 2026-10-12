@@ -436,7 +436,7 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({
                 onClick={() => onOpenAuth('register')}
                 className="w-full sm:w-auto px-6 py-2.5 sm:px-8 sm:py-3 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-500 text-white shadow-sm transition-all active:scale-95 cursor-pointer"
               >
-                {lang === 'hi' ? 'निःशुल्क खाता बनाएं' : 'Register Account Free'}
+                {lang === 'hi' ? 'नया खाता बनाएं' : 'Create New Account'}
               </button>
               <button
                 onClick={() => onOpenAuth('login')}
@@ -472,14 +472,6 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({
             </span>
           </div>
           <div className="flex items-center gap-3 text-slate-400">
-            {onOpenGitHubExport && (
-              <button
-                onClick={onOpenGitHubExport}
-                className="text-emerald-400 hover:text-emerald-300 font-semibold text-xs underline cursor-pointer"
-              >
-                {lang === 'en' ? 'GitHub Code' : 'GitHub पर कोड अपलोड करें'}
-              </button>
-            )}
             <span>
               {lang === 'en' ? '🌐 English Global Edition' : `🇮🇳 ${getLanguageName(lang)}`}
             </span>

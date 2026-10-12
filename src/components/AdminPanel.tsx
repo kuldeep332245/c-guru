@@ -18,7 +18,8 @@ import {
   Trash2,
   UserCheck,
   Send,
-  Terminal
+  Terminal,
+  Upload
 } from 'lucide-react';
 import { User } from '../types';
 import {
@@ -191,6 +192,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('open-github-export-modal'))}
+              className="px-4 py-2.5 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-500 text-white shadow-md flex items-center gap-2 transition-all hover:scale-105 cursor-pointer"
+            >
+              <Upload className="w-4 h-4" />
+              <span>🚀 GitHub कोड अपलोड / सिंक</span>
+            </button>
             <button
               onClick={() => onGoToTab('tutorials')}
               className="px-4 py-2.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-500 text-white shadow-md flex items-center gap-2 transition-all hover:scale-105"

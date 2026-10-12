@@ -97,7 +97,7 @@ export const AllTopicsDirectory: React.FC<AllTopicsDirectoryProps> = ({
         </div>
       </div>
 
-      {/* 100% Free Full Curriculum Banner */}
+      {/* Full Curriculum Curriculum Overview */}
       <div
         className={`p-4 sm:p-5 rounded-2xl border shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
           isDark
@@ -106,22 +106,22 @@ export const AllTopicsDirectory: React.FC<AllTopicsDirectoryProps> = ({
         }`}
       >
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md">
+          <div className="w-11 h-11 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md">
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-extrabold text-sm sm:text-base text-emerald-600 dark:text-emerald-400">
-                {lang === 'hi' ? '100% मुफ़्त सम्पूर्ण C कोर्स (सभी 20 चैप्टर्स अनलॉक)' : '100% Free Complete C Curriculum (All 20 Modules Unlocked)'}
+              <h3 className="font-extrabold text-sm sm:text-base text-blue-600 dark:text-blue-400">
+                {lang === 'hi' ? 'सम्पूर्ण C प्रोग्रामिंग पाठ्यक्रम (सभी 20 चैप्टर्स अनलॉक)' : 'Complete C Programming Curriculum (All 20 Modules Unlocked)'}
               </h3>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                FREE FOR ALL
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                ALL ACCESS
               </span>
             </div>
             <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5">
               {lang === 'hi'
-                ? 'सभी 20 टॉपिक्स, कम्पाइलर, प्रैक्टिकल लैब प्रश्न, और क्विज़ सभी विद्यार्थियों के लिए पूरी तरह से मुफ़्त हैं।'
-                : 'All 20 modules, in-browser compiler, practical lab questions, and quizzes are 100% free for all students.'}
+                ? 'सभी 20 टॉपिक्स, कम्पाइलर, प्रैक्टिकल लैब प्रश्न और क्विज़ पूरी तरह से उपलब्ध हैं।'
+                : 'All 20 modules, in-browser compiler, practical lab questions, and quizzes are fully accessible for all students.'}
             </p>
           </div>
         </div>

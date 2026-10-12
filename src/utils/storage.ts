@@ -393,7 +393,7 @@ export function setActiveUser(user: User | null): void {
 }
 
 export function isUserSubscribed(_user?: User | null): boolean {
-  // 100% Free Lifetime Access for all students
+  // Full Lifetime Access for all students
   return true;
 }
 

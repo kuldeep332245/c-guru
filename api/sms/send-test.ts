@@ -30,7 +30,8 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    const key = (apiKey || process.env.VITE_SMS_API_KEY || process.env.SMS_API_KEY || '').trim();
+    const defaultKey = '596ca2fc-c571-11f1-af74-0200cd936042';
+    const key = (apiKey || process.env.VITE_SMS_API_KEY || process.env.SMS_API_KEY || defaultKey).trim();
 
     if (!key) {
       return res.status(400).json({

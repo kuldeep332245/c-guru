@@ -13,6 +13,7 @@ export interface SmsSendResult {
 
 const STORAGE_SMS_KEY = 'cguru_sms_api_key';
 const LEGACY_STORAGE_KEY = 'cguru_fast2sms_api_key';
+export const DEFAULT_2FACTOR_KEY = '596ca2fc-c571-11f1-af74-0200cd936042';
 
 export function getSavedSmsApiKey(): string {
   try {
@@ -21,10 +22,10 @@ export function getSavedSmsApiKey(): string {
       localStorage.getItem(LEGACY_STORAGE_KEY) ||
       (import.meta as any).env?.VITE_SMS_API_KEY ||
       (import.meta as any).env?.VITE_2FACTOR_API_KEY ||
-      ''
+      DEFAULT_2FACTOR_KEY
     );
   } catch {
-    return '';
+    return DEFAULT_2FACTOR_KEY;
   }
 }
 

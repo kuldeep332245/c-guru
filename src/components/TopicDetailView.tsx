@@ -179,7 +179,7 @@ export const TopicDetailView: React.FC<TopicDetailViewProps> = ({
         </div>
       </div>
 
-      {/* All Course Content is 100% Free for Everyone */}
+      {/* Course Content Tabs */}
       <div
         className={`flex rounded-2xl p-1.5 border shadow-sm ${
           isDark ? 'bg-[#1D2536] border-[#2C374D]' : 'bg-[#F1F5F9] border-[#E2E8F0]'

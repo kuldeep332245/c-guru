@@ -182,9 +182,6 @@ export const TutorialViewer: React.FC<TutorialViewerProps> = ({
                     <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">
                       Module {topic.order}
                     </span>
-                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/30">
-                      100% Free
-                    </span>
                   </div>
 
                   <div className="flex items-center gap-1.5">

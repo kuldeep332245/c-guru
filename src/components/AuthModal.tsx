@@ -53,7 +53,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [authMethod, setAuthMethod] = useState<'otp' | 'password'>('otp');
 
-  // Registration & User details
+  // Registration & User details (Course selection removed as requested)
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -75,7 +75,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Strict Language Error Localizer
+  // Strict Language Error Localizer (Guarantees English when lang is not 'hi')
   const localizeErrorMessage = (err: string | null | undefined): string => {
     if (!err) return '';
     const isHi = lang === 'hi';
@@ -113,12 +113,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       if (lower.includes('ईमेल') || lower.includes('email')) {
         return 'Please enter a valid email address.';
       }
+      // If error contains Devanagari Hindi characters, fallback cleanly to English
       if (/[\u0900-\u097F]/.test(err)) {
         return 'Invalid or incorrect OTP entered. Please enter the valid OTP sent to your phone.';
       }
       return err;
     }
 
+    // When language is Hindi
     if (lower.includes('invalid') && lower.includes('otp')) {
       return 'अमान्य या गलत ओटीपी दर्ज किया गया है। कृपया अपने मोबाइल पर आया सही ओटीपी दर्ज करें।';
     }
@@ -128,6 +130,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     return err;
   };
 
+  // Reset and sync mode whenever initialMode or isOpen changes
   useEffect(() => {
     if (isOpen) {
       setMode(initialMode);
@@ -140,6 +143,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   }, [isOpen, initialMode]);
 
+  // Countdown timer effect
   useEffect(() => {
     let timer: any = null;
     if (countdown > 0) {
@@ -154,8 +158,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   if (!isOpen) return null;
 
+  // Clean phone number helper
   const cleanP = phone.replace(/\D/g, '').slice(-10);
 
+  // Handle Send OTP
   const handleSendOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setError(null);
@@ -170,6 +176,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       return;
     }
 
+    // STRICT CHECK: Unregistered numbers CANNOT log in!
     if (mode === 'login') {
       const isRegistered = isPhoneRegistered(cleanP);
       if (!isRegistered) {
@@ -213,14 +220,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
       if (res.success) {
         setOtpStep('verify');
-        setCountdown(60);
+        setCountdown(60); // 60 seconds resend countdown
         setOtpDigits(['', '', '', '', '', '']);
+
         setIsSimulated(Boolean(res.isSimulated));
 
         const cleanNotice = (res.message && !res.message.includes('असली') && !res.message.toLowerCase().includes('asli'))
           ? res.message
           : (lang === 'hi' ? `आपके नंबर (+91 ${cleanP}) पर ओटीपी भेजा गया है` : `OTP sent to your number (+91 ${cleanP})`);
         setSuccessMsg(cleanNotice);
+        // Focus first OTP input
         setTimeout(() => {
           otpInputRefs.current[0]?.focus();
         }, 150);
@@ -243,8 +252,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
+  // Handle OTP digit change
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) {
+      // User pasted full OTP
       const pasted = value.replace(/\D/g, '').slice(0, 6);
       if (pasted.length > 0) {
         const nextDigits = [...otpDigits];
@@ -263,17 +274,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     nextDigits[index] = digit;
     setOtpDigits(nextDigits);
 
+    // Auto focus next input
     if (digit && index < 5) {
       otpInputRefs.current[index + 1]?.focus();
     }
   };
 
+  // Handle backspace navigation in OTP
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
       otpInputRefs.current[index - 1]?.focus();
     }
   };
 
+  // Handle Verify OTP & Login/Register
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -304,6 +318,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         return;
       }
 
+      // If Login mode, only login existing user!
       if (mode === 'login') {
         const authRes = loginUserWithPhoneOtp(cleanP);
         setIsSubmitting(false);
@@ -328,6 +343,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           );
         }
       } else {
+        // Register mode: create new account
         const authRes = registerUserWithPhoneOtp(cleanP, {
           name: name.trim(),
           email: email.trim(),
@@ -363,6 +379,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
+  // Legacy / Password Login handler
   const handlePasswordLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -415,7 +432,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           isDark ? 'bg-[#181B24] border-[#2B313F] text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}
       >
-        {/* Modal Top Header */}
+        {/* Modal Top Header (Fixed) */}
         <div className="p-4 sm:p-5 pb-3 border-b border-slate-700/30 shrink-0 relative">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -436,6 +453,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
             </div>
 
+            {/* Prominent Close Button */}
             <button
               onClick={onClose}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-xs cursor-pointer ${
@@ -463,7 +481,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 setOtpStep('phone');
                 setError(null);
               }}
-              className={`py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              className={`py-2 text-xs font-semibold rounded-lg transition-all ${
                 mode === 'login'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
@@ -478,7 +496,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 setOtpStep('phone');
                 setError(null);
               }}
-              className={`py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              className={`py-2 text-xs font-semibold rounded-lg transition-all ${
                 mode === 'register'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
@@ -488,383 +506,392 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </button>
           </div>
 
-          {/* Status Alerts */}
-          {error && (
-            <div className="mb-4 p-3 rounded-xl text-xs flex items-start sm:items-center justify-between gap-2.5 bg-rose-500/15 border-2 border-rose-500/40 text-rose-300 animate-in fade-in">
-              <div className="flex items-center gap-2 min-w-0">
-                <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
-                <span className="font-medium">{error}</span>
-              </div>
-              {mode === 'login' && error.toLowerCase().includes('not register') && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode('register');
-                    setError(null);
-                  }}
-                  className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shrink-0 transition-colors shadow-sm cursor-pointer whitespace-nowrap"
-                >
-                  {lang === 'hi' ? 'रजिस्टर करें →' : 'Register Now →'}
-                </button>
-              )}
+        {/* Status Alerts */}
+        {error && (
+          <div className="mb-4 p-3 rounded-xl text-xs flex items-start sm:items-center justify-between gap-2.5 bg-rose-500/15 border-2 border-rose-500/40 text-rose-300 animate-in fade-in">
+            <div className="flex items-center gap-2 min-w-0">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+              <span className="font-medium">{error}</span>
             </div>
-          )}
+            {mode === 'login' && error.toLowerCase().includes('not register') && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('register');
+                  setError(null);
+                }}
+                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shrink-0 transition-colors shadow-sm cursor-pointer whitespace-nowrap"
+              >
+                {lang === 'hi' ? 'रजिस्टर करें →' : 'Register Now →'}
+              </button>
+            )}
+          </div>
+        )}
 
-          {successMsg && (
-            <div className="mb-4 p-3 rounded-xl text-xs flex items-center gap-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 animate-in fade-in">
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
-              <span>{successMsg}</span>
-            </div>
-          )}
+        {successMsg && (
+          <div className="mb-4 p-3 rounded-xl text-xs flex items-center gap-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 animate-in fade-in">
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <span>{successMsg}</span>
+          </div>
+        )}
 
-          {/* TAB 1: OTP FLOW */}
-          {authMethod === 'otp' && (
-            <div>
-              {otpStep === 'phone' ? (
-                <form onSubmit={handleSendOtp} className="space-y-4">
-                  {mode === 'register' && (
-                    <>
-                      <div>
-                        <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                          {lang === 'hi' ? 'पूरा नाम *' : 'Full Name *'}
-                        </label>
-                        <div className="relative">
-                          <UserIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                          <input
-                            type="text"
-                            required
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder={lang === 'hi' ? 'उदा. कुलदीप सिंह' : 'e.g. Alex Smith'}
-                            className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-blue-500 ${
-                              isDark ? 'bg-[#13161D] border-[#2B313F] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
-                            }`}
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                          {lang === 'hi' ? 'जीमेल / ईमेल *' : 'Email Address *'}
-                        </label>
-                        <div className="relative">
-                          <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                          <input
-                            type="email"
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder={lang === 'hi' ? 'उदा. yourname@gmail.com' : 'e.g. yourname@gmail.com'}
-                            className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-blue-500 ${
-                              isDark ? 'bg-[#13161D] border-[#2B313F] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
-                            }`}
-                          />
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  <div>
-                    <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                      {lang === 'hi' ? 'मोबाइल नंबर (10-अंक) *' : 'Mobile Number (10 Digits) *'}
-                    </label>
-                    <div className="relative">
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-slate-400 text-xs font-semibold">
-                        <span>🇮🇳 +91</span>
-                      </div>
-                      <input
-                        type="tel"
-                        required
-                        maxLength={10}
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                        placeholder="9876543210"
-                        className={`w-full pl-16 pr-3 py-2.5 rounded-xl border text-xs sm:text-sm tracking-wider font-mono focus:outline-none focus:border-blue-500 ${
-                          isDark ? 'bg-[#13161D] border-[#2B313F] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
-                        }`}
-                      />
-                    </div>
-                    <p className="text-[10px] text-slate-400 mt-1">
-                      {lang === 'hi'
-                        ? '* इस नंबर पर 6-अंकों का ओटीपी भेजा जाएगा।'
-                        : '* A 6-digit OTP will be sent to this number.'}
-                    </p>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting || cleanP.length !== 10}
-                    className="w-full py-3 rounded-xl font-semibold text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
-                  >
-                    {isSubmitting ? (
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <>
-                        <span>
-                          {mode === 'login'
-                            ? (lang === 'hi' ? 'ओटीपी प्राप्त करें' : 'Get OTP & Sign In')
-                            : (lang === 'hi' ? 'ओटीपी भेजें और रजिस्टर करें' : 'Send OTP & Register')}
-                        </span>
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
-
-                  <div className="pt-2 text-center">
-                    {mode === 'login' ? (
-                      <div className="text-xs">
-                        <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                          {lang === 'hi' ? 'खाता नहीं है?' : "Don't have an account?"}{' '}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setMode('register');
-                            setOtpStep('phone');
-                            setError(null);
-                          }}
-                          className="font-bold text-blue-500 hover:underline cursor-pointer ml-1"
-                        >
-                          {lang === 'hi' ? 'यहाँ रजिस्टर करें (नया खाता) →' : 'Register Now (Create Account) →'}
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="text-xs">
-                        <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                          {lang === 'hi' ? 'पहले से खाता है?' : 'Already registered?'}{' '}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setMode('login');
-                            setOtpStep('phone');
-                            setError(null);
-                          }}
-                          className="font-bold text-blue-500 hover:underline cursor-pointer ml-1"
-                        >
-                          {lang === 'hi' ? 'सीधे लॉगिन करें →' : 'Sign In Directly →'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </form>
-              ) : (
-                <form onSubmit={handleVerifyOtp} className="space-y-5 animate-in fade-in duration-200">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                      {lang === 'hi' ? 'ओटीपी भेजा गया:' : 'OTP Sent To:'}{' '}
-                      <strong className={isDark ? 'text-white' : 'text-slate-900'}>+91 {cleanP}</strong>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOtpStep('phone');
-                        setError(null);
-                      }}
-                      className="text-blue-500 hover:underline flex items-center gap-1 font-medium cursor-pointer"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                      <span>{lang === 'hi' ? 'नंबर बदलें' : 'Change Number'}</span>
-                    </button>
-                  </div>
-
-                  <div>
-                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 text-center ${
-                      isDark ? 'text-slate-300' : 'text-slate-700'
-                    }`}>
-                      {lang === 'hi' ? 'मोबाइल पर आया 6-अंकों का OTP दर्ज करें' : 'Enter 6-Digit Mobile OTP'}
-                    </label>
-                    <div className="flex justify-center gap-1.5 sm:gap-2.5">
-                      {otpDigits.map((digit, index) => (
+        {/* TAB 1: OTP FLOW (Primary) */}
+        {authMethod === 'otp' && (
+          <div>
+            {otpStep === 'phone' ? (
+              /* Phone input form */
+              <form onSubmit={handleSendOtp} className="space-y-4">
+                {mode === 'register' && (
+                  <>
+                    <div>
+                      <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                        {lang === 'hi' ? 'पूरा नाम *' : 'Full Name *'}
+                      </label>
+                      <div className="relative">
+                        <UserIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
-                          key={index}
-                          ref={(el) => {
-                            otpInputRefs.current[index] = el;
-                          }}
                           type="text"
-                          inputMode="numeric"
-                          maxLength={1}
-                          value={digit}
-                          onChange={(e) => handleOtpChange(index, e.target.value)}
-                          onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                          className={`w-9 sm:w-12 h-11 sm:h-13 text-center text-lg sm:text-xl font-bold font-mono rounded-xl border focus:outline-none focus:border-blue-500 transition-all ${
-                            digit
-                              ? 'border-blue-500 bg-blue-600/10 text-blue-400'
-                              : isDark
-                              ? 'bg-[#13161D] border-[#2B313F] text-white'
-                              : 'bg-slate-50 border-slate-300 text-slate-900'
+                          required
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          placeholder={lang === 'hi' ? 'उदा. कुलदीप सिंह' : 'e.g. Alex Smith'}
+                          className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-blue-500 ${
+                            isDark ? 'bg-[#13161D] border-[#2B313F] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                           }`}
                         />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between text-xs pt-1">
-                    <span className={isDark ? 'text-slate-400' : 'text-slate-500'}>
-                      {lang === 'hi' ? 'ओटीपी नहीं मिला?' : "Didn't receive OTP?"}
-                    </span>
-                    {countdown > 0 ? (
-                      <span className="text-slate-400 font-mono">
-                        {lang === 'hi' ? 'पुनः भेजें' : 'Resend'}: 00:{countdown < 10 ? `0${countdown}` : countdown}s
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => handleSendOtp()}
-                        disabled={isSubmitting}
-                        className="text-blue-500 hover:underline font-semibold flex items-center gap-1 cursor-pointer"
-                      >
-                        <RefreshCw className="w-3 h-3" />
-                        <span>{lang === 'hi' ? 'पुनः ओटीपी भेजें' : 'Resend OTP'}</span>
-                      </button>
-                    )}
-                  </div>
-
-                  {isSimulated && (
-                    <div className={`p-3 rounded-xl border text-xs flex items-start gap-2.5 ${
-                      isDark ? 'bg-amber-950/30 border-amber-500/30 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-900'
-                    }`}>
-                      <span className="text-base leading-none">📱</span>
-                      <div className="space-y-0.5">
-                        <p className="font-bold">
-                          {lang === 'hi' ? 'मोबाइल पर SMS प्राप्त नहीं हुआ?' : 'Did not receive OTP on mobile?'}
-                        </p>
-                        <p className="text-[11px] leading-relaxed opacity-90">
-                          {lang === 'hi'
-                            ? 'कृपया जांचें कि आपके फोन में नेटवर्क सिग्नल है, या टाइमर समाप्त होने पर पुनः ओटीपी भेजें।'
-                            : 'Please check your mobile network reception, or click Resend OTP after the timer ends.'}
-                        </p>
                       </div>
                     </div>
+
+                    <div>
+                      <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                        {lang === 'hi' ? 'जीमेल / ईमेल *' : 'Email Address *'}
+                      </label>
+                      <div className="relative">
+                        <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="email"
+                          required
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder={lang === 'hi' ? 'उदा. yourname@gmail.com' : 'e.g. yourname@gmail.com'}
+                          className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-blue-500 ${
+                            isDark ? 'bg-[#13161D] border-[#2B313F] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <div>
+                  <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                    {lang === 'hi' ? 'मोबाइल नंबर (10-अंक) *' : 'Mobile Number (10 Digits) *'}
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-slate-400 text-xs font-semibold">
+                      <span>🇮🇳 +91</span>
+                    </div>
+                    <input
+                      type="tel"
+                      required
+                      maxLength={10}
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                      placeholder="9876543210"
+                      className={`w-full pl-16 pr-3 py-2.5 rounded-xl border text-xs sm:text-sm tracking-wider font-mono focus:outline-none focus:border-blue-500 ${
+                        isDark ? 'bg-[#13161D] border-[#2B313F] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                      }`}
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    {lang === 'hi'
+                      ? '* इस नंबर पर 6-अंकों का ओटीपी भेजा जाएगा।'
+                      : '* A 6-digit OTP will be sent to this number.'}
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting || cleanP.length !== 10}
+                  className="w-full py-3 rounded-xl font-semibold text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
+                >
+                  {isSubmitting ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <>
+                      <span>
+                        {mode === 'login'
+                          ? (lang === 'hi' ? 'ओटीपी प्राप्त करें' : 'Get OTP & Sign In')
+                          : (lang === 'hi' ? 'ओटीपी भेजें और रजिस्टर करें' : 'Send OTP & Register')}
+                      </span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
                   )}
+                </button>
 
+                {/* Explicit Switch Option for Mobile Users */}
+                <div className="pt-2 text-center">
+                  {mode === 'login' ? (
+                    <div className="text-xs">
+                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+                        {lang === 'hi' ? 'खाता नहीं है?' : "Don't have an account?"}{' '}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMode('register');
+                          setOtpStep('phone');
+                          setError(null);
+                        }}
+                        className="font-bold text-blue-500 hover:underline cursor-pointer ml-1"
+                      >
+                        {lang === 'hi' ? 'यहाँ रजिस्टर करें (नया खाता) →' : 'Register Now (Create Account) →'}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-xs">
+                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+                        {lang === 'hi' ? 'पहले से खाता है?' : 'Already registered?'}{' '}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMode('login');
+                          setOtpStep('phone');
+                          setError(null);
+                        }}
+                        className="font-bold text-blue-500 hover:underline cursor-pointer ml-1"
+                      >
+                        {lang === 'hi' ? 'सीधे लॉगिन करें →' : 'Sign In Directly →'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </form>
+            ) : (
+              /* OTP verification screen */
+              <form onSubmit={handleVerifyOtp} className="space-y-5 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+                    {lang === 'hi' ? 'ओटीपी भेजा गया:' : 'OTP Sent To:'}{' '}
+                    <strong className={isDark ? 'text-white' : 'text-slate-900'}>+91 {cleanP}</strong>
+                  </span>
                   <button
-                    type="submit"
-                    disabled={isSubmitting || otpDigits.join('').trim().length < 4}
-                    className="w-full py-3 rounded-xl font-semibold text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
+                    type="button"
+                    onClick={() => {
+                      setOtpStep('phone');
+                      setError(null);
+                    }}
+                    className="text-blue-500 hover:underline flex items-center gap-1 font-medium cursor-pointer"
                   >
-                    {isSubmitting ? (
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <>
-                        <span>
-                          {mode === 'login'
-                            ? (lang === 'hi' ? 'सत्यापित करें और लॉगिन करें' : 'Verify & Sign In')
-                            : (lang === 'hi' ? 'सत्यापित करें और शुरू करें' : 'Verify & Get Started')}
-                        </span>
-                        <CheckCircle2 className="w-4 h-4" />
-                      </>
-                    )}
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>{lang === 'hi' ? 'नंबर बदलें' : 'Change Number'}</span>
                   </button>
-                </form>
-              )}
+                </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-200 dark:border-[#2B313F] text-center">
+                {/* Individual OTP Boxes */}
+                <div>
+                  <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 text-center ${
+                    isDark ? 'text-slate-300' : 'text-slate-700'
+                  }`}>
+                    {lang === 'hi' ? 'मोबाइल पर आया 6-अंकों का OTP दर्ज करें' : 'Enter 6-Digit Mobile OTP'}
+                  </label>
+                  <div className="flex justify-center gap-1.5 sm:gap-2.5">
+                    {otpDigits.map((digit, index) => (
+                      <input
+                        key={index}
+                        ref={(el) => {
+                          otpInputRefs.current[index] = el;
+                        }}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                        className={`w-9 sm:w-12 h-11 sm:h-13 text-center text-lg sm:text-xl font-bold font-mono rounded-xl border focus:outline-none focus:border-blue-500 transition-all ${
+                          digit
+                            ? 'border-blue-500 bg-blue-600/10 text-blue-400'
+                            : isDark
+                            ? 'bg-[#13161D] border-[#2B313F] text-white'
+                            : 'bg-slate-50 border-slate-300 text-slate-900'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Resend & Timer */}
+                <div className="flex items-center justify-between text-xs pt-1">
+                  <span className={isDark ? 'text-slate-400' : 'text-slate-500'}>
+                    {lang === 'hi' ? 'ओटीपी नहीं मिला?' : "Didn't receive OTP?"}
+                  </span>
+                  {countdown > 0 ? (
+                    <span className="text-slate-400 font-mono">
+                      {lang === 'hi' ? 'पुनः भेजें' : 'Resend'}: 00:{countdown < 10 ? `0${countdown}` : countdown}s
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleSendOtp()}
+                      disabled={isSubmitting}
+                      className="text-blue-500 hover:underline font-semibold flex items-center gap-1 cursor-pointer"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      <span>{lang === 'hi' ? 'पुनः ओटीपी भेजें' : 'Resend OTP'}</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Helpful friendly hint if user doesn't receive SMS */}
+                {isSimulated && (
+                  <div className={`p-3 rounded-xl border text-xs flex items-start gap-2.5 ${
+                    isDark ? 'bg-amber-950/30 border-amber-500/30 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-900'
+                  }`}>
+                    <span className="text-base leading-none">📱</span>
+                    <div className="space-y-0.5">
+                      <p className="font-bold">
+                        {lang === 'hi' ? 'मोबाइल पर SMS प्राप्त नहीं हुआ?' : 'Did not receive OTP on mobile?'}
+                      </p>
+                      <p className="text-[11px] leading-relaxed opacity-90">
+                        {lang === 'hi'
+                          ? 'कृपया जांचें कि आपके फोन में नेटवर्क सिग्नल है, या टाइमर समाप्त होने पर पुनः ओटीपी भेजें।'
+                          : 'Please check your mobile network reception, or click Resend OTP after the timer ends.'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting || otpDigits.join('').trim().length < 4}
+                  className="w-full py-3 rounded-xl font-semibold text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
+                >
+                  {isSubmitting ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <>
+                      <span>
+                        {mode === 'login'
+                          ? (lang === 'hi' ? 'सत्यापित करें और लॉगिन करें' : 'Verify & Sign In')
+                          : (lang === 'hi' ? 'सत्यापित करें और शुरू करें' : 'Verify & Get Started')}
+                      </span>
+                      <CheckCircle2 className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
+
+            {/* Toggle to Password Login */}
+            <div className="mt-6 pt-4 border-t border-slate-200 dark:border-[#2B313F] text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMethod('password');
+                  setError(null);
+                }}
+                className={`text-xs hover:underline inline-flex items-center gap-1.5 cursor-pointer ${
+                  isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>
+                  {lang === 'hi'
+                    ? 'पासवर्ड के माध्यम से लॉगिन करें'
+                    : 'Sign in with Password instead'}
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: PASSWORD LOGIN (Fallback Option) */}
+        {authMethod === 'password' && (
+          <form onSubmit={handlePasswordLogin} className="space-y-4">
+            <div>
+              <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                {lang === 'hi' ? 'रजिस्टर्ड ईमेल / मोबाइल नंबर' : 'Registered Email or Mobile'}
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  required
+                  value={loginId}
+                  onChange={(e) => setLoginId(e.target.value)}
+                  placeholder={lang === 'hi' ? 'yourname@gmail.com या 9876543210' : 'yourname@gmail.com or 9876543210'}
+                  className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-blue-500 ${
+                    isDark ? 'bg-[#13161D] border-[#2B313F] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                {lang === 'hi' ? 'पासवर्ड' : 'Password'}
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder={lang === 'hi' ? 'अपना पासवर्ड दर्ज करें' : 'Enter your password'}
+                  className={`w-full pl-9 pr-10 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-blue-500 ${
+                    isDark ? 'bg-[#13161D] border-[#2B313F] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                  }`}
+                />
                 <button
                   type="button"
-                  onClick={() => {
-                    setAuthMethod('password');
-                    setError(null);
-                  }}
-                  className={`text-xs hover:underline inline-flex items-center gap-1.5 cursor-pointer ${
-                    isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
                 >
-                  <KeyRound className="w-3.5 h-3.5" />
-                  <span>
-                    {lang === 'hi'
-                      ? 'पासवर्ड के माध्यम से लॉगिन करें'
-                      : 'Sign in with Password instead'}
-                  </span>
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
-          )}
 
-          {/* TAB 2: PASSWORD LOGIN */}
-          {authMethod === 'password' && (
-            <form onSubmit={handlePasswordLogin} className="space-y-4">
-              <div>
-                <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                  {lang === 'hi' ? 'रजिस्टर्ड ईमेल / मोबाइल नंबर' : 'Registered Email or Mobile'}
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    required
-                    value={loginId}
-                    onChange={(e) => setLoginId(e.target.value)}
-                    placeholder={lang === 'hi' ? 'yourname@gmail.com या 9876543210' : 'yourname@gmail.com or 9876543210'}
-                    className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-blue-500 ${
-                      isDark ? 'bg-[#13161D] border-[#2B313F] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
-                    }`}
-                  />
-                </div>
-              </div>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full py-3 rounded-xl font-semibold text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
+            >
+              {isSubmitting ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <span>{lang === 'hi' ? 'पासवर्ड से लॉगिन करें' : 'Sign In with Password'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
 
-              <div>
-                <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                  {lang === 'hi' ? 'पासवर्ड' : 'Password'}
-                </label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    placeholder={lang === 'hi' ? 'अपना पासवर्ड दर्ज करें' : 'Enter your password'}
-                    className={`w-full pl-9 pr-10 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-blue-500 ${
-                      isDark ? 'bg-[#13161D] border-[#2B313F] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
-                    }`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
+            {/* Switch back to OTP */}
+            <div className="mt-4 pt-3 border-t border-slate-200 dark:border-[#2B313F] text-center">
               <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-3 rounded-xl font-semibold text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
+                type="button"
+                onClick={() => {
+                  setAuthMethod('otp');
+                  setOtpStep('phone');
+                  setError(null);
+                }}
+                className={`text-xs hover:underline inline-flex items-center gap-1.5 cursor-pointer ${
+                  isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
+                }`}
               >
-                {isSubmitting ? (
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>
-                    <span>{lang === 'hi' ? 'पासवर्ड से लॉगिन करें' : 'Sign In with Password'}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
+                <Smartphone className="w-3.5 h-3.5 text-blue-500" />
+                <span className="text-blue-500 font-medium">
+                  {lang === 'hi' ? 'वापस मोबाइल OTP से लॉगिन करें' : 'Switch back to Mobile OTP'}
+                </span>
               </button>
-
-              <div className="mt-4 pt-3 border-t border-slate-200 dark:border-[#2B313F] text-center">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMethod('otp');
-                    setOtpStep('phone');
-                    setError(null);
-                  }}
-                  className={`text-xs hover:underline inline-flex items-center gap-1.5 cursor-pointer ${
-                    isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <Smartphone className="w-3.5 h-3.5 text-blue-500" />
-                  <span className="text-blue-500 font-medium">
-                    {lang === 'hi' ? 'वापस मोबाइल OTP से लॉगिन करें' : 'Switch back to Mobile OTP'}
-                  </span>
-                </button>
-              </div>
-            </form>
-          )}
+            </div>
+          </form>
+        )}
         </div>
+
       </div>
     </div>
   );

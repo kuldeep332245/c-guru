@@ -132,7 +132,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* 100% Free Lifetime Course Pass Card */}
+      {/* Active Course Pass Card */}
       <div
         className={`rounded-2xl p-6 sm:p-7 border shadow-sm relative overflow-hidden transition-all ${
           isDark
@@ -150,18 +150,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="flex items-center gap-2 flex-wrap">
                 <span className={`font-bold text-base sm:text-lg ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   {lang === 'hi'
-                    ? '100% मुफ़्त सम्पूर्ण C कोर्स (सभी अध्याय अनलॉक)'
-                    : '100% Free Complete C Curriculum (All Chapters Unlocked)'}
+                    ? 'सम्पूर्ण C पाठ्यक्रम (सभी 20 अध्याय अनलॉक)'
+                    : 'Complete C Curriculum (All Chapters Unlocked)'}
                 </span>
                 <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/30">
-                  {lang === 'hi' ? 'सक्रिय' : 'Free Access'}
+                  {lang === 'hi' ? 'सक्रिय' : 'Full Access'}
                 </span>
               </div>
 
               <p className={`text-xs sm:text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 {lang === 'hi'
-                  ? 'सभी 20 चैप्टर्स, कम्पाइलर, और प्रैक्टिकल लैब प्रश्न 100% मुफ़्त अनलॉक हैं।'
-                  : 'All 20 modules, playground compiler, and practical lab programs are 100% free and unlocked.'}
+                  ? 'सभी 20 चैप्टर्स, कम्पाइलर और प्रैक्टिकल लैब प्रश्न पूरी तरह से अनलॉक हैं।'
+                  : 'All 20 modules, playground compiler, and practical lab programs are fully unlocked.'}
               </p>
             </div>
           </div>
