@@ -15,6 +15,9 @@ export interface User {
   subscriptionExpiresAt?: string;
   subscriptionPlan?: string;
   transactionId?: string;
+  isBlocked?: boolean;
+  blockedAt?: string;
+  blockedReason?: string;
 }
 
 export interface UserProgress {

@@ -1,5 +1,6 @@
 import { User, UserProgress } from '../types';
 import { C_TOPICS, MILESTONES } from '../data/cTopics';
+import { validateRealEmail } from './emailValidator';
 
 const STORAGE_USERS_KEY = 'cguru_users_db';
 const STORAGE_ACTIVE_USER_KEY = 'cguru_active_user_session';
@@ -23,6 +24,23 @@ export const ADMIN_USER: User = {
   subscriptionPlan: '⭐ Lifetime Super Admin Pass (All Courses Unlocked)',
   transactionId: 'TXN_SUPERADMIN_LIFETIME'
 };
+
+const STORAGE_ADMIN_TOKEN_KEY = 'cguru_admin_secret_token';
+export const DEFAULT_ADMIN_TOKEN = 'CGURU_SUPER_ADMIN_SECURE_TOKEN_2026';
+
+export function getSavedAdminToken(): string {
+  try {
+    return localStorage.getItem(STORAGE_ADMIN_TOKEN_KEY) || DEFAULT_ADMIN_TOKEN;
+  } catch {
+    return DEFAULT_ADMIN_TOKEN;
+  }
+}
+
+export function saveAdminToken(token: string): void {
+  try {
+    localStorage.setItem(STORAGE_ADMIN_TOKEN_KEY, token.trim());
+  } catch {}
+}
 
 const DEFAULT_DEMO_USER: User = {
   id: 'user_kuldeep_demo',
@@ -102,7 +120,15 @@ export function registerUserWithCredentials(data: {
   try {
     const users = getAllUsers();
     const cleanP = cleanPhone(data.phone);
-    const cleanEmail = data.email.trim().toLowerCase();
+    // Strict Real Email Check
+    const emailCheck = validateRealEmail(data.email, 'hi');
+    if (!emailCheck.isValid) {
+      return {
+        success: false,
+        error: emailCheck.error || 'कृपया सही ईमेल आईडी दर्ज करें।'
+      };
+    }
+    const cleanEmail = emailCheck.cleanedEmail || data.email.trim().toLowerCase();
     const cleanPassword = data.password.trim();
 
     // Check if phone or email already registered
@@ -176,6 +202,13 @@ export function loginUserWithCredentials(
     });
 
     if (user) {
+      if (user.isBlocked) {
+        return {
+          success: false,
+          error: 'सुरक्षा अलर्ट: आपका खाता व्यवस्थापक (Admin) द्वारा ब्लॉक कर दिया गया है। एक्सेस प्रतिबंधित है।'
+        };
+      }
+
       // If user has a password, compare (case-sensitive or trimmed)
       if (user.password) {
         if (user.password.trim() !== inputPass) {
@@ -230,6 +263,12 @@ export function loginUserWithPhoneOtp(
     const user = users.find(u => cleanPhone(u.phone) === cleanP);
 
     if (user) {
+      if (user.isBlocked) {
+        return {
+          success: false,
+          error: 'सुरक्षा अलर्ट: आपका खाता व्यवस्थापक (Admin) द्वारा ब्लॉक कर दिया गया है। एक्सेस प्रतिबंधित है।'
+        };
+      }
       setActiveUser(user);
       return { success: true, user };
     }
@@ -270,12 +309,21 @@ export function registerUserWithPhoneOtp(
       };
     }
 
+    const emailVal = validateRealEmail(extraData.email, 'hi');
+    if (!emailVal.isValid) {
+      return {
+        success: false,
+        error: emailVal.error || 'कृपया सही ईमेल आईडी दर्ज करें।'
+      };
+    }
+    const cleanEmail = emailVal.cleanedEmail || extraData.email.trim().toLowerCase();
     const cleanName = extraData.name.trim() || `Student ${cleanP.slice(-4)}`;
-    const cleanEmail = extraData.email.trim().toLowerCase() || `${cleanP}@cguru.app`;
     const cleanCourse = extraData.course || 'Complete C Programming Masterclass';
 
+    const userId = `CGURU-U${Date.now().toString().slice(-4)}${Math.floor(1000 + Math.random() * 9000)}`;
+
     const newUser: User = {
-      id: `user_${Date.now()}`,
+      id: userId,
       name: cleanName,
       email: cleanEmail,
       phone: cleanP,
@@ -292,6 +340,22 @@ export function registerUserWithPhoneOtp(
     users.push(newUser);
     saveAllUsers(users);
     setActiveUser(newUser);
+
+    // Asynchronously sync with MongoDB database backend
+    try {
+      fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: cleanName,
+          email: cleanEmail,
+          phone: cleanP,
+          password: extraData.password?.trim() || '',
+          course: cleanCourse,
+          role: newUser.role
+        })
+      }).catch(() => {});
+    } catch {}
 
     saveUserProgress(newUser.id, {
       completedTopicIds: [],
@@ -324,6 +388,12 @@ export function loginOrRegisterWithPhoneOtp(
     let user = users.find(u => cleanPhone(u.phone) === cleanP);
 
     if (user) {
+      if (user.isBlocked) {
+        return {
+          success: false,
+          error: 'सुरक्षा अलर्ट: आपका खाता व्यवस्थापक (Admin) द्वारा ब्लॉक कर दिया गया है। एक्सेस प्रतिबंधित है।'
+        };
+      }
       // User exists, update if extra details provided
       if (extraData?.name && (!user.name || user.name.startsWith('Student'))) {
         user.name = extraData.name.trim();
@@ -377,6 +447,62 @@ export function loginOrRegisterWithPhoneOtp(
     return { success: true, user: newUser };
   } catch (err: any) {
     return { success: false, error: err.message || 'Authentication error.' };
+  }
+}
+
+export function loginOrRegisterWithGoogleUser(userData: {
+  id?: string;
+  userId?: string;
+  name: string;
+  email: string;
+  phone?: string;
+  avatarSeed?: string;
+  role?: 'student' | 'admin';
+  isAdmin?: boolean;
+  isSubscribed?: boolean;
+  isBlocked?: boolean;
+  course?: string;
+}): { success: boolean; user?: User; error?: string } {
+  try {
+    const cleanEmail = userData.email.trim().toLowerCase();
+    const users = getAllUsers();
+    let user = users.find(u => (u.email || '').toLowerCase() === cleanEmail);
+
+    if (user && user.isBlocked) {
+      return {
+        success: false,
+        error: 'सुरक्षा अलर्ट: आपका खाता व्यवस्थापक (Admin) द्वारा ब्लॉक कर दिया गया है। एक्सेस प्रतिबंधित है।'
+      };
+    }
+
+    if (!user) {
+      const isAdmin = cleanEmail === 'kuldeep0203singh@gmail.com' || userData.isAdmin;
+      user = {
+        id: userData.id || userData.userId || `CGURU-G${Date.now().toString().slice(-4)}${Math.floor(1000 + Math.random() * 9000)}`,
+        name: userData.name || cleanEmail.split('@')[0],
+        email: cleanEmail,
+        phone: userData.phone || '',
+        avatarSeed: userData.avatarSeed || userData.name.toLowerCase().replace(/\s+/g, '_'),
+        course: userData.course || 'Complete C Programming Masterclass',
+        createdAt: new Date().toISOString().split('T')[0],
+        role: isAdmin ? 'admin' : 'student',
+        isAdmin: Boolean(isAdmin),
+        isSubscribed: Boolean(isAdmin || userData.isSubscribed),
+        subscriptionPlan: isAdmin ? '⭐ Lifetime Super Admin Pass' : 'Free Trial'
+      };
+      users.push(user);
+      saveAllUsers(users);
+    } else {
+      if (userData.name) user.name = userData.name;
+      if (userData.avatarSeed) user.avatarSeed = userData.avatarSeed;
+      if (userData.id && !user.id) user.id = userData.id;
+      saveAllUsers(users);
+    }
+
+    setActiveUser(user);
+    return { success: true, user };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Google authentication failed' };
   }
 }
 
@@ -447,7 +573,53 @@ export function toggleUserSubscription(userId: string, grant: boolean): User | n
   if (active && active.id === userId) {
     setActiveUser(users[idx]);
   }
+
+  // Sync with MongoDB backend
+  fetch('/api/admin/users/subscription', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-admin-token': getSavedAdminToken()
+    },
+    body: JSON.stringify({ userId, isSubscribed: grant })
+  }).catch(() => {});
+
   return users[idx];
+}
+
+export function toggleBlockUser(userId: string, block: boolean, reason?: string): { success: boolean; users: User[] } {
+  const users = getAllUsers();
+  const updated = users.map(u => {
+    if (u.id === userId || u.phone === userId) {
+      return {
+        ...u,
+        isBlocked: block,
+        blockedAt: block ? new Date().toISOString() : undefined,
+        blockedReason: block ? (reason || 'Admin block') : undefined
+      };
+    }
+    return u;
+  });
+
+  saveAllUsers(updated);
+
+  // If the currently active user is the one being blocked, log them out
+  const active = getActiveUser();
+  if (active && (active.id === userId || active.phone === userId) && block) {
+    localStorage.removeItem(STORAGE_ACTIVE_USER_KEY);
+  }
+
+  // Sync with MongoDB backend
+  fetch('/api/admin/users/block', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-admin-token': getSavedAdminToken()
+    },
+    body: JSON.stringify({ userId, isBlocked: block, reason })
+  }).catch(() => {});
+
+  return { success: true, users: updated };
 }
 
 export function deleteUser(userId: string): boolean {
@@ -455,7 +627,140 @@ export function deleteUser(userId: string): boolean {
   const users = getAllUsers();
   const filtered = users.filter(u => u.id !== userId);
   saveAllUsers(filtered);
+
+  // Sync with MongoDB backend
+  fetch('/api/admin/users/delete', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-admin-token': getSavedAdminToken()
+    },
+    body: JSON.stringify({ userId })
+  }).catch(() => {});
+
   return true;
+}
+
+export async function fetchRemoteUsers(): Promise<User[]> {
+  try {
+    const res = await fetch('/api/admin/users', {
+      headers: {
+        'x-admin-token': getSavedAdminToken()
+      }
+    });
+    if (!res.ok) return getAllUsers();
+    const data = await res.json();
+    if (data.success && Array.isArray(data.users)) {
+      const currentLocals = getAllUsers();
+      const localMap = new Map(currentLocals.map(u => [u.id, u]));
+
+      // Merge remote MongoDB users into local cache
+      const merged: User[] = data.users.map((dbUser: any) => {
+        const id = dbUser.userId || dbUser.id || `user_${dbUser.phone}`;
+        const existing = localMap.get(id);
+        return {
+          id,
+          name: dbUser.name,
+          email: dbUser.email,
+          phone: dbUser.phone,
+          role: dbUser.role || (dbUser.isAdmin ? 'admin' : 'student'),
+          isAdmin: Boolean(dbUser.isAdmin),
+          isSubscribed: Boolean(dbUser.isSubscribed),
+          isBlocked: Boolean(dbUser.isBlocked),
+          blockedAt: dbUser.blockedAt,
+          blockedReason: dbUser.blockedReason,
+          course: dbUser.course || 'Complete C Programming Masterclass',
+          createdAt: dbUser.createdAt ? dbUser.createdAt.split('T')[0] : (existing?.createdAt || '2026-04-01'),
+          avatarSeed: dbUser.avatarSeed || existing?.avatarSeed || 'student'
+        };
+      });
+
+      // Also preserve any local users not in db
+      currentLocals.forEach(loc => {
+        if (!merged.some(m => m.id === loc.id || (loc.phone && m.phone === loc.phone))) {
+          merged.push(loc);
+        }
+      });
+
+      saveAllUsers(merged);
+      return merged;
+    }
+  } catch {}
+  return getAllUsers();
+}
+
+export async function getDatabaseStatusApi(): Promise<{
+  connected: boolean;
+  provider: 'mongodb' | 'local_fallback';
+  totalUsers: number;
+  activeUsers: number;
+  blockedUsers: number;
+  dbName: string;
+  uriMasked: string;
+  pingMs?: number;
+  error?: string;
+} | null> {
+  try {
+    const res = await fetch('/api/database/status');
+    const data = await res.json();
+    if (data.success && data.database) {
+      return data.database;
+    }
+  } catch {}
+  return null;
+}
+
+export async function connectMongoDatabaseApi(
+  uri: string,
+  dbName: string = 'cguru_database'
+): Promise<{ success: boolean; message: string; pingMs?: number; syncedUsers?: number; error?: string }> {
+  try {
+    const res = await fetch('/api/database/connect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uri, dbName })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      return { success: false, message: data.error || 'Connection failed' };
+    }
+    return {
+      success: true,
+      message: data.message,
+      pingMs: data.pingMs,
+      syncedUsers: data.syncedUsers
+    };
+  } catch (err: any) {
+    return { success: false, message: err.message || 'Network request failed' };
+  }
+}
+
+export async function fetchSingleUserMongoDetail(userId: string): Promise<any | null> {
+  try {
+    const res = await fetch(`/api/admin/users/detail/${encodeURIComponent(userId)}`);
+    const data = await res.json();
+    if (data.success && data.user) {
+      return data.user;
+    }
+  } catch {}
+  return null;
+}
+
+export async function syncUsersToMongoApi(): Promise<{ success: boolean; message: string; totalUsers?: number }> {
+  try {
+    const res = await fetch('/api/admin/users/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const data = await res.json();
+    return {
+      success: Boolean(data.success),
+      message: data.message || 'Sync completed',
+      totalUsers: data.totalUsers
+    };
+  } catch (err: any) {
+    return { success: false, message: err.message || 'Sync failed' };
+  }
 }
 
 export function findUserByPhone(phone: string): User | null {

@@ -16,7 +16,8 @@ import {
   Laptop,
   Globe,
   Moon,
-  Sun
+  Sun,
+  Github
 } from 'lucide-react';
 import { C_TOPICS } from '../data/cTopics';
 import { ALL_INDIAN_LANGUAGES, getLanguageName } from '../utils/languages';
@@ -132,7 +133,7 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({
             <img
               src="/c-guru-logo.png"
               alt="C-Guru"
-              className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl object-cover shadow-sm border border-blue-500/30 shrink-0"
+              className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg object-contain bg-white p-0.5 shadow-xs border border-blue-500/25 shrink-0"
             />
             <span className={`font-bold text-xs sm:text-base tracking-tight truncate ${
               isDark ? 'text-white' : 'text-slate-900'
@@ -189,6 +190,9 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({
               </button>
             )}
 
+            
+
+
             <button
               onClick={() => onOpenAuth('login')}
               className="px-2 py-1 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-xs transition-all active:scale-95 whitespace-nowrap cursor-pointer"
@@ -209,12 +213,12 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({
       <main className="flex-1">
         <section className="relative overflow-hidden pt-6 pb-10 sm:pt-16 sm:pb-20">
           <div className="max-w-7xl mx-auto px-3 sm:px-6 relative z-10 text-center space-y-4 sm:space-y-6">
-            {/* Center Logo Showcase */}
+            {/* Center Logo Showcase (Compact & Balanced) */}
             <div className="flex justify-center mb-0.5">
               <img
                 src="/c-guru-logo.png"
                 alt="C-Guru Logo"
-                className="w-16 h-16 sm:w-28 sm:h-28 rounded-2xl object-cover shadow-lg border border-blue-500/20"
+                className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg object-contain bg-white p-0.5 shadow-sm border border-blue-500/25"
               />
             </div>
 
@@ -417,7 +421,7 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({
             <img
               src="/c-guru-logo.png"
               alt="C-Guru"
-              className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover mx-auto shadow-sm border border-blue-500/20"
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg object-contain bg-white p-0.5 mx-auto shadow-xs border border-blue-500/20"
             />
             <h2 className={`text-xl sm:text-3xl font-bold tracking-tight ${
               isDark ? 'text-white' : 'text-slate-900'
@@ -458,11 +462,11 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({
         isDark ? 'bg-[#14171E] border-[#2B313F] text-slate-400' : 'bg-white border-slate-200 text-slate-600'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left text-xs">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <img
               src="/c-guru-logo.png"
               alt="C-Guru"
-              className="w-7 h-7 rounded-lg object-cover shadow-xs border border-blue-500/20"
+              className="w-5 h-5 sm:w-6 sm:h-6 rounded-md object-contain bg-white p-0.5 shadow-xs border border-blue-500/20"
             />
             <span className={`font-bold text-sm tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>
               C-Guru Academy

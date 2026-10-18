@@ -1,5 +1,5 @@
 // Client-side Authentication and OTP API helpers
-import { sendOtpToMobile, getSavedSmsApiKey } from './smsService';
+import { sendOtpToMobile } from './smsService';
 
 export interface SendOtpResponse {
   success: boolean;
@@ -26,7 +26,8 @@ const clientOtpFallback = new Map<string, { otp: string; token?: string; expires
 export async function sendOtpApi(
   phone: string,
   mode: 'login' | 'register' = 'login',
-  lang: string = 'en'
+  lang: string = 'en',
+  email?: string
 ): Promise<SendOtpResponse> {
   const isHi = lang === 'hi';
   const cleanP = phone.replace(/\D/g, '').slice(-10);
@@ -40,13 +41,11 @@ export async function sendOtpApi(
     };
   }
 
-  const savedKey = getSavedSmsApiKey();
-
   try {
     const res = await fetch('/api/auth/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: cleanP, mode, apiKey: savedKey, lang })
+      body: JSON.stringify({ phone: cleanP, mode, lang, email })
     });
 
     if (res.ok) {
@@ -97,7 +96,7 @@ export async function sendOtpApi(
       ? `आपके नंबर (+91 ${cleanP}) पर ओटीपी भेजा गया है`
       : `OTP sent to your number (+91 ${cleanP})`;
     try {
-      const smsRes = await sendOtpToMobile(cleanP, generatedOtp, savedKey);
+      const smsRes = await sendOtpToMobile(cleanP, generatedOtp);
       if (smsRes.isRealSms) {
         isReal = true;
         feedbackMsg = smsRes.message || (isHi ? `आपके नंबर (+91 ${cleanP}) पर ओटीपी भेजा गया है` : `OTP sent to your number (+91 ${cleanP})`);
@@ -196,6 +195,42 @@ export async function verifyOtpApi(
         ? 'गलत या अमान्य ओटीपी। कृपया अपने मोबाइल पर आया सही ओटीपी दर्ज करें।'
         : 'Invalid or incorrect OTP. Please enter the valid OTP sent to your phone.',
       error: isHi ? 'गलत ओटीपी' : 'Invalid OTP'
+    };
+  }
+}
+
+export interface GoogleAuthResponse {
+  success: boolean;
+  message?: string;
+  user?: any;
+  isNewUser?: boolean;
+  error?: string;
+}
+
+export async function googleAuthApi(profile: {
+  email: string;
+  name: string;
+  picture?: string;
+  googleId?: string;
+}): Promise<GoogleAuthResponse> {
+  try {
+    const res = await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(profile)
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      return {
+        success: false,
+        error: data.error || 'Google login failed'
+      };
+    }
+    return data;
+  } catch (err: any) {
+    return {
+      success: false,
+      error: err.message || 'Network error connecting to Google Auth service.'
     };
   }
 }

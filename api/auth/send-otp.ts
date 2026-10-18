@@ -1,3 +1,5 @@
+import { validateRealEmail } from '../../src/utils/emailValidator';
+
 // Vercel Serverless Function: Send OTP via 2Factor to mobile
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -18,8 +20,19 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { phone, apiKey, mode = 'login', lang = 'en' } = req.body || {};
+    const { phone, apiKey, mode = 'login', lang = 'en', email } = req.body || {};
     const isHi = lang === 'hi';
+
+    if (mode === 'register' && email) {
+      const emailCheck = validateRealEmail(email, lang);
+      if (!emailCheck.isValid) {
+        return res.status(400).json({
+          success: false,
+          error: emailCheck.error || (isHi ? 'कृपया असली और मान्य Gmail दर्ज करें।' : 'Please enter a valid Gmail address.')
+        });
+      }
+    }
+
     const cleanDigits = String(phone || '').replace(/\D/g, '').slice(-10);
 
     if (cleanDigits.length !== 10) {

@@ -25,11 +25,10 @@ import { CompilerPlayground } from './components/CompilerPlayground';
 import { BugHunter } from './components/BugHunter';
 import { QuizSection } from './components/QuizSection';
 import { Dashboard } from './components/Dashboard';
-import { AdminPanel } from './components/AdminPanel';
 import { HomePage } from './components/HomePage';
 import { AuthModal } from './components/AuthModal';
 import { WelcomePage } from './components/WelcomePage';
-import { GitHubExportModal } from './components/GitHubExportModal';
+import { GitHubSyncModal } from './components/GitHubSyncModal';
 import { C_TOPICS } from './data/cTopics';
 import { Topic, User, UserProgress } from './types';
 import {
@@ -37,8 +36,7 @@ import {
   setActiveUser,
   getUserProgress,
   saveUserProgress,
-  isUserSubscribed,
-  ADMIN_USER
+  isUserSubscribed
 } from './utils/storage';
 import { getNavLabels, getLanguageName } from './utils/languages';
 import { initAppSecurity, registerSecurityListener } from './utils/security';
@@ -59,6 +57,14 @@ export default function App() {
   });
 
   const [user, setUser] = useState<User | null>(() => getActiveUser());
+  const isAdminUser = Boolean(
+    user && (
+      user.role === 'admin' ||
+      (user as any).isAdmin ||
+      user.email === 'kuldeep0203singh@gmail.com' ||
+      user.phone === '9876543210'
+    )
+  );
   const [authMode, setAuthMode] = useState<'login' | 'register'>('register');
   const [userProgress, setUserProgress] = useState<UserProgress>(() => {
     const u = getActiveUser();
@@ -78,14 +84,6 @@ export default function App() {
   useEffect(() => {
     initAppSecurity();
 
-    const handleOpenGitHub = () => setIsGitHubModalOpen(true);
-    window.addEventListener('open-github-export-modal', handleOpenGitHub);
-
-    // Auto-open GitHub uploader if ?github is in URL
-    if (window.location.search.includes('github') || window.location.search.includes('export')) {
-      setIsGitHubModalOpen(true);
-    }
-
     const unregister = registerSecurityListener((ev) => {
       // Only show alert on active screenshot key attempt
       if (ev.type === 'screenshot') {
@@ -100,7 +98,6 @@ export default function App() {
 
     return () => {
       unregister();
-      window.removeEventListener('open-github-export-modal', handleOpenGitHub);
     };
   }, []);
 
@@ -178,9 +175,15 @@ export default function App() {
     }
   }, [isDark]);
 
-  // Load progress when user changes
+  // Load progress when user changes and verify block status
   useEffect(() => {
     if (user) {
+      if (user.isBlocked) {
+        setUser(null);
+        setActiveUser(null);
+        setSecurityToast('सुरक्षा अलर्ट: आपका अकाउंट व्यवस्थापक (Admin) द्वारा ब्लॉक कर दिया गया है।');
+        return;
+      }
       const p = getUserProgress(user.id);
       setUserProgress(p);
     }
@@ -339,12 +342,12 @@ export default function App() {
           lang={lang}
         />
 
-        {/* GitHub Code Export / Update Modal */}
-        <GitHubExportModal
+        {/* 1-Click GitHub Sync & Code Export Modal */}
+        <GitHubSyncModal
           isOpen={isGitHubModalOpen}
           onClose={() => setIsGitHubModalOpen(false)}
           isDark={isDark}
-          lang={effectiveLang}
+          lang={lang}
         />
 
         {/* Security Shield & Anti-Screenshot Overlay */}
@@ -391,7 +394,7 @@ export default function App() {
         }}
         onOpenPayment={() => {}}
         onLogout={handleLogout}
-        onOpenGitHubExport={() => setIsGitHubModalOpen(true)}
+        onOpenGitHubExport={isAdminUser ? () => setIsGitHubModalOpen(true) : undefined}
         completedCount={userProgress.completedTopicIds.length}
         totalTopics={C_TOPICS.length}
       />
@@ -508,16 +511,6 @@ export default function App() {
             onOpenAuth={() => setIsAuthModalOpen(true)}
           />
         )}
-
-        {activeTab === 'admin' && user && (
-          <AdminPanel
-            currentUser={user}
-            isDark={isDark}
-            lang={effectiveLang}
-            onSwitchUser={(u) => setUser(u)}
-            onGoToTab={(tab) => setActiveTab(tab as TabType)}
-          />
-        )}
       </main>
 
       {/* Auth Modal (Unified Registration & Login) */}
@@ -529,6 +522,16 @@ export default function App() {
         initialMode={authMode}
         lang={effectiveLang}
       />
+
+      {/* 1-Click GitHub Sync & Code Export Modal (Admin Only) */}
+      {isAdminUser && (
+        <GitHubSyncModal
+          isOpen={isGitHubModalOpen}
+          onClose={() => setIsGitHubModalOpen(false)}
+          isDark={isDark}
+          lang={lang}
+        />
+      )}
 
       {/* Mobile Bottom Navigation Bar (Ultra-clean 1-tap navigation for phone users) */}
       <nav
@@ -586,7 +589,7 @@ export default function App() {
             <img
               src="/c-guru-logo.png"
               alt="C-Guru"
-              className="w-7 h-7 rounded-lg object-cover shadow-xs border border-blue-500/20"
+              className="w-7 h-7 rounded-lg object-contain bg-white p-0.5 shadow-xs border border-blue-500/20"
             />
             <span className={`font-bold text-sm tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>
               C-Guru Academy
@@ -605,14 +608,6 @@ export default function App() {
           </div>
         </div>
       </footer>
-
-      {/* GitHub Code Export / Update Modal */}
-      <GitHubExportModal
-        isOpen={isGitHubModalOpen}
-        onClose={() => setIsGitHubModalOpen(false)}
-        isDark={isDark}
-        lang={effectiveLang}
-      />
 
       {/* Security Shield & Anti-Screenshot Overlay */}
       {renderSecurityShields()}

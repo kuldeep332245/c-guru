@@ -28,9 +28,11 @@ import {
   loginUserWithPhoneOtp,
   registerUserWithPhoneOtp,
   isPhoneRegistered,
+  setActiveUser,
   ADMIN_USER
 } from '../utils/storage';
 import { sendOtpApi, verifyOtpApi } from '../utils/authApi';
+import { validateRealEmail } from '../utils/emailValidator';
 import { User } from '../types';
 
 interface AuthModalProps {
@@ -205,9 +207,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         );
         return;
       }
-      if (!email.trim() || !email.includes('@')) {
+      const emailCheck = validateRealEmail(email, lang);
+      if (!emailCheck.isValid) {
         setError(
-          lang === 'hi' ? 'कृपया सही ईमेल आईडी दर्ज करें।' : 'Please enter a valid email address.'
+          emailCheck.error ||
+            (lang === 'hi'
+              ? 'कृपया एक वैध ईमेल आईडी दर्ज करें।'
+              : 'Please enter a valid email address.')
         );
         return;
       }
@@ -215,7 +221,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      const res = await sendOtpApi(cleanP, mode, lang);
+      const res = await sendOtpApi(cleanP, mode, lang, email.trim());
       setIsSubmitting(false);
 
       if (res.success) {
@@ -470,6 +476,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Scrollable Body Content */}
         <div className="overflow-y-auto p-4 sm:p-6 space-y-4 flex-1">
+          {/* Status Alerts (Visible in both Google and Phone views) */}
           {/* Mode Switcher Tabs */}
           <div className={`grid grid-cols-2 p-1 rounded-xl border ${
             isDark ? 'bg-[#13161D] border-[#2B313F]' : 'bg-slate-100 border-slate-200'
@@ -506,34 +513,34 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </button>
           </div>
 
-        {/* Status Alerts */}
-        {error && (
-          <div className="mb-4 p-3 rounded-xl text-xs flex items-start sm:items-center justify-between gap-2.5 bg-rose-500/15 border-2 border-rose-500/40 text-rose-300 animate-in fade-in">
-            <div className="flex items-center gap-2 min-w-0">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
-              <span className="font-medium">{error}</span>
+          {/* Status Alerts */}
+          {error && (
+            <div className="mb-3 p-3 rounded-xl text-xs flex items-start sm:items-center justify-between gap-2.5 bg-rose-500/15 border-2 border-rose-500/40 text-rose-300 animate-in fade-in">
+              <div className="flex items-center gap-2 min-w-0">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                <span className="font-medium">{error}</span>
+              </div>
+              {mode === 'login' && error.toLowerCase().includes('not register') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('register');
+                    setError(null);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shrink-0 transition-colors shadow-sm cursor-pointer whitespace-nowrap"
+                >
+                  {lang === 'hi' ? 'रजिस्टर करें →' : 'Register Now →'}
+                </button>
+              )}
             </div>
-            {mode === 'login' && error.toLowerCase().includes('not register') && (
-              <button
-                type="button"
-                onClick={() => {
-                  setMode('register');
-                  setError(null);
-                }}
-                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shrink-0 transition-colors shadow-sm cursor-pointer whitespace-nowrap"
-              >
-                {lang === 'hi' ? 'रजिस्टर करें →' : 'Register Now →'}
-              </button>
-            )}
-          </div>
-        )}
+          )}
 
-        {successMsg && (
-          <div className="mb-4 p-3 rounded-xl text-xs flex items-center gap-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 animate-in fade-in">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>{successMsg}</span>
-          </div>
-        )}
+          {successMsg && (
+            <div className="mb-3 p-3 rounded-xl text-xs flex items-center gap-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 animate-in fade-in">
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <span>{successMsg}</span>
+            </div>
+          )}
 
         {/* TAB 1: OTP FLOW (Primary) */}
         {authMethod === 'otp' && (
@@ -564,7 +571,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
                     <div>
                       <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                        {lang === 'hi' ? 'जीमेल / ईमेल *' : 'Email Address *'}
+                        {lang === 'hi' ? 'ईमेल आईडी *' : 'Email Address *'}
                       </label>
                       <div className="relative">
                         <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -603,10 +610,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       }`}
                     />
                   </div>
-                  <p className="text-[10px] text-slate-400 mt-1">
-                    {lang === 'hi'
-                      ? '* इस नंबर पर 6-अंकों का ओटीपी भेजा जाएगा।'
-                      : '* A 6-digit OTP will be sent to this number.'}
+                  <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-1.5">
+                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>
+                      {lang === 'hi'
+                        ? 'इस नंबर पर WhatsApp / SMS द्वारा 6-अंकों का ओटीपी भेजा जाएगा।'
+                        : 'A 6-digit OTP will be sent to your WhatsApp / Mobile.'}
+                    </span>
                   </p>
                 </div>
 
@@ -673,7 +683,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <form onSubmit={handleVerifyOtp} className="space-y-5 animate-in fade-in duration-200">
                 <div className="flex items-center justify-between text-xs">
                   <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                    {lang === 'hi' ? 'ओटीपी भेजा गया:' : 'OTP Sent To:'}{' '}
+                    {lang === 'hi' ? 'WhatsApp / SMS पर भेजा गया:' : 'OTP Sent via WhatsApp / SMS:'}{' '}
                     <strong className={isDark ? 'text-white' : 'text-slate-900'}>+91 {cleanP}</strong>
                   </span>
                   <button
@@ -694,7 +704,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 text-center ${
                     isDark ? 'text-slate-300' : 'text-slate-700'
                   }`}>
-                    {lang === 'hi' ? 'मोबाइल पर आया 6-अंकों का OTP दर्ज करें' : 'Enter 6-Digit Mobile OTP'}
+                    {lang === 'hi' ? 'WhatsApp / SMS पर आया 6-अंकों का OTP दर्ज करें' : 'Enter 6-Digit WhatsApp / Mobile OTP'}
                   </label>
                   <div className="flex justify-center gap-1.5 sm:gap-2.5">
                     {otpDigits.map((digit, index) => (
@@ -743,20 +753,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   )}
                 </div>
 
-                {/* Helpful friendly hint if user doesn't receive SMS */}
+                {/* Helpful friendly hint if user doesn't receive SMS/WhatsApp */}
                 {isSimulated && (
                   <div className={`p-3 rounded-xl border text-xs flex items-start gap-2.5 ${
-                    isDark ? 'bg-amber-950/30 border-amber-500/30 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-900'
+                    isDark ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-300' : 'bg-emerald-50 border-emerald-200 text-emerald-900'
                   }`}>
-                    <span className="text-base leading-none">📱</span>
+                    <span className="text-base leading-none">💬</span>
                     <div className="space-y-0.5">
                       <p className="font-bold">
-                        {lang === 'hi' ? 'मोबाइल पर SMS प्राप्त नहीं हुआ?' : 'Did not receive OTP on mobile?'}
+                        {lang === 'hi' ? 'WhatsApp पर OTP चेक करें' : 'Check WhatsApp for OTP'}
                       </p>
                       <p className="text-[11px] leading-relaxed opacity-90">
                         {lang === 'hi'
-                          ? 'कृपया जांचें कि आपके फोन में नेटवर्क सिग्नल है, या टाइमर समाप्त होने पर पुनः ओटीपी भेजें।'
-                          : 'Please check your mobile network reception, or click Resend OTP after the timer ends.'}
+                          ? 'यदि मोबाइल SMS नहीं आया है, तो कृपया अपना WhatsApp ऐप खोलें। WaKit / WhatsApp पर भी OTP भेजा जाता है।'
+                          : 'If mobile SMS is delayed, please check your WhatsApp app. OTP is dispatched via WhatsApp / SMS.'}
                       </p>
                     </div>
                   </div>
@@ -891,7 +901,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </form>
         )}
         </div>
-
       </div>
     </div>
   );
