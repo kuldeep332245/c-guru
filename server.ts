@@ -193,13 +193,13 @@ async function sendWhatsAppViaWakit(
 
       console.log(`[WAKIT-WHATSAPP] Response from ${endpoint} (${response.status}):`, result || rawText);
 
-      const isSuccess = response.ok && (!result || (result.success !== false && result.status !== 'error'));
-      if (isSuccess) {
+      const isSuccess = (response.status === 200 || response.status === 201) && (!result || (result.success !== false && result.status !== 'error'));
+      if (isSuccess || (result && (result.success || result.data?.status === 'sent'))) {
         return {
           success: true,
           provider: 'wakit_whatsapp',
           isRealSms: true,
-          message: `WhatsApp पर OTP भेज दिया गया है (+91 ${cleanDigits})`
+          message: `WhatsApp पर OTP भेज दिया गया है (+${fullPhone})`
         };
       }
 
@@ -285,36 +285,6 @@ async function sendSmsViaGateway(
           isRealSms: true,
           message: `OTP sent to your number (+91 ${phone})`
         };
-      }
-
-      // If template name was required or custom OTP failed, try AUTOGEN route (2factor's default approved route)
-      const detailsStr = String(result?.Details || rawText || '').toLowerCase();
-      if (detailsStr.includes('template') || detailsStr.includes('dlt') || detailsStr.includes('missing') || !isSuccess) {
-        try {
-          const autoUrl = `https://2factor.in/API/V1/${encodeURIComponent(apiKey)}/SMS/${encodeURIComponent(phone)}/AUTOGEN`;
-          const autoRes = await fetch(autoUrl);
-          const autoText = await autoRes.text();
-          let autoData: any = null;
-          try {
-            autoData = JSON.parse(autoText);
-          } catch {
-            console.warn('[SMS-GATEWAY] 2Factor AUTOGEN non-JSON:', autoText);
-          }
-          console.log(`[SMS-GATEWAY] 2Factor.in AUTOGEN status:`, autoData || autoText);
-          if (autoData && (autoData.Status === 'Success' || String(autoData.Status).toLowerCase() === 'success')) {
-            return {
-              success: true,
-              provider: '2factor',
-              isRealSms: true,
-              message: `OTP sent to your number (+91 ${phone})`
-            };
-          }
-          if (autoData && autoData.Details) {
-            result = autoData;
-          }
-        } catch (e) {
-          console.error('[SMS-GATEWAY] 2Factor AUTOGEN fallback error:', e);
-        }
       }
 
       // Friendly Hindi translations for 2Factor errors
