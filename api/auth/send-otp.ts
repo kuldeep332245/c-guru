@@ -57,86 +57,82 @@ export default async function handler(req: any, res: any) {
       'wk_live_XrwS5NYJKkiKgIQdn5YWICaEUi3GAM5bMZvH4APp'
     ).trim();
 
-    const wakitUrl = (
-      process.env.WAKIT_API_URL ||
-      process.env.WHATSAPP_API_URL ||
-      'https://api.wakit.io/v1/messages/send'
-    ).trim();
+    const endpointsToTry = process.env.WAKIT_API_URL
+      ? [process.env.WAKIT_API_URL]
+      : [
+          'https://wakit.in/api/v1/otp/send',
+          'https://wakit.in/api/v1/messages',
+          'https://api.wakit.io/v1/messages/send'
+        ];
 
     if (wakitKey) {
-      try {
-        const fullPhone = `91${cleanDigits}`;
-        const otpMessage = `🔐 C-Guru: आपका मोबाइल सत्यापन OTP कोड है: *${generatedOtp}*। यह कोड 5 मिनट के लिए मान्य है। कृपया इसे किसी के साथ साझा न करें।`;
-        const payload = {
-          number: fullPhone,
-          phone: fullPhone,
-          to: fullPhone,
-          receiver: fullPhone,
-          message: otpMessage,
-          text: otpMessage,
-          instance_id: process.env.WAKIT_INSTANCE_ID || undefined
-        };
+      const fullPhone = `91${cleanDigits}`;
+      const otpMessage = `🔐 C-Guru: आपका मोबाइल सत्यापन OTP कोड है: *${generatedOtp}*। यह कोड 5 मिनट के लिए मान्य है। कृपया इसे किसी के साथ साझा न करें।`;
+      const payload = {
+        to: `+${fullPhone}`,
+        phone: `+${fullPhone}`,
+        number: fullPhone,
+        receiver: fullPhone,
+        code: generatedOtp,
+        otp: generatedOtp,
+        message: otpMessage,
+        text: otpMessage,
+        instance_id: process.env.WAKIT_INSTANCE_ID || undefined
+      };
 
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          'User-Agent': 'CGuruWhatsApp/1.0',
-          'Authorization': wakitKey.startsWith('Bearer ') ? wakitKey : `Bearer ${wakitKey}`,
-          'x-api-key': wakitKey,
-          'apikey': wakitKey
-        };
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'User-Agent': 'CGuruWhatsApp/1.0',
+        'Authorization': wakitKey.startsWith('Bearer ') ? wakitKey : `Bearer ${wakitKey}`,
+        'x-api-key': wakitKey,
+        'apikey': wakitKey
+      };
 
-        const wRes = await fetch(wakitUrl, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(payload)
-        }).catch(() => null);
+      for (const endpoint of endpointsToTry) {
+        try {
+          const wRes = await fetch(endpoint, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload)
+          });
 
-        if (wRes && wRes.ok) {
-          const wData: any = await wRes.json().catch(() => null);
-          if (!wData || (wData.success !== false && wData.status !== 'error')) {
+          const rawText = await wRes.text();
+          let wData: any = null;
+          try {
+            wData = JSON.parse(rawText);
+          } catch {}
+
+          if (wRes.ok && (!wData || (wData.success !== false && wData.status !== 'error'))) {
             isRealSms = true;
             providerUsed = 'wakit_whatsapp';
             feedbackMsg = isHi
               ? `व्हाट्सएप (WhatsApp) पर OTP भेज दिया गया है (+91 ${cleanDigits})`
               : `OTP has been sent to your WhatsApp (+91 ${cleanDigits})`;
+            break;
           }
+        } catch (wErr) {
+          console.error('[Vercel WaKit WhatsApp Error]:', wErr);
         }
-      } catch (wErr) {
-        console.error('[Vercel WaKit WhatsApp Error]:', wErr);
       }
     }
 
-    // 2. Fallback: SMS Gateway (2Factor) if WhatsApp was not delivered
+    // 2. Fallback: Direct Text SMS (Only if WhatsApp could not connect, NO voice call)
     const defaultKey = '596ca2fc-c571-11f1-af74-0200cd936042';
     const key = (apiKey || process.env.VITE_SMS_API_KEY || process.env.SMS_API_KEY || defaultKey).trim();
 
     if (!isRealSms && key) {
-      const url1 = `https://2factor.in/API/V1/${encodeURIComponent(key)}/SMS/${encodeURIComponent(cleanDigits)}/${encodeURIComponent(generatedOtp)}/OTP1`;
-      let r = await fetch(url1).catch(() => null);
-      let data: any = null;
-      if (r) {
-        try {
-          data = await r.json();
-        } catch {}
-      }
-
-      if (data && (data.Status === 'Success' || String(data.Status).toLowerCase() === 'success')) {
-        isRealSms = true;
-        providerUsed = '2factor_sms';
-      } else {
-        const autoUrl = `https://2factor.in/API/V1/${encodeURIComponent(key)}/SMS/${encodeURIComponent(cleanDigits)}/AUTOGEN`;
-        let r2 = await fetch(autoUrl).catch(() => null);
-        let data2: any = null;
-        if (r2) {
-          try {
-            data2 = await r2.json();
-          } catch {}
-        }
-        if (data2 && (data2.Status === 'Success' || String(data2.Status).toLowerCase() === 'success')) {
+      try {
+        const url1 = `https://2factor.in/API/V1/${encodeURIComponent(key)}/SMS/${encodeURIComponent(cleanDigits)}/${encodeURIComponent(generatedOtp)}/OTP1`;
+        const r = await fetch(url1);
+        const data = await r.json().catch(() => null);
+        if (data && (data.Status === 'Success' || String(data.Status).toLowerCase() === 'success')) {
           isRealSms = true;
           providerUsed = '2factor_sms';
+          feedbackMsg = isHi
+            ? `एसएमएस (SMS) द्वारा OTP भेज दिया गया है (+91 ${cleanDigits})`
+            : `OTP sent via SMS (+91 ${cleanDigits})`;
         }
-      }
+      } catch {}
     }
 
     return res.status(200).json({

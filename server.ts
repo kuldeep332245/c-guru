@@ -146,71 +146,76 @@ async function sendWhatsAppViaWakit(
 
   console.log(`[WAKIT-WHATSAPP] Attempting to dispatch WhatsApp OTP to +${fullPhone}...`);
 
-  const endpoint = wakitUrl || 'https://api.wakit.io/v1/messages/send';
+  const endpointsToTry = wakitUrl
+    ? [wakitUrl]
+    : [
+        'https://wakit.in/api/v1/otp/send',
+        'https://wakit.in/api/v1/messages',
+        'https://api.wakit.io/v1/messages/send'
+      ];
 
-  try {
-    const payload = {
-      number: fullPhone,
-      phone: fullPhone,
-      to: fullPhone,
-      receiver: fullPhone,
-      message: otpMessage,
-      text: otpMessage,
-      instance_id: process.env.WAKIT_INSTANCE_ID || undefined
-    };
+  const payload = {
+    to: `+${fullPhone}`,
+    phone: `+${fullPhone}`,
+    number: fullPhone,
+    receiver: fullPhone,
+    code: otp,
+    otp: otp,
+    message: otpMessage,
+    text: otpMessage,
+    instance_id: process.env.WAKIT_INSTANCE_ID || undefined
+  };
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'User-Agent': 'CGuruWhatsApp/1.0'
-    };
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'User-Agent': 'CGuruWhatsApp/1.0',
+    'Authorization': wakitKey.startsWith('Bearer ') ? wakitKey : `Bearer ${wakitKey}`,
+    'x-api-key': wakitKey,
+    'apikey': wakitKey
+  };
 
-    if (wakitKey) {
-      headers['Authorization'] = wakitKey.startsWith('Bearer ') ? wakitKey : `Bearer ${wakitKey}`;
-      headers['x-api-key'] = wakitKey;
-      headers['apikey'] = wakitKey;
-    }
+  let lastError = '';
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload)
-    });
-
-    const rawText = await response.text();
-    let result: any = null;
+  for (const endpoint of endpointsToTry) {
     try {
-      result = JSON.parse(rawText);
-    } catch {
-      // not JSON
+      console.log(`[WAKIT-WHATSAPP] Dispatching OTP to +${fullPhone} via ${endpoint}...`);
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload)
+      });
+
+      const rawText = await response.text();
+      let result: any = null;
+      try {
+        result = JSON.parse(rawText);
+      } catch {}
+
+      console.log(`[WAKIT-WHATSAPP] Response from ${endpoint} (${response.status}):`, result || rawText);
+
+      const isSuccess = response.ok && (!result || (result.success !== false && result.status !== 'error'));
+      if (isSuccess) {
+        return {
+          success: true,
+          provider: 'wakit_whatsapp',
+          isRealSms: true,
+          message: `WhatsApp पर OTP भेज दिया गया है (+91 ${cleanDigits})`
+        };
+      }
+
+      lastError = result?.message || result?.error || rawText || `HTTP ${response.status}`;
+    } catch (err: any) {
+      console.warn(`[WAKIT-WHATSAPP] Endpoint ${endpoint} failed:`, err.message);
+      lastError = err.message;
     }
-
-    console.log(`[WAKIT-WHATSAPP] Dispatch response (${response.status}):`, result || rawText);
-
-    const isSuccess = response.ok && (!result || (result.success !== false && result.status !== 'error'));
-    if (isSuccess) {
-      return {
-        success: true,
-        provider: 'wakit_whatsapp',
-        isRealSms: true,
-        message: `WhatsApp पर OTP भेज दिया गया है (+91 ${cleanDigits})`
-      };
-    }
-
-    return {
-      success: false,
-      provider: 'wakit_whatsapp',
-      isRealSms: false,
-      error: result?.message || result?.error || rawText || 'WaKit API Error'
-    };
-  } catch (err: any) {
-    console.error(`[WAKIT-WHATSAPP] Dispatch error:`, err);
-    return {
-      success: false,
-      provider: 'wakit_whatsapp',
-      isRealSms: false,
-      error: err.message
-    };
   }
+
+  return {
+    success: false,
+    provider: 'wakit_whatsapp',
+    isRealSms: false,
+    error: lastError || 'WaKit API Error'
+  };
 }
 
 // SMS & WhatsApp Gateway Dispatch Function
