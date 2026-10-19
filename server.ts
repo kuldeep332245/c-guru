@@ -127,7 +127,7 @@ async function sendWhatsAppViaWakit(
     process.env.WHATSAPP_API_KEY ||
     process.env.WATI_API_KEY ||
     process.env.WAKIT_TOKEN ||
-    ''
+    'wk_live_XrwS5NYJKkiKgIQdn5YWICaEUi3GAM5bMZvH4APp'
   ).trim();
 
   const wakitUrl = (
