@@ -29,6 +29,7 @@ import { HomePage } from './components/HomePage';
 import { AuthModal } from './components/AuthModal';
 import { WelcomePage } from './components/WelcomePage';
 import { GitHubSyncModal } from './components/GitHubSyncModal';
+import { BackendConnectModal } from './components/BackendConnectModal';
 import { C_TOPICS } from './data/cTopics';
 import { Topic, User, UserProgress } from './types';
 import {
@@ -76,6 +77,7 @@ export default function App() {
   const [selectedFlowchartId, setSelectedFlowchartId] = useState<string | undefined>(undefined);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isGitHubModalOpen, setIsGitHubModalOpen] = useState(false);
+  const [isBackendModalOpen, setIsBackendModalOpen] = useState(false);
   const [authToast, setAuthToast] = useState<string | null>(null);
   const [securityToast, setSecurityToast] = useState<string | null>(null);
   const [screenShieldActive, setScreenShieldActive] = useState<boolean>(false);
@@ -330,6 +332,7 @@ export default function App() {
           setLang={setLang}
           setIsDark={setIsDark}
           onOpenGitHubExport={() => setIsGitHubModalOpen(true)}
+          onOpenBackendConnect={() => setIsBackendModalOpen(true)}
         />
 
         {/* Unified Login & Registration Modal */}
@@ -349,6 +352,15 @@ export default function App() {
           isDark={isDark}
           lang={lang}
         />
+
+        {/* 1-Click Backend & Database Control Modal */}
+        <BackendConnectModal
+          isOpen={isBackendModalOpen}
+          onClose={() => setIsBackendModalOpen(false)}
+          isDark={isDark}
+          lang={lang}
+        />
+
 
         {/* Security Shield & Anti-Screenshot Overlay */}
         {renderSecurityShields()}
@@ -395,6 +407,7 @@ export default function App() {
         onOpenPayment={() => {}}
         onLogout={handleLogout}
         onOpenGitHubExport={isAdminUser ? () => setIsGitHubModalOpen(true) : undefined}
+        onOpenBackendConnect={isAdminUser ? () => setIsBackendModalOpen(true) : undefined}
         completedCount={userProgress.completedTopicIds.length}
         totalTopics={C_TOPICS.length}
       />
@@ -528,6 +541,16 @@ export default function App() {
         <GitHubSyncModal
           isOpen={isGitHubModalOpen}
           onClose={() => setIsGitHubModalOpen(false)}
+          isDark={isDark}
+          lang={lang}
+        />
+      )}
+
+      {/* 1-Click Backend & Database Control Modal (Admin Only) */}
+      {isAdminUser && (
+        <BackendConnectModal
+          isOpen={isBackendModalOpen}
+          onClose={() => setIsBackendModalOpen(false)}
           isDark={isDark}
           lang={lang}
         />

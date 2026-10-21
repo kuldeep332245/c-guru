@@ -710,6 +710,9 @@ export async function getDatabaseStatusApi(): Promise<{
   return null;
 }
 
+export const fetchMongoDatabaseStatus = getDatabaseStatusApi;
+
+
 export async function connectMongoDatabaseApi(
   uri: string,
   dbName: string = 'cguru_database'

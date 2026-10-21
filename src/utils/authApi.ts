@@ -90,20 +90,37 @@ export async function sendOtpApi(
       );
     } catch {}
 
-    // Real SMS Dispatch via 2Factor / Fast2SMS if API key is present!
+    const fullPhone = `+91${cleanP}`;
     let isReal = false;
     let feedbackMsg = isHi
-      ? `आपके नंबर (+91 ${cleanP}) पर ओटीपी भेजा गया है`
-      : `OTP sent to your number (+91 ${cleanP})`;
+      ? `व्हाट्सएप (WhatsApp) पर OTP भेजा गया है (${fullPhone})`
+      : `OTP sent to your WhatsApp (${fullPhone})`;
+
+    // Direct WhatsApp OTP Dispatch via Wakit.in (Supported via CORS directly in browser)
     try {
-      const smsRes = await sendOtpToMobile(cleanP, generatedOtp);
-      if (smsRes.isRealSms) {
+      const wakitKey = 'wk_live_XrwS5NYJKkiKgIQdn5YWICaEUi3GAM5bMZvH4APp';
+      const wRes = await fetch('https://wakit.in/api/v1/otp/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${wakitKey}`
+        },
+        body: JSON.stringify({
+          to: fullPhone,
+          code: generatedOtp
+        })
+      });
+
+      const wData: any = await wRes.json().catch(() => null);
+      if (wRes.ok && wData && (wData.success || wData.data?.status === 'sent')) {
         isReal = true;
-        feedbackMsg = smsRes.message || (isHi ? `आपके नंबर (+91 ${cleanP}) पर ओटीपी भेजा गया है` : `OTP sent to your number (+91 ${cleanP})`);
-      } else if (smsRes.message && !smsRes.message.startsWith('OTP sent')) {
-        feedbackMsg = smsRes.message;
+        feedbackMsg = isHi
+          ? `व्हाट्सएप (WhatsApp) पर OTP भेज दिया गया है (${fullPhone})`
+          : `OTP sent to your WhatsApp (${fullPhone})`;
       }
-    } catch {}
+    } catch (wErr) {
+      console.warn('Client-side Wakit dispatch exception:', wErr);
+    }
 
     return {
       success: true,

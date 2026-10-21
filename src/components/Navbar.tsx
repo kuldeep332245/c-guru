@@ -23,7 +23,8 @@ import {
   Lock,
   FolderArchive,
   FlaskConical,
-  Github
+  Github,
+  Database
 } from 'lucide-react';
 import { User as UserType } from '../types';
 import { ALL_INDIAN_LANGUAGES, getNavLabels, getLanguageName } from '../utils/languages';
@@ -54,6 +55,7 @@ interface NavbarProps {
   onOpenPayment: () => void;
   onLogout: () => void;
   onOpenGitHubExport?: () => void;
+  onOpenBackendConnect?: () => void;
   completedCount: number;
   totalTopics: number;
 }
@@ -71,6 +73,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenPayment,
   onLogout,
   onOpenGitHubExport,
+  onOpenBackendConnect,
   completedCount,
   totalTopics
 }) => {
@@ -329,6 +332,23 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             
 
+            {/* 1-Click Database Connect Button (Admin Only) */}
+            {isAdmin && onOpenBackendConnect && (
+              <button
+                type="button"
+                onClick={onOpenBackendConnect}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                  isDark
+                    ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
+                    : 'border-emerald-500/30 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 shadow-xs'
+                }`}
+                title={lang === 'hi' ? '1-क्लिक बैकएंड व डेटाबेस कनेक्ट' : '1-Click Backend & Database Connect'}
+              >
+                <Database className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="hidden xl:inline">{lang === 'hi' ? 'डेटाबेस' : 'Database'}</span>
+              </button>
+            )}
+
             {!user && (
               <button
                 onClick={onOpenAuth}
@@ -518,6 +538,32 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
 
                 
+
+                {/* 1-Click Database & Backend Connect (Admin Only) */}
+                {isAdmin && onOpenBackendConnect && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSidebarOpen(false);
+                      onOpenBackendConnect();
+                    }}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+                      isDark
+                        ? 'bg-[#191D26] border-[#2B313F] text-slate-200 hover:bg-[#222733]'
+                        : 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100 shadow-xs'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Database className="w-4 h-4 text-emerald-400" />
+                      <span>
+                        {lang === 'hi' ? '1-क्लिक डेटाबेस व बैकएंड (Admin)' : '1-Click Database & Backend (Admin)'}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-emerald-400 font-semibold px-2 py-0.5 rounded-md border border-emerald-500/20 bg-emerald-500/10">
+                      MongoDB
+                    </span>
+                  </button>
+                )}
 
                 {/* 4. PROFILE BUTTON AT THE VERY BOTTOM */}
                 <button

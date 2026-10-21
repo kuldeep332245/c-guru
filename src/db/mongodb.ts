@@ -233,3 +233,27 @@ export async function getUsersCollection(): Promise<Collection<MongoUserDocument
   if (!db) return null;
   return db.collection<MongoUserDocument>('users');
 }
+
+export async function getCertificatesCollection(): Promise<Collection<any> | null> {
+  const { db } = await connectToDatabase();
+  if (!db) return null;
+  const col = db.collection('certificates');
+  try {
+    await col.createIndex({ certificateId: 1 }, { unique: true, sparse: true });
+    await col.createIndex({ userId: 1 });
+  } catch {}
+  return col;
+}
+
+export async function getPaymentsCollection(): Promise<Collection<any> | null> {
+  const { db } = await connectToDatabase();
+  if (!db) return null;
+  const col = db.collection('payments');
+  try {
+    await col.createIndex({ transactionId: 1 }, { unique: true, sparse: true });
+    await col.createIndex({ utr: 1 }, { sparse: true });
+    await col.createIndex({ userId: 1 });
+  } catch {}
+  return col;
+}
+

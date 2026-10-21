@@ -3,6 +3,8 @@ import path from 'path';
 import {
   MongoUserDocument,
   getUsersCollection,
+  getCertificatesCollection,
+  getPaymentsCollection,
   connectToDatabase,
   getEffectiveMongoUri,
   getEffectiveDbName,
@@ -10,9 +12,14 @@ import {
   resetAndReconnect
 } from './mongodb';
 import { validateRealEmail } from '../utils/emailValidator';
+import { hashPassword, verifyPassword, sanitizeMongoInput } from '../utils/serverSecurity';
+
 
 const LOCAL_DATA_DIR = path.resolve(process.cwd(), 'data');
 const LOCAL_USERS_FILE = path.resolve(LOCAL_DATA_DIR, 'users.json');
+const LOCAL_CERTS_FILE = path.resolve(LOCAL_DATA_DIR, 'certificates.json');
+const LOCAL_PAYMENTS_FILE = path.resolve(LOCAL_DATA_DIR, 'payments.json');
+
 
 // Ensure local fallback directory exists
 function ensureLocalFile() {
@@ -138,12 +145,16 @@ export async function registerOrUpdateMongoUser(data: {
     }
 
     // Update existing user's details & login timestamp
+    const hashedPassword = data.password
+      ? (data.password.startsWith('pbkdf2$') ? data.password : hashPassword(data.password.trim()))
+      : existing.password;
+
     const updatedUser: MongoUserDocument = {
       ...existing,
       name: cleanName || existing.name,
       email: cleanEmailStr || existing.email,
       phone: cleanPhoneDigits || existing.phone,
-      password: data.password ? data.password.trim() : existing.password,
+      password: hashedPassword,
       course: data.course || existing.course || 'Complete C Programming Masterclass',
       role: isAdmin ? 'admin' : (existing.role || 'student'),
       isAdmin: isAdmin || Boolean(existing.isAdmin),
@@ -179,12 +190,16 @@ export async function registerOrUpdateMongoUser(data: {
 
   // 2. Create brand new User with generated User ID
   const newUserId = generateUserId();
+  const hashedPassword = data.password
+    ? (data.password.startsWith('pbkdf2$') ? data.password : hashPassword(data.password.trim()))
+    : '';
+
   const newUserDoc: MongoUserDocument = {
     userId: newUserId,
     name: cleanName || `Student ${cleanPhoneDigits.slice(-4)}`,
     email: cleanEmailStr,
     phone: cleanPhoneDigits,
-    password: data.password ? data.password.trim() : '',
+    password: hashedPassword,
     course: data.course || 'Complete C Programming Masterclass',
     avatarSeed: cleanName.toLowerCase().replace(/\s+/g, '_') || 'student',
     role: isAdmin ? 'admin' : 'student',
@@ -532,3 +547,263 @@ export async function handleGoogleAuthUser(profile: {
 
   return { success: true, user: newUserDoc, isNewUser: true };
 }
+
+// ---------------- USER PROGRESS & TELEMETRY ----------------
+
+export async function saveUserProgressInDb(userId: string, progress: any): Promise<boolean> {
+  const collection = await getUsersCollection();
+  const nowIso = new Date().toISOString();
+  if (collection) {
+    try {
+      await collection.updateOne(
+        { userId },
+        { $set: { progress, updatedAt: nowIso } }
+      );
+    } catch (e) {
+      console.warn('[MONGODB] Update progress error:', e);
+    }
+  }
+
+  // Also update local cache
+  const locals = getLocalUsers();
+  const idx = locals.findIndex(u => u.userId === userId || u.phone === userId || u.email === userId);
+  if (idx !== -1) {
+    locals[idx].progress = progress;
+    locals[idx].updatedAt = nowIso;
+    saveLocalUsers(locals);
+  }
+  return true;
+}
+
+export async function getUserProgressFromDb(userId: string): Promise<any | null> {
+  const collection = await getUsersCollection();
+  if (collection) {
+    try {
+      const user = await collection.findOne({ userId });
+      if (user && user.progress) return user.progress;
+    } catch {}
+  }
+  const locals = getLocalUsers();
+  const found = locals.find(u => u.userId === userId || u.phone === userId || u.email === userId);
+  return found?.progress || null;
+}
+
+// ---------------- LIVE LEADERBOARD ----------------
+
+function formatAndSortLeaderboard(users: any[], limit: number): any[] {
+  return users
+    .map((u) => {
+      const completed = u.progress?.completedTopicIds?.length || 0;
+      const scores = Object.values(u.progress?.quizScores || {}) as any[];
+      const totalScore = scores.reduce((acc: number, curr: any) => {
+        const val = typeof curr === 'object' && curr !== null ? curr.score || 0 : Number(curr) || 0;
+        return acc + val;
+      }, 0);
+      const bugs = u.progress?.bugsSolvedIds?.length || 0;
+      const streak = u.progress?.streakDays || 1;
+      const points = completed * 50 + totalScore * 10 + bugs * 20 + streak * 5;
+
+      return {
+        rank: 0,
+        userId: u.userId,
+        name: u.name || 'C Student',
+        avatarSeed: u.avatarSeed || 'student',
+        completedTopics: completed,
+        totalQuizScore: totalScore,
+        bugsSolved: bugs,
+        streakDays: streak,
+        points,
+        isPro: Boolean(u.isSubscribed)
+      };
+    })
+    .sort((a, b) => b.points - a.points)
+    .slice(0, limit)
+    .map((item, idx) => ({ ...item, rank: idx + 1 }));
+}
+
+export async function getLeaderboardFromDb(limit: number = 25): Promise<any[]> {
+  const collection = await getUsersCollection();
+  if (collection) {
+    try {
+      const users = await collection
+        .find({ isBlocked: { $ne: true } })
+        .project({
+          userId: 1,
+          name: 1,
+          avatarSeed: 1,
+          isSubscribed: 1,
+          progress: 1,
+          createdAt: 1
+        })
+        .limit(100)
+        .toArray();
+
+      return formatAndSortLeaderboard(users, limit);
+    } catch {}
+  }
+
+  const locals = getLocalUsers().filter(u => !u.isBlocked);
+  return formatAndSortLeaderboard(locals, limit);
+}
+
+// ---------------- USER PASSWORD AUTHENTICATION ----------------
+
+export async function authenticateUserWithPassword(
+  phoneOrEmail: string,
+  plainPassword: string
+): Promise<{ success: boolean; user?: MongoUserDocument; error?: string }> {
+  const clean = (phoneOrEmail || '').trim();
+  if (!clean || !plainPassword) {
+    return { success: false, error: 'कृपया मोबाइल/ईमेल और पासवर्ड दोनों दर्ज करें।' };
+  }
+  const cleanPhoneDigits = clean.replace(/\D/g, '').slice(-10);
+  const cleanEmailStr = clean.toLowerCase();
+
+  const user = await findUserByPhoneOrEmail(cleanPhoneDigits, cleanEmailStr);
+  if (!user) {
+    return { success: false, error: 'यह खाता पंजीकृत नहीं है। कृपया नया खाता बनाएं।' };
+  }
+  if (user.isBlocked) {
+    return { success: false, error: 'सुरक्षा प्रतिबंध: यह खाता व्यवस्थापक द्वारा ब्लॉक किया गया है।' };
+  }
+  if (!user.password) {
+    return { success: false, error: 'इस खाते पर पासवर्ड सेट नहीं है। कृपया OTP से लॉगिन करें।' };
+  }
+
+  const isValid = verifyPassword(plainPassword, user.password);
+  if (!isValid) {
+    return { success: false, error: 'गलत पासवर्ड दर्ज किया गया है। कृपया पुनः प्रयास करें।' };
+  }
+
+  // Update last login
+  const nowIso = new Date().toISOString();
+  user.lastLoginAt = nowIso;
+  const col = await getUsersCollection();
+  if (col) {
+    try {
+      await col.updateOne({ userId: user.userId }, { $set: { lastLoginAt: nowIso } });
+    } catch {}
+  }
+  const locals = getLocalUsers();
+  const idx = locals.findIndex(u => u.userId === user.userId);
+  if (idx !== -1) {
+    locals[idx].lastLoginAt = nowIso;
+    saveLocalUsers(locals);
+  }
+
+  return { success: true, user };
+}
+
+// ---------------- CERTIFICATE PERSISTENCE ----------------
+
+function getLocalCertificates(): any[] {
+  try {
+    if (!fs.existsSync(LOCAL_CERTS_FILE)) {
+      fs.writeFileSync(LOCAL_CERTS_FILE, JSON.stringify([], null, 2), 'utf-8');
+      return [];
+    }
+    const raw = fs.readFileSync(LOCAL_CERTS_FILE, 'utf-8');
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalCertificates(certs: any[]) {
+  try {
+    fs.writeFileSync(LOCAL_CERTS_FILE, JSON.stringify(certs, null, 2), 'utf-8');
+  } catch {}
+}
+
+export async function saveCertificateInDb(certData: any): Promise<boolean> {
+  const col = await getCertificatesCollection();
+  if (col) {
+    try {
+      await col.updateOne(
+        { certificateId: certData.certificateId },
+        { $set: certData },
+        { upsert: true }
+      );
+    } catch (e) {
+      console.warn('[MONGODB] Save cert error:', e);
+    }
+  }
+  const local = getLocalCertificates();
+  const idx = local.findIndex(c => c.certificateId === certData.certificateId);
+  if (idx !== -1) {
+    local[idx] = certData;
+  } else {
+    local.push(certData);
+  }
+  saveLocalCertificates(local);
+  return true;
+}
+
+export async function getCertificateFromDb(certId: string): Promise<any | null> {
+  const col = await getCertificatesCollection();
+  if (col) {
+    try {
+      const found = await col.findOne({ certificateId: certId });
+      if (found) return found;
+    } catch {}
+  }
+  const local = getLocalCertificates();
+  return local.find(c => c.certificateId === certId) || null;
+}
+
+// ---------------- PAYMENT PERSISTENCE ----------------
+
+function getLocalPayments(): any[] {
+  try {
+    if (!fs.existsSync(LOCAL_PAYMENTS_FILE)) {
+      fs.writeFileSync(LOCAL_PAYMENTS_FILE, JSON.stringify([], null, 2), 'utf-8');
+      return [];
+    }
+    const raw = fs.readFileSync(LOCAL_PAYMENTS_FILE, 'utf-8');
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalPayments(payments: any[]) {
+  try {
+    fs.writeFileSync(LOCAL_PAYMENTS_FILE, JSON.stringify(payments, null, 2), 'utf-8');
+  } catch {}
+}
+
+export async function savePaymentInDb(paymentData: any): Promise<boolean> {
+  const col = await getPaymentsCollection();
+  if (col) {
+    try {
+      await col.updateOne(
+        { transactionId: paymentData.transactionId },
+        { $set: paymentData },
+        { upsert: true }
+      );
+    } catch (e) {
+      console.warn('[MONGODB] Save payment error:', e);
+    }
+  }
+  const local = getLocalPayments();
+  const idx = local.findIndex(p => p.transactionId === paymentData.transactionId);
+  if (idx !== -1) {
+    local[idx] = paymentData;
+  } else {
+    local.push(paymentData);
+  }
+  saveLocalPayments(local);
+  return true;
+}
+
+export async function getAllPaymentsFromDb(): Promise<any[]> {
+  const col = await getPaymentsCollection();
+  if (col) {
+    try {
+      const docs = await col.find({}).sort({ createdAt: -1 }).toArray();
+      if (docs && docs.length > 0) return docs;
+    } catch {}
+  }
+  return getLocalPayments();
+}
+

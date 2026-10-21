@@ -17,7 +17,8 @@ import {
   Globe,
   Moon,
   Sun,
-  Github
+  Github,
+  Database
 } from 'lucide-react';
 import { C_TOPICS } from '../data/cTopics';
 import { ALL_INDIAN_LANGUAGES, getLanguageName } from '../utils/languages';
@@ -29,6 +30,7 @@ interface WelcomePageProps {
   setLang?: (lang: string) => void;
   setIsDark?: (dark: boolean) => void;
   onOpenGitHubExport?: () => void;
+  onOpenBackendConnect?: () => void;
 }
 
 export const WelcomePage: React.FC<WelcomePageProps> = ({
@@ -37,8 +39,10 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({
   lang = 'hi',
   setLang,
   setIsDark,
-  onOpenGitHubExport
+  onOpenGitHubExport,
+  onOpenBackendConnect
 }) => {
+
   const highlights = [
     {
       icon: BookOpen,
@@ -192,6 +196,22 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({
 
             
 
+            {onOpenBackendConnect && (
+              <button
+                onClick={onOpenBackendConnect}
+                className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-xs ${
+                  isDark
+                    ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25'
+                    : 'border-emerald-500/30 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                }`}
+                title={lang === 'hi' ? '1-क्लिक में बैकएंड व डेटाबेस कनेक्ट करें' : '1-Click Connect Backend & Database'}
+              >
+                <Database className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
+                <span className="text-[11px] sm:text-xs font-bold">
+                  {lang === 'hi' ? 'डेटाबेस' : 'Database'}
+                </span>
+              </button>
+            )}
 
             <button
               onClick={() => onOpenAuth('login')}

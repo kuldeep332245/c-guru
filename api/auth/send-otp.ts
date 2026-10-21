@@ -1,18 +1,22 @@
+import crypto from 'crypto';
 import { validateRealEmail } from '../../src/utils/emailValidator';
+import { findUserByPhoneOrEmail } from '../../src/db/userService';
+import { applyCorsAndSecurityHeaders, sanitizeMongoInput } from '../../src/utils/serverSecurity';
 
-// Vercel Serverless Function: Send WhatsApp OTP via Wakit.in
+const OTP_SECRET = process.env.OTP_SECRET || 'cguru_stateless_secret_2026';
+
+function generateVerificationToken(phone: string, otp: string, exp: number): string {
+  const payload = `${phone}:${otp}:${exp}`;
+  const sig = crypto.createHmac('sha256', OTP_SECRET).update(payload).digest('hex');
+  return Buffer.from(JSON.stringify({ phone, otp, exp, sig })).toString('base64');
+}
+
+// Vercel Serverless Function: Send WhatsApp OTP via Wakit.in & SMS Gateway
 export default async function handler(req: any, res: any) {
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+  applyCorsAndSecurityHeaders(res);
 
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
@@ -20,7 +24,8 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { phone, mode = 'login', lang = 'en', email } = req.body || {};
+    const body = sanitizeMongoInput(req.body || {});
+    const { phone, mode = 'login', lang = 'en', email, apiKey } = body;
     const isHi = lang === 'hi';
 
     if (mode === 'register' && email) {
@@ -42,8 +47,21 @@ export default async function handler(req: any, res: any) {
       });
     }
 
+    // Check if user is blocked
+    const existing = await findUserByPhoneOrEmail(cleanDigits, email);
+    if (existing && existing.isBlocked) {
+      return res.status(403).json({
+        success: false,
+        error: isHi
+          ? 'सुरक्षा प्रतिबंध: यह खाता व्यवस्थापक (Admin) द्वारा ब्लॉक कर दिया गया है।'
+          : 'Security restriction: This account is blocked by the administrator.'
+      });
+    }
+
     const fullPhone = `+91${cleanDigits}`;
     const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 10 * 60 * 1000;
+    const verificationToken = generateVerificationToken(cleanDigits, generatedOtp, expiresAt);
 
     const wakitKey = (
       process.env.WAKIT_API_KEY ||
@@ -94,12 +112,13 @@ export default async function handler(req: any, res: any) {
       provider: providerUsed,
       devOtp: generatedOtp,
       expiresIn: 600,
-      mode
+      mode,
+      verificationToken
     });
   } catch (err: any) {
     return res.status(500).json({
       success: false,
-      error: err.message
+      error: err.message || 'OTP भेजने में विफलता।'
     });
   }
 }

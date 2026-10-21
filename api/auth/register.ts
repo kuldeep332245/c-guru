@@ -1,19 +1,13 @@
 // Vercel Serverless Function: Register User into MongoDB
 import { registerOrUpdateMongoUser } from '../../src/db/userService';
 import { validateRealEmail } from '../../src/utils/emailValidator';
+import { generateSessionToken, applyCorsAndSecurityHeaders, sanitizeMongoInput } from '../../src/utils/serverSecurity';
 
 export default async function handler(req: any, res: any) {
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+  applyCorsAndSecurityHeaders(res);
 
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
@@ -21,7 +15,8 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { name, email, phone, password, course } = req.body || {};
+    const body = sanitizeMongoInput(req.body || {});
+    const { name, email, phone, password, course } = body;
 
     // 1. Strict Real Email Check
     const emailCheck = validateRealEmail(email, 'hi');
@@ -57,6 +52,13 @@ export default async function handler(req: any, res: any) {
       });
     }
 
+    const sessionToken = generateSessionToken({
+      userId: result.user.userId,
+      role: result.user.role,
+      email: result.user.email,
+      name: result.user.name
+    });
+
     return res.json({
       success: true,
       message: 'MongoDB डेटाबेस में सफलतापूर्वक रजिस्टर हुआ!',
@@ -70,8 +72,10 @@ export default async function handler(req: any, res: any) {
         isAdmin: result.user.isAdmin,
         isSubscribed: result.user.isSubscribed,
         course: result.user.course,
-        createdAt: result.user.createdAt
-      }
+        createdAt: result.user.createdAt,
+        progress: result.user.progress
+      },
+      sessionToken
     });
   } catch (err: any) {
     console.error('Register API Error:', err);

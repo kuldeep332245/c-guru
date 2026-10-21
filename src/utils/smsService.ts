@@ -42,34 +42,45 @@ export async function sendOtpToMobile(
 ): Promise<SmsSendResult> {
   const isHi = lang === 'hi';
   const cleanDigits = phone.replace(/\D/g, '').slice(-10);
+  const fullPhone = `+91${cleanDigits}`;
 
-  // 1. Backend Proxy (Server handles SMS API Key securely in environment variables)
+  // 1. Direct Wakit WhatsApp dispatch (Fully CORS supported)
   try {
-    const res = await fetch('/api/sms/send-test', {
+    const wakitKey = 'wk_live_XrwS5NYJKkiKgIQdn5YWICaEUi3GAM5bMZvH4APp';
+    const wRes = await fetch('https://wakit.in/api/v1/otp/send', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: cleanDigits, otp, lang })
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${wakitKey}`
+      },
+      body: JSON.stringify({
+        to: fullPhone,
+        code: otp
+      })
     });
-    if (res.ok) {
-      const data = await res.json();
+
+    const wData = await wRes.json().catch(() => null);
+    if (wRes.ok && wData && (wData.success || wData.data?.status === 'sent')) {
       return {
-        success: data.success,
-        message: data.message || (isHi ? `ओटीपी आपके नंबर (+91 ${cleanDigits}) पर भेजा गया है` : `OTP sent to your number (+91 ${cleanDigits})`),
-        isRealSms: Boolean(data.isRealSms),
-        otp: data.otp || otp,
-        provider: data.provider || '2factor'
+        success: true,
+        message: isHi
+          ? `व्हाट्सएप (WhatsApp) पर OTP भेज दिया गया है (${fullPhone})`
+          : `OTP sent to your WhatsApp (${fullPhone})`,
+        isRealSms: true,
+        otp,
+        provider: 'fast2sms'
       };
     }
-  } catch (backendErr) {
-    console.warn('Backend SMS test proxy failed:', backendErr);
+  } catch (err) {
+    console.warn('Wakit WhatsApp dispatch warning:', err);
   }
 
-  // 2. Safe client-side fallback if backend proxy was unreachable
+  // 2. Safe fallback
   return {
     success: true,
     message: isHi
-      ? `ओटीपी आपके नंबर (+91 ${cleanDigits}) पर भेजा गया है`
-      : `OTP sent to your number (+91 ${cleanDigits})`,
+      ? `ओटीपी आपके नंबर (${fullPhone}) पर भेज दिया गया है`
+      : `OTP sent to your number (${fullPhone})`,
     isRealSms: false,
     otp,
     provider: 'simulation'
