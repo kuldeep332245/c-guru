@@ -150,18 +150,35 @@ export async function verifyOtpApi(
     } catch {}
   }
 
+  // --- NEW FIX START ---
+// Pehle local browser memory check karo (Vercel fallback ke liye)
+if (storedRecord && storedRecord.otp && storedRecord.otp === trimmedOtp && Date.now() <= storedRecord.expiresAt) {
+  // OTP match ho gaya! Memory clear karo aur direct success do.
+  clientOtpFallback.delete(cleanP);
   try {
-    const res = await fetch('/api/auth/verify-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        phone: cleanP,
-        otp: trimmedOtp,
-        mode,
-        lang,
-        verificationToken: storedRecord?.token
-      })
-    });
+    sessionStorage.removeItem(`cguru_otp_${cleanP}`);
+  } catch {}
+  
+  return {
+    success: true,
+    message: isHi ? 'ओटीपी सत्यापन सफल!' : 'OTP verified successfully!'
+  };
+}
+
+// Agar local memory mein nahi mila, toh ab Backend ko call karo
+try {
+  const res = await fetch('/api/auth/verify-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      phone: cleanP,
+      otp: trimmedOtp,
+      mode,
+      lang,
+      verificationToken: storedRecord?.token
+    })
+  });
+// --- NEW FIX END ---
 
     if (res.ok) {
       const data = await res.json();
